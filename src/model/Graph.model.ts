@@ -36,6 +36,7 @@ export interface ParamValues {
 
 export interface NodeDisplay {
   bounds: Bounds;
+  folded: boolean;
 }
 
 export interface Bounds {

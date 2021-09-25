@@ -3,7 +3,7 @@ import './App.css';
 import DragToMove from './ui-utils/DragToMove';
 import GraphService from './service/GraphService';
 import {getInitialGraphModel, NodeKind, NodeModel} from './model/Graph.model';
-import Node from './Node';
+import Node from './components/Node/Node';
 
 const graphServiceKey: any = 'c12d6-6s5df4-fdkslf';
 
@@ -17,6 +17,7 @@ if (window[graphServiceKey] == null) {
     name: 'Node 1',
     paramValues: {},
     display: {
+      folded: true,
       bounds: {
         x: 0,
         y: 0,
@@ -32,6 +33,7 @@ if (window[graphServiceKey] == null) {
     name: 'Node 2',
     paramValues: {},
     display: {
+      folded: false,
       bounds: {
         x: 10,
         y: 50,

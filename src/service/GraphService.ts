@@ -33,6 +33,10 @@ export default class GraphService {
   setNodeName(id: string, name: string): void {
     this._store.next(setNodeName(id, name, this._store.value));
   }
+
+  toggleNodeFoldState(id: string): void {
+    this._store.next(toggleNodeFoldState(id, this._store.value));
+  }
 }
 
 function translateViewport(coordinates: Coordinates, state: GraphModel): GraphModel {
@@ -96,5 +100,15 @@ function setNodeName(id: string, name: string, state: GraphModel): GraphModel {
   return transformExistingNode(id, state, (node) => ({
     ...node,
     name,
+  }));
+}
+
+function toggleNodeFoldState(id: string, state: GraphModel): GraphModel {
+  return transformExistingNode(id, state, (node) => ({
+    ...node,
+    display: {
+      ...node.display,
+      folded: ! node.display.folded,
+    },
   }));
 }
