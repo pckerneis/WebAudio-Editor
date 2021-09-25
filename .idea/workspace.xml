@@ -11,15 +11,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="842bcb10-7fc8-486e-a5b4-1d9cb12368d4" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/Node.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/model/Graph.model.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/service/GraphService.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ui-utils/DragToMove.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/EditableLabel.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/yarn.lock" beforeDir="false" afterPath="$PROJECT_DIR$/yarn.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Node.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/Node.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/GraphService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/GraphService.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,8 +78,16 @@
       <option name="presentableId" value="Default" />
       <updated>1632412638655</updated>
       <workItem from="1632412639851" duration="4137000" />
-      <workItem from="1632559461755" duration="9708000" />
+      <workItem from="1632559461755" duration="11418000" />
     </task>
+    <task id="LOCAL-00001" summary="Initialize graph : add nodes and drag them around">
+      <created>1632580366795</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1632580366795</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -101,6 +104,10 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Initialize graph : add nodes and drag them around" />
+    <option name="LAST_COMMIT_MESSAGE" value="Initialize graph : add nodes and drag them around" />
   </component>
   <component name="WindowStateProjectService">
     <state width="498" height="446" key="SwitcherDM" timestamp="1632579345960">

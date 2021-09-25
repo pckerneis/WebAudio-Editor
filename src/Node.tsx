@@ -1,6 +1,7 @@
 import React from 'react';
 import DragToMove from './ui-utils/DragToMove';
 import PropTypes from 'prop-types';
+import EditableLabel from './EditableLabel';
 
 export default function Node(props: any) {
   const {
@@ -26,8 +27,10 @@ export default function Node(props: any) {
       <DragToMove className="Node"
                   onDragMove={setNodePosition}
                   onDragStart={handlePointerDown}
-                  elementPosition={nodeModel.display.bounds}>
-        <span>{nodeModel.name}</span>
+                  elementPosition={nodeModel.display.bounds}
+                  style={({display: 'flex'})}>
+        <EditableLabel value={nodeModel.name}
+                       onChange={(name) => service.setNodeName(nodeModel.id, name)}/>
       </DragToMove>
     </div>
   );

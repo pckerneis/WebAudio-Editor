@@ -29,6 +29,10 @@ export default class GraphService {
   sendNodeToFront(id: string): void {
     this._store.next(sendNodeToFront(id, this._store.value));
   }
+
+  setNodeName(id: string, name: string): void {
+    this._store.next(setNodeName(id, name, this._store.value));
+  }
 }
 
 function translateViewport(coordinates: Coordinates, state: GraphModel): GraphModel {
@@ -86,4 +90,11 @@ function sendNodeToFront(id: string, state: GraphModel): GraphModel {
     ...state,
     nodeOrder: [...state.nodeOrder.filter(n => n !== id), id],
   }
+}
+
+function setNodeName(id: string, name: string, state: GraphModel): GraphModel {
+  return transformExistingNode(id, state, (node) => ({
+    ...node,
+    name,
+  }));
 }
