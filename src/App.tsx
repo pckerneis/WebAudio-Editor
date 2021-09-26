@@ -89,6 +89,7 @@ function drawConnection(connection: ConnectionState, registry: PortRegistry, ctx
 
 class App extends React.Component<{}, AppState> {
   private _subscription: Subscription;
+  private resizeHandler?: (() => void);
 
   constructor(props: {}) {
     super(props);
@@ -107,9 +108,17 @@ class App extends React.Component<{}, AppState> {
 
   componentWillUnmount(): void {
     this._subscription.unsubscribe();
+
+
+    if (this.resizeHandler != null) {
+      window.removeEventListener('resize', this.resizeHandler!);
+      this.resizeHandler = undefined;
+    }
   }
 
   componentDidMount(): void {
+    this.resizeHandler = () => this.renderConnections();
+    window.addEventListener('resize', this.resizeHandler);
     this.renderConnections();
   }
 
