@@ -1,15 +1,17 @@
-import React, {createRef, useLayoutEffect} from 'react';
+import React, {createRef, useCallback, useLayoutEffect, useState} from 'react';
 import './Node.css';
 import DragToMove from '../../ui-utils/DragToMove';
 import PropTypes from 'prop-types';
 import EditableLabel from '../EditableLabel/EditableLabel';
 import FoldButton from '../FoldButton/FoldButton';
 import ParamPanel from '../ParamPanel/ParamPanel';
-import {NodeState, PortId} from '../../state/NodeState';
+import {NodeId, NodeState, PortId} from '../../state/NodeState';
 import GraphService from '../../service/GraphService';
 import {NodeDefinitionModel} from '../../model/NodeDefinition.model';
 import {PortRegistry, ReferencedPort} from '../../service/PortRegistry';
 import SelectedItemSet from '../../utils/SelectedItemSet';
+import Coordinates from '../../model/Coordinates';
+import Bounds from '../../model/Bounds';
 
 interface NodeProps {
   nodeState: NodeState;
@@ -19,6 +21,12 @@ interface NodeProps {
   selected: boolean;
   style?: any;
   selectedItemSet: SelectedItemSet<string>;
+}
+
+function buildPorts(nodeState: NodeState): {bottomPorts: ReferencedPort[], topPorts: ReferencedPort[]} {
+  const topPorts = buildReferencedPorts(nodeState.inputPorts);
+  const bottomPorts = buildReferencedPorts(nodeState.outputPorts);
+  return {topPorts, bottomPorts};
 }
 
 export default function Node(props: NodeProps) {
@@ -38,39 +46,60 @@ export default function Node(props: NodeProps) {
     minHeight: nodeState.display.bounds.height,
   };
 
-  const handlePointerDown = (evt: any) => {
+  const [startPosition, setStartPosition] = useState({} as Bounds);
+  const [positionByItem, setPositionByItem] = useState({} as { [id: NodeId]: Bounds });
+
+  const handlePointerDown = useCallback((evt: any) => {
     service.sendNodeToFront(nodeState.id);
     selectedItemSet.selectOnMouseDown(nodeState.id, evt);
-  };
+  }, [service, selectedItemSet, nodeState.id]);
 
-  const handlePointerUp = (evt: any) => {
-    service.sendNodeToFront(nodeState.id);
-    selectedItemSet.selectOnMouseUp(nodeState.id, evt);
-  };
+  const handleMoved = useCallback((coordinates: Coordinates) => {
+    if (selectedItemSet.isSelected(nodeState.id)) {
+      const offsetX = startPosition.x - coordinates.x;
+      const offsetY = startPosition.y - coordinates.y;
 
-  const hasParams = Object.keys(definition.params).length > 0;
+      Object.entries(positionByItem).forEach(([id, bounds]) => {
+        service.setNodePosition(id, {
+          x: bounds.x - offsetX,
+          y: bounds.y - offsetY,
+        });
+      });
+    }
+  }, [selectedItemSet, nodeState.id, positionByItem, service, startPosition.x, startPosition.y]);
 
-  const topPorts = buildReferencedPorts(nodeState.inputPorts);
-  const bottomPorts = buildReferencedPorts(nodeState.outputPorts);
+  const handleDragStart = useCallback(() => {
+    const selectedNodes = selectedItemSet.items.map(id => service.snapshot.nodes[id]).filter(Boolean) as NodeState[];
+    const positionByItem = {} as { [id: NodeId]: Bounds };
+    selectedNodes.forEach(node => positionByItem[node.id] = node.display.bounds);
+    setPositionByItem(positionByItem);
+
+    setStartPosition(nodeState.display.bounds);
+  }, [nodeState.display.bounds]);
+
+  const {topPorts, bottomPorts} = buildPorts(nodeState);
 
   useLayoutEffect(() => {
     portRegistry.registerPorts(...topPorts);
     portRegistry.registerPorts(...bottomPorts);
   });
 
+  const hasParams = Object.keys(definition.params).length > 0;
+
   return (
     <div className={selected ? 'Node selected' : 'Node'}
          style={nodeStyle}
          onPointerDown={handlePointerDown}
-         onPointerUp={handlePointerUp}
     >
       <DragToMove
-        onDragMove={coordinates => service.setNodePosition(nodeState.id, coordinates)}
+        onDragStart={handleDragStart}
+        onDragMove={handleMoved}
         elementPosition={nodeState.display.bounds}
         style={({display: 'flex'})}
       >
         <div className="NodeContent"
-             onPointerDown={handlePointerDown}>
+             onPointerDown={handlePointerDown}
+        >
           <div style={({display: 'flex', width: '100%'})}>
             {
               hasParams
