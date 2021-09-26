@@ -9,19 +9,27 @@ import {NodeState, PortId} from '../../state/NodeState';
 import GraphService from '../../service/GraphService';
 import {NodeDefinitionModel} from '../../model/NodeDefinition.model';
 import {PortRegistry, ReferencedPort} from '../../service/PortRegistry';
+import SelectedItemSet from '../../utils/SelectedItemSet';
 
-export default function Node(props: any) {
+interface NodeProps {
+  nodeState: NodeState;
+  service: GraphService;
+  definition: NodeDefinitionModel;
+  portRegistry: PortRegistry;
+  selected: boolean;
+  style?: any;
+  selectedItemSet: SelectedItemSet<string>;
+}
+
+export default function Node(props: NodeProps) {
   const {
     nodeState,
     service,
     definition,
     portRegistry,
-  } = props as {
-    nodeState: NodeState,
-    service: GraphService,
-    definition: NodeDefinitionModel,
-    portRegistry: PortRegistry,
-  };
+    selected,
+    selectedItemSet
+  } = props;
 
   const nodeStyle = {
     ...props.style,
@@ -30,8 +38,14 @@ export default function Node(props: any) {
     minHeight: nodeState.display.bounds.height,
   };
 
-  const handlePointerDown = () => {
+  const handlePointerDown = (evt: any) => {
     service.sendNodeToFront(nodeState.id);
+    selectedItemSet.selectOnMouseDown(nodeState.id, evt);
+  };
+
+  const handlePointerUp = (evt: any) => {
+    service.sendNodeToFront(nodeState.id);
+    selectedItemSet.selectOnMouseUp(nodeState.id, evt);
   };
 
   const hasParams = Object.keys(definition.params).length > 0;
@@ -45,16 +59,18 @@ export default function Node(props: any) {
   });
 
   return (
-    <div className="Node"
+    <div className={selected ? 'Node selected' : 'Node'}
          style={nodeStyle}
-         onPointerDown={handlePointerDown}>
+         onPointerDown={handlePointerDown}
+         onPointerUp={handlePointerUp}
+    >
       <DragToMove
         onDragMove={coordinates => service.setNodePosition(nodeState.id, coordinates)}
-        onDragStart={handlePointerDown}
         elementPosition={nodeState.display.bounds}
         style={({display: 'flex'})}
       >
-        <div className="NodeContent">
+        <div className="NodeContent"
+             onPointerDown={handlePointerDown}>
           <div style={({display: 'flex', width: '100%'})}>
             {
               hasParams
@@ -91,14 +107,16 @@ export default function Node(props: any) {
   );
 }
 
-const {shape} = PropTypes;
+const {shape, bool} = PropTypes;
 
 Node.propTypes = {
   nodeState: shape({}).isRequired,
   definition: shape({}).isRequired,
   service: shape({}).isRequired,
   portRegistry: shape({}).isRequired,
+  selectedItemSet: shape({}).isRequired,
   style: shape({}),
+  selected: bool,
 }
 
 function buildReferencedPorts(portIds: PortId[]): ReferencedPort[] {

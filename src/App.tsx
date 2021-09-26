@@ -6,18 +6,21 @@ import Node from './components/Node/Node';
 import {NodeKind} from './model/NodeKind.model';
 import SingletonWrapper from './service/SingletonWrapper';
 import NodeDefinitionService from './service/NodeDefinitionService';
-import {getNodeDefinitions} from './model/NodeDefinition.model';
+import {getNodeDefinitions, NodeDefinitionModel} from './model/NodeDefinition.model';
 import {NodeState} from './state/NodeState';
 import {Subscription} from 'rxjs';
 import {GraphState} from './state/GraphState';
 import {ConnectionState} from './state/ConnectionState';
 import {PortRegistry} from './service/PortRegistry';
+import SelectedItemSet from './utils/SelectedItemSet';
 
 const nodeDefinitionService = SingletonWrapper
   .create(NodeDefinitionService, getNodeDefinitions())
   .get();
 
 const serviceWrapper = SingletonWrapper.lazyWrap(GraphService);
+
+const graphSelection = SingletonWrapper.create(SelectedItemSet).get() as SelectedItemSet<string>;
 
 if (!SingletonWrapper.hasInstance(GraphService)) {
   const s = serviceWrapper.get();
@@ -37,6 +40,8 @@ if (!SingletonWrapper.hasInstance(GraphService)) {
   s.addConnection(n1.id, 0, n2.id, 0);
   s.addConnection(n1.id, 0, n3.id, 0);
   s.addConnection(n3.id, 0, n2.id, 0);
+
+  graphSelection.addToSelection(n1.id);
 }
 
 const service = serviceWrapper.get();
@@ -44,19 +49,22 @@ const service = serviceWrapper.get();
 interface AppState {
   graphState: GraphState;
   canvasRef: React.RefObject<HTMLCanvasElement>;
+  selection: string[];
 }
 
 function buildNodes(graphState: GraphState): any {
   return graphState.nodeOrder
     .map((id: any) => ([id, graphState.nodes[id]] as [string, NodeState]))
     .map(([id, nodeState]: [string, NodeState]) => {
-      const definition = nodeDefinitionService.getNodeDefinition(nodeState.kind) ?? {};
+      const definition = nodeDefinitionService.getNodeDefinition(nodeState.kind) as NodeDefinitionModel;
       return (
         <Node key={id}
               nodeState={nodeState}
               service={service}
               definition={definition}
               portRegistry={service}
+              selected={graphSelection.isSelected(id)}
+              selectedItemSet={graphSelection}
         />
       )
     });
@@ -88,7 +96,7 @@ function drawConnection(connection: ConnectionState, registry: PortRegistry, ctx
 }
 
 class App extends React.Component<{}, AppState> {
-  private _subscription: Subscription;
+  private _subscriptions: Subscription[] = [];
   private resizeHandler?: (() => void);
 
   constructor(props: {}) {
@@ -97,18 +105,25 @@ class App extends React.Component<{}, AppState> {
     this.state = {
       graphState: service.snapshot,
       canvasRef: createRef(),
+      selection: graphSelection.items,
     };
 
-    this._subscription = service.state$
+    this._subscriptions.push(service.state$
       .subscribe((graphState) => this.setState((prev) => ({
         ...prev,
         graphState,
-      })));
+      }))));
+
+    this._subscriptions.push(graphSelection.selection$
+      .subscribe((selection) => this.setState((prev) => ({
+        ...prev,
+        selection,
+      }))));
   }
 
   componentWillUnmount(): void {
-    this._subscription.unsubscribe();
-
+    this._subscriptions.forEach(sub => sub.unsubscribe());
+    this._subscriptions = [];
 
     if (this.resizeHandler != null) {
       window.removeEventListener('resize', this.resizeHandler!);

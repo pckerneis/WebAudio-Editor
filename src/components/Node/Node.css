@@ -9,6 +9,10 @@
     overflow: hidden;
 }
 
+.Node.selected {
+    box-shadow: 0 0 2px 2px #12acff;
+}
+
 .NodeContent {
     display: flex;
     flex-direction: column;
