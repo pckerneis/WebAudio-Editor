@@ -167,9 +167,12 @@ class App extends React.Component<{}, AppState> {
           <canvas ref={this.state.canvasRef}/>
         </div>
         <div className="GraphContainer">
-          <DragToMove onDragMove={e => service.setViewportTranslate(e)}
-                      elementPosition={service.snapshot.viewportOffset}
-                      style={({minHeight: '100vh'})}>
+          <DragToMove
+            onDragMove={e => service.setViewportTranslate(e)}
+            onDragStart={() => graphSelection.clearSelection()}
+            elementPosition={service.snapshot.viewportOffset}
+            style={({minHeight: '100vh'})}
+          >
             <div className="GraphViewportAnchor" style={graphAnchorStyle}>
               {nodes}
             </div>
