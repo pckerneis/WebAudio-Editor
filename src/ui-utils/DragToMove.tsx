@@ -16,11 +16,13 @@ export default function DragToMove(props: any) {
   const [dragStartPosition, setDragStartPosition] = useState({x: 0, y: 0});
 
   const handlePointerDown = (e: any) => {
-    setIsDragging(true);
-    setStartPosition(elementPosition);
-    setDragStartPosition({x: e.screenX, y: e.screenY});
-    if (onDragStart) onDragStart();
-    e.stopPropagation();
+    if (e.button !== 2) {
+      setIsDragging(true);
+      setStartPosition(elementPosition);
+      setDragStartPosition({x: e.screenX, y: e.screenY});
+      if (onDragStart) onDragStart();
+      e.stopPropagation();
+    }
   };
 
   const handlePointerUp = () => {
