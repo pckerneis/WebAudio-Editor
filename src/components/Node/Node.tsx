@@ -1,28 +1,27 @@
-import React from 'react';
+import React, {createRef, useLayoutEffect} from 'react';
 import './Node.css';
 import DragToMove from '../../ui-utils/DragToMove';
 import PropTypes from 'prop-types';
 import EditableLabel from '../EditableLabel/EditableLabel';
 import FoldButton from '../FoldButton/FoldButton';
 import ParamPanel from '../ParamPanel/ParamPanel';
-import {NodeState} from '../../state/NodeState';
+import {NodeState, PortId} from '../../state/NodeState';
 import GraphService from '../../service/GraphService';
 import {NodeDefinitionModel} from '../../model/NodeDefinition.model';
+import {PortRegistry, ReferencedPort} from '../../service/PortRegistry';
 
 export default function Node(props: any) {
   const {
     nodeState,
     service,
     definition,
+    portRegistry,
   } = props as {
     nodeState: NodeState,
     service: GraphService,
     definition: NodeDefinitionModel,
+    portRegistry: PortRegistry,
   };
-
-  const setNodePosition = (coordinates: any) => {
-    service.setNodePosition(nodeState.id, coordinates);
-  }
 
   const nodeStyle = {
     ...props.style,
@@ -37,24 +36,20 @@ export default function Node(props: any) {
 
   const hasParams = Object.keys(definition.params).length > 0;
 
-  const topPorts = Array(definition.inputPortCount)
-    .fill(0)
-    .map((_, idx) => (
-      <div key={idx} className="Port"> </div>
-    ));
+  const topPorts = buildReferencedPorts(nodeState.inputPorts);
+  const bottomPorts = buildReferencedPorts(nodeState.outputPorts);
 
-  const bottomPorts = Array(definition.outputPortCount)
-    .fill(0)
-    .map((_, idx) => (
-      <div key={idx} className="Port"> </div>
-    ));
+  useLayoutEffect(() => {
+    portRegistry.registerPorts(...topPorts);
+    portRegistry.registerPorts(...bottomPorts);
+  });
 
   return (
     <div className="Node"
          style={nodeStyle}
          onPointerDown={handlePointerDown}>
       <DragToMove
-        onDragMove={setNodePosition}
+        onDragMove={coordinates => service.setNodePosition(nodeState.id, coordinates)}
         onDragStart={handlePointerDown}
         elementPosition={nodeState.display.bounds}
         style={({display: 'flex'})}
@@ -76,7 +71,7 @@ export default function Node(props: any) {
             />
           </div>
           {
-            ! nodeState.display.folded
+            !nodeState.display.folded
             && hasParams
             && <ParamPanel
               paramValues={nodeState.paramValues}
@@ -87,10 +82,10 @@ export default function Node(props: any) {
         </div>
       </DragToMove>
       <div className="TopPortsContainer">
-        {topPorts}
+        {topPorts.map(rp => rp.template)}
       </div>
       <div className="BottomPortsContainer">
-        {bottomPorts}
+        {bottomPorts.map(rp => rp.template)}
       </div>
     </div>
   );
@@ -102,5 +97,16 @@ Node.propTypes = {
   nodeState: shape({}).isRequired,
   definition: shape({}).isRequired,
   service: shape({}).isRequired,
+  portRegistry: shape({}).isRequired,
   style: shape({}),
+}
+
+function buildReferencedPorts(portIds: PortId[]): ReferencedPort[] {
+  return Array(portIds.length)
+    .fill(0)
+    .map((_, idx) => {
+      const ref = createRef<HTMLDivElement>();
+      const template = (<div key={idx} className="Port" ref={ref}> </div>);
+      return {id: portIds[idx], ref, template};
+    });
 }

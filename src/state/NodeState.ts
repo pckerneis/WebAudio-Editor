@@ -3,6 +3,7 @@ import {NodeKind} from '../model/NodeKind.model';
 import Bounds from '../model/Bounds';
 
 export type NodeId = string;
+export type PortId = string;
 
 export interface NodeState extends Identified<NodeId> {
   id: NodeId;
@@ -10,6 +11,8 @@ export interface NodeState extends Identified<NodeId> {
   paramValues: ParamValues;
   display: NodeDisplay;
   name: string;
+  inputPorts: PortId[];
+  outputPorts: PortId[];
 }
 
 export interface ParamValues {
