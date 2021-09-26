@@ -4,48 +4,94 @@ import DragToMove from '../../ui-utils/DragToMove';
 import PropTypes from 'prop-types';
 import EditableLabel from '../EditableLabel/EditableLabel';
 import FoldButton from '../FoldButton/FoldButton';
+import ParamPanel from '../ParamPanel/ParamPanel';
+import {NodeState} from '../../state/NodeState';
+import GraphService from '../../service/GraphService';
+import {NodeDefinitionModel} from '../../model/NodeDefinition.model';
 
 export default function Node(props: any) {
   const {
-    nodeModel,
+    nodeState,
     service,
-  } = props;
+    definition,
+  } = props as {
+    nodeState: NodeState,
+    service: GraphService,
+    definition: NodeDefinitionModel,
+  };
 
   const setNodePosition = (coordinates: any) => {
-    service.setNodePosition(nodeModel.id, coordinates);
+    service.setNodePosition(nodeState.id, coordinates);
   }
 
   const nodeStyle = {
-    transform: `translate(${nodeModel.display.bounds.x}px, ${nodeModel.display.bounds.y}px)`,
-    minWidth: `${nodeModel.display.bounds.width}`,
-    minHeight: `${nodeModel.display.bounds.height}`,
+    ...props.style,
+    transform: `translate(${nodeState.display.bounds.x}px, ${nodeState.display.bounds.y}px)`,
+    width: nodeState.display.bounds.width,
+    minHeight: nodeState.display.bounds.height,
   };
 
   const handlePointerDown = () => {
-    service.sendNodeToFront(nodeModel.id);
+    service.sendNodeToFront(nodeState.id);
   };
 
+  const hasParams = Object.keys(definition.params).length > 0;
+
+  const topPorts = Array(definition.inputPortCount)
+    .fill(0)
+    .map((_, idx) => (
+      <div key={idx} className="Port"> </div>
+    ));
+
+  const bottomPorts = Array(definition.outputPortCount)
+    .fill(0)
+    .map((_, idx) => (
+      <div key={idx} className="Port"> </div>
+    ));
+
   return (
-    <div style={nodeStyle}
+    <div className="Node"
+         style={nodeStyle}
          onPointerDown={handlePointerDown}>
       <DragToMove
-        className="Node"
         onDragMove={setNodePosition}
         onDragStart={handlePointerDown}
-        elementPosition={nodeModel.display.bounds}
+        elementPosition={nodeState.display.bounds}
         style={({display: 'flex'})}
       >
-        <div style={({display: 'flex'})}>
-          <FoldButton
-            style={({ margin: '0 4px' })}
-            folded={nodeModel.display.folded}
-            onButtonClick={() => service.toggleNodeFoldState(nodeModel.id)}
-          />
-          <EditableLabel
-            value={nodeModel.name}
-            onChange={(name) => service.setNodeName(nodeModel.id, name)}/>
+        <div className="NodeContent">
+          <div style={({display: 'flex', width: '100%'})}>
+            {
+              hasParams
+              && <FoldButton
+                style={({margin: '0 4px'})}
+                folded={nodeState.display.folded}
+                onButtonClick={() => service.toggleNodeFoldState(nodeState.id)}
+              />
+            }
+            <EditableLabel
+              className="NodeLabel"
+              value={nodeState.name}
+              onChange={(name) => service.setNodeName(nodeState.id, name)}
+            />
+          </div>
+          {
+            ! nodeState.display.folded
+            && hasParams
+            && <ParamPanel
+              paramValues={nodeState.paramValues}
+              paramDefinitions={definition.params}
+              style={({marginBottom: '5px'})}
+            />
+          }
         </div>
       </DragToMove>
+      <div className="TopPortsContainer">
+        {topPorts}
+      </div>
+      <div className="BottomPortsContainer">
+        {bottomPorts}
+      </div>
     </div>
   );
 }
@@ -53,6 +99,8 @@ export default function Node(props: any) {
 const {shape} = PropTypes;
 
 Node.propTypes = {
-  nodeModel: shape({}).isRequired,
+  nodeState: shape({}).isRequired,
+  definition: shape({}).isRequired,
   service: shape({}).isRequired,
+  style: shape({}),
 }

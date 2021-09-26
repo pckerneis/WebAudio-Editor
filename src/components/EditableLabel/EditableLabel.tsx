@@ -1,10 +1,13 @@
 import PropTypes from 'prop-types';
 import React, {useState} from 'react';
+import {consumeEvent} from '../../ui-utils/events';
 
 export default function EditableLabel(props: any) {
   const {
     onChange,
-    value
+    value,
+    style,
+    className,
   } = props;
 
   const [editable, setEditable] = useState(false);
@@ -12,7 +15,6 @@ export default function EditableLabel(props: any) {
 
   const handleDoubleClick = () => {
     setEditable(true);
-    console.log('editable');
   };
 
   const handleKeyUp = (event: any) => {
@@ -28,29 +30,33 @@ export default function EditableLabel(props: any) {
   };
 
   const content = editable ? (
-    <input value={transientValue}
-           autoFocus
-           onPointerDown={evt => evt.stopPropagation()}
-           onPointerUp={evt => evt.stopPropagation()}
-           onChange={(event) => setTransientValue(event.target.value)}
-           onKeyUp={handleKeyUp}
-           onBlur={sendValueAndClose}
-           style={({width: '100%'})}/>
+    <input
+      value={transientValue}
+      autoFocus
+      onPointerDown={consumeEvent}
+      onPointerUp={consumeEvent}
+      onChange={(event) => setTransientValue(event.target.value)}
+      onKeyUp={handleKeyUp}
+      onBlur={sendValueAndClose}
+      style={({...style, width: '100%'})}/>
   ) : (
-    <span>{value}</span>
+    <span style={({margin: '1px', textAlign: 'center'})}>{value}</span>
   );
 
   return (
-    <div onDoubleClick={handleDoubleClick}
+    <div className={className}
+         onDoubleClick={handleDoubleClick}
          style={({display: 'flex'})}>
       {content}
     </div>
   );
 }
 
-const {func, string} = PropTypes;
+const {func, string, shape} = PropTypes;
 
 EditableLabel.propTypes = {
   onChange: func.isRequired,
   value: string.isRequired,
-}
+  style: shape({}),
+  className: string,
+};

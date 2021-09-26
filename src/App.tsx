@@ -2,27 +2,33 @@ import React, {useLayoutEffect, useState} from 'react';
 import './App.css';
 import DragToMove from './ui-utils/DragToMove';
 import GraphService from './service/GraphService';
-import {getInitialGraphModel, NodeKind, NodeModel} from './model/Graph.model';
 import Node from './components/Node/Node';
+import {NodeKind} from './model/NodeKind.model';
+import SingletonWrapper from './service/SingletonWrapper';
+import NodeDefinitionService from './service/NodeDefinitionService';
+import {getNodeDefinitions} from './model/NodeDefinition.model';
+import {getInitialGraphModel} from './state/GraphState';
+import {NodeState} from './state/NodeState';
 
-const graphServiceKey: any = 'c12d6-6s5df4-fdkslf';
+const serviceWrapper = SingletonWrapper.lazyWrap(GraphService);
 
-if (window[graphServiceKey] == null) {
-  // @ts-ignore
-  window[graphServiceKey] = new GraphService();
-  const s: GraphService = window[graphServiceKey] as unknown as GraphService;
+if (! SingletonWrapper.hasInstance(GraphService)) {
+  const s = serviceWrapper.get();
+
   s.addNode({
     id: '1',
     kind: NodeKind.osc,
     name: 'Node 1',
-    paramValues: {},
+    paramValues: {
+      type: 'osc',
+    },
     display: {
       folded: true,
       bounds: {
         x: 0,
         y: 0,
-        width: 0,
-        height: 0,
+        width: 100,
+        height: 20,
       },
     },
   });
@@ -37,14 +43,17 @@ if (window[graphServiceKey] == null) {
       bounds: {
         x: 10,
         y: 50,
-        width: 0,
+        width: 100,
         height: 0,
       },
     },
   });
 }
 
-const service: GraphService = window[graphServiceKey] as unknown as GraphService;
+const service = serviceWrapper.get();
+const nodeDefinitionService = SingletonWrapper
+  .create(NodeDefinitionService, getNodeDefinitions())
+  .get();
 
 function App() {
   const translateViewport = (e: any) => {
@@ -62,10 +71,11 @@ function App() {
   };
 
   const nodes = appState.nodeOrder
-    .map(id => ([id, appState.nodes[id]] as [string, NodeModel]))
-    .map(([id, nodeModel]: [string, NodeModel]) => {
+    .map(id => ([id, appState.nodes[id]] as [string, NodeState]))
+    .map(([id, nodeState]: [string, NodeState]) => {
+      const definition = nodeDefinitionService.getNodeDefinition(nodeState.kind) ?? {};
       return (
-        <Node key={id} nodeModel={nodeModel} service={service}/>
+        <Node key={id} nodeState={nodeState} service={service} definition={definition}/>
       )
     });
 

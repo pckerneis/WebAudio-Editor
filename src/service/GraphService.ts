@@ -1,12 +1,14 @@
 import {BehaviorSubject, Observable} from 'rxjs';
-import {Coordinates, getInitialGraphModel, GraphModel, NodeModel} from '../model/Graph.model';
+import {getInitialGraphModel, GraphState} from '../state/GraphState';
+import Coordinates from '../model/Coordinates';
+import {NodeState} from '../state/NodeState';
 
 export default class GraphService {
-  public readonly state$: Observable<GraphModel>;
+  public readonly state$: Observable<GraphState>;
 
-  private _store = new BehaviorSubject<GraphModel>(getInitialGraphModel());
+  private _store = new BehaviorSubject<GraphState>(getInitialGraphModel());
 
-  get snapshot(): GraphModel {
+  get snapshot(): GraphState {
     return this._store.value;
   };
 
@@ -18,7 +20,7 @@ export default class GraphService {
     this._store.next(translateViewport(coordinates, this._store.value));
   }
 
-  addNode(node: NodeModel): void {
+  addNode(node: NodeState): void {
     this._store.next(addNode(node.id, node, this._store.value));
   }
 
@@ -39,27 +41,27 @@ export default class GraphService {
   }
 }
 
-function translateViewport(coordinates: Coordinates, state: GraphModel): GraphModel {
+function translateViewport(coordinates: Coordinates, state: GraphState): GraphState {
   return {
     ...state,
     viewportOffset: coordinates,
   };
 }
 
-function addNode(id: string, nodeModel: NodeModel, state: GraphModel): GraphModel {
+function addNode(id: string, nodeState: NodeState, state: GraphState): GraphState {
   if (Object.keys(state.nodes).includes(id)) {
     throw new Error('A node already exists with ID ' + id);
   }
 
   return {
     ...state,
-    nodes: {...state.nodes, [id]: nodeModel},
+    nodes: {...state.nodes, [id]: nodeState},
     nodeOrder: [id, ...state.nodeOrder],
   };
 }
 
 
-function setNodePosition(id: string, coordinates: Coordinates, state: GraphModel): GraphModel {
+function setNodePosition(id: string, coordinates: Coordinates, state: GraphState): GraphState {
   return transformExistingNode(id, state, (n) => ({
     ...n,
     display: {
@@ -73,8 +75,8 @@ function setNodePosition(id: string, coordinates: Coordinates, state: GraphModel
 }
 
 function transformExistingNode(id: string,
-                               state: GraphModel,
-                               mapper: (n: NodeModel) => NodeModel): GraphModel {
+                               state: GraphState,
+                               mapper: (n: NodeState) => NodeState): GraphState {
 
   if (!Object.keys(state.nodes).includes(id)) {
     throw new Error('Cannot find node with ID ' + id);
@@ -89,26 +91,26 @@ function transformExistingNode(id: string,
   };
 }
 
-function sendNodeToFront(id: string, state: GraphModel): GraphModel {
+function sendNodeToFront(id: string, state: GraphState): GraphState {
   return {
     ...state,
     nodeOrder: [...state.nodeOrder.filter(n => n !== id), id],
   }
 }
 
-function setNodeName(id: string, name: string, state: GraphModel): GraphModel {
+function setNodeName(id: string, name: string, state: GraphState): GraphState {
   return transformExistingNode(id, state, (node) => ({
     ...node,
     name,
   }));
 }
 
-function toggleNodeFoldState(id: string, state: GraphModel): GraphModel {
+function toggleNodeFoldState(id: string, state: GraphState): GraphState {
   return transformExistingNode(id, state, (node) => ({
     ...node,
     display: {
       ...node.display,
-      folded: ! node.display.folded,
+      folded: !node.display.folded,
     },
   }));
 }
