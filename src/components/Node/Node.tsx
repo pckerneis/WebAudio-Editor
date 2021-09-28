@@ -75,7 +75,7 @@ export default function Node(props: NodeProps) {
     setPositionByItem(positionByItem);
 
     setStartPosition(nodeState.display.bounds);
-  }, [nodeState.display.bounds]);
+  }, [nodeState.display.bounds, selectedItemSet.items, service.snapshot.nodes]);
 
   const {topPorts, bottomPorts} = buildPorts(nodeState);
 
