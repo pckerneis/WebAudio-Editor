@@ -23,7 +23,7 @@ interface NodeProps {
   selectedItemSet: SelectedItemSet<string>;
 }
 
-function buildPorts(nodeState: NodeState): {bottomPorts: ReferencedPort[], topPorts: ReferencedPort[]} {
+function buildPorts(nodeState: NodeState): { bottomPorts: ReferencedPort[], topPorts: ReferencedPort[] } {
   const topPorts = buildReferencedPorts(nodeState.inputPorts);
   const bottomPorts = buildReferencedPorts(nodeState.outputPorts);
   return {topPorts, bottomPorts};
@@ -95,6 +95,7 @@ export default function Node(props: NodeProps) {
         onDragStart={handleDragStart}
         onDragMove={handleMoved}
         elementPosition={nodeState.display.bounds}
+        buttons={[0]}
         style={({display: 'flex'})}
       >
         <div className="NodeContent"
@@ -153,7 +154,7 @@ function buildReferencedPorts(portIds: PortId[]): ReferencedPort[] {
     .fill(0)
     .map((_, idx) => {
       const ref = createRef<HTMLDivElement>();
-      const template = (<div key={idx} className="Port" ref={ref}> </div>);
+      const template = (<div key={idx} className="Port" ref={ref}></div>);
       return {id: portIds[idx], ref, template};
     });
 }

@@ -78,7 +78,8 @@ export default class GraphService implements PortRegistry {
 
   addConnection(sourceNodeId: string, sourcePortIndex: number,
                 targetNodeId: string, targetPortIndex: number): void {
-    this._store.next(addConnection(sourceNodeId, sourcePortIndex, targetNodeId, targetPortIndex,
+    const connectionId = this._sequence.nextString();
+    this._store.next(addConnection(connectionId, sourceNodeId, sourcePortIndex, targetNodeId, targetPortIndex,
       this.snapshot));
   }
 
@@ -169,7 +170,8 @@ function assertNodeExists(nodeId: string, state: GraphState): void {
   }
 }
 
-function addConnection(sourceNodeId: string, sourcePortIndex: number,
+function addConnection(connectionId: string,
+                       sourceNodeId: string, sourcePortIndex: number,
                        targetNodeId: string, targetPortIndex: number,
                        state: GraphState): GraphState {
   assertNodeExists(sourceNodeId, state);
@@ -182,7 +184,7 @@ function addConnection(sourceNodeId: string, sourcePortIndex: number,
     throw new Error('Cannot find port.');
   }
 
-  const newConnection: ConnectionState = {source, target};
+  const newConnection: ConnectionState = {id: connectionId, source, target};
 
   return {
     ...state,

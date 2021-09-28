@@ -13,6 +13,9 @@ import {GraphState} from './state/GraphState';
 import {ConnectionState} from './state/ConnectionState';
 import {PortRegistry} from './service/PortRegistry';
 import SelectedItemSet from './utils/SelectedItemSet';
+import Coordinates from './model/Coordinates';
+import {cubicBezier, rectangleCenter, translateY} from './utils/geometry';
+import {ConnectionCurve, drawConnectionCurve, hitsConnectionCurve} from './ui-utils/ConnectionCurve';
 
 const nodeDefinitionService = SingletonWrapper
   .create(NodeDefinitionService, getNodeDefinitions())
@@ -50,49 +53,7 @@ interface AppState {
   graphState: GraphState;
   canvasRef: React.RefObject<HTMLCanvasElement>;
   selection: string[];
-}
-
-function buildNodes(graphState: GraphState): any {
-  return graphState.nodeOrder
-    .map((id: any) => ([id, graphState.nodes[id]] as [string, NodeState]))
-    .map(([id, nodeState]: [string, NodeState]) => {
-      const definition = nodeDefinitionService.getNodeDefinition(nodeState.kind) as NodeDefinitionModel;
-      return (
-        <Node key={id}
-              nodeState={nodeState}
-              service={service}
-              definition={definition}
-              portRegistry={service}
-              selected={graphSelection.isSelected(id)}
-              selectedItemSet={graphSelection}
-        />
-      )
-    });
-}
-
-function drawConnection(connection: ConnectionState, registry: PortRegistry, ctx: CanvasRenderingContext2D): void {
-  const sourcePort = registry.getAllRegisteredPorts()
-    .find(p => p.id === connection.source)?.ref.current;
-
-  const targetPort = registry.getAllRegisteredPorts()
-    .find(p => p.id === connection.target)?.ref.current;
-
-  if (sourcePort && targetPort) {
-    const sb = sourcePort.getBoundingClientRect();
-    const tb = targetPort.getBoundingClientRect();
-
-    const sx = sb.x + sb.width / 2;
-    const sy = sb.y + sb.height / 2;
-    const tx = tb.x + tb.width / 2;
-    const ty = tb.y + tb.height / 2;
-
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = 'grey';
-    ctx.beginPath();
-    ctx.moveTo(sx, sy);
-    ctx.lineTo(tx, ty);
-    ctx.stroke();
-  }
+  connectionCurves: ConnectionCurve[];
 }
 
 class App extends React.Component<{}, AppState> {
@@ -106,12 +67,14 @@ class App extends React.Component<{}, AppState> {
       graphState: service.snapshot,
       canvasRef: createRef(),
       selection: graphSelection.items,
+      connectionCurves: [],
     };
 
     this._subscriptions.push(service.state$
       .subscribe((graphState) => this.setState((prev) => ({
         ...prev,
         graphState,
+        connectionCurves: computeConnectionCurves(graphState, service),
       }))));
 
     this._subscriptions.push(graphSelection.selection$
@@ -134,6 +97,10 @@ class App extends React.Component<{}, AppState> {
   componentDidMount(): void {
     this.resizeHandler = () => this.renderConnections();
     window.addEventListener('resize', this.resizeHandler);
+    this.setState(state => ({
+      ...state,
+      connectionCurves: computeConnectionCurves(service.snapshot, service),
+    }));
     this.renderConnections();
   }
 
@@ -152,7 +119,12 @@ class App extends React.Component<{}, AppState> {
     const ctx = canvas?.getContext('2d');
 
     if (ctx != null) {
-      this.state.graphState.connections.forEach(connection => drawConnection(connection, service, ctx));
+      this.state.connectionCurves
+        .map(connectionCurve => ({
+          selected: graphSelection.isSelected(connectionCurve.id),
+          connectionCurve
+        }))
+        .forEach(({selected, connectionCurve}) => drawConnectionCurve(connectionCurve, selected, ctx));
     }
   }
 
@@ -161,16 +133,35 @@ class App extends React.Component<{}, AppState> {
     const graphAnchorStyle = getGraphAnchorStyle(graphState);
     const nodes = buildNodes(graphState);
 
+    const handlePointerDown = (evt: any) => {
+      let somethingHit = false;
+      const mouseCoordinates = {
+        x: evt.clientX,
+        y: evt.clientY,
+      };
+
+      for (const c of this.state.connectionCurves) {
+        if (hitsConnectionCurve(mouseCoordinates, c, 8)) {
+          graphSelection.selectOnMouseDown(c.id, evt);
+          somethingHit = true;
+        }
+      }
+
+      if (! somethingHit) {
+        graphSelection.clearSelection();
+      }
+    }
+
     return (
       <div className="App">
         <div className="CanvasContainer">
           <canvas ref={this.state.canvasRef}/>
         </div>
-        <div className="GraphContainer">
+        <div className="GraphContainer" onPointerDown={handlePointerDown}>
           <DragToMove
             onDragMove={e => service.setViewportTranslate(e)}
-            onDragStart={() => graphSelection.clearSelection()}
             elementPosition={service.snapshot.viewportOffset}
+            buttons={[1]}
             style={({minHeight: '100vh'})}
           >
             <div className="GraphViewportAnchor" style={graphAnchorStyle}>
@@ -186,6 +177,55 @@ class App extends React.Component<{}, AppState> {
 function getGraphAnchorStyle(graphState: GraphState): any {
   const {x, y} = graphState.viewportOffset;
   return {transform: `translate(${x}px, ${y}px)`};
+}
+
+
+function buildNodes(graphState: GraphState): any {
+  return graphState.nodeOrder
+    .map((id: any) => ([id, graphState.nodes[id]] as [string, NodeState]))
+    .map(([id, nodeState]: [string, NodeState]) => {
+      const definition = nodeDefinitionService.getNodeDefinition(nodeState.kind) as NodeDefinitionModel;
+      return (
+        <Node key={id}
+              nodeState={nodeState}
+              service={service}
+              definition={definition}
+              portRegistry={service}
+              selected={graphSelection.isSelected(id)}
+              selectedItemSet={graphSelection}
+        />
+      )
+    });
+}
+
+function computeConnectionCurves(graphState: GraphState, portRegistry: PortRegistry): ConnectionCurve[] {
+  return graphState.connections.map(connectionState => ({
+    id: connectionState.id,
+    points: computeConnectionCurve(connectionState, portRegistry),
+  }));
+}
+
+function computeConnectionCurve(connection: ConnectionState, registry: PortRegistry): Coordinates[] {
+  const sourcePort = registry.getAllRegisteredPorts()
+    .find(p => p.id === connection.source)?.ref.current;
+
+  const targetPort = registry.getAllRegisteredPorts()
+    .find(p => p.id === connection.target)?.ref.current;
+
+  if (!sourcePort || !targetPort) {
+    throw new Error('Cannot compute connection curve because either source port or target port could not be found.');
+  }
+
+  const sb = sourcePort.getBoundingClientRect();
+  const tb = targetPort.getBoundingClientRect();
+
+  const start = rectangleCenter(sb);
+  const end = rectangleCenter(tb);
+  const cp1 = translateY(start, 80);
+  const cp2 = translateY(end, -80);
+
+  const points = [start, cp1, cp2, end];
+  return cubicBezier(points, 100);
 }
 
 export default App;

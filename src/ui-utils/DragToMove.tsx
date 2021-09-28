@@ -9,6 +9,7 @@ export default function DragToMove(props: any) {
     children,
     style,
     className,
+    buttons,
   } = props;
 
   const [isDragging, setIsDragging] = useState(false);
@@ -16,7 +17,7 @@ export default function DragToMove(props: any) {
   const [dragStartPosition, setDragStartPosition] = useState({x: 0, y: 0});
 
   const handlePointerDown = (e: any) => {
-    if (e.button !== 2) {
+    if (buttons.includes(e.button)) {
       setIsDragging(true);
       setStartPosition(elementPosition);
       setDragStartPosition({x: e.screenX, y: e.screenY});
@@ -61,12 +62,13 @@ export default function DragToMove(props: any) {
   );
 }
 
-const {func, element, shape, string} = PropTypes;
+const {func, element, shape, string, array} = PropTypes;
 
 DragToMove.propTypes = {
   onDragMove: func.isRequired,
   onDragStart: func,
   elementPosition: shape({}).isRequired,
+  buttons: array.isRequired,
   children: element,
   style: shape({}),
   className: string,
