@@ -16,6 +16,14 @@ export function translateY(c: Coordinates, yOffset: number): Coordinates {
   };
 }
 
+export function translate(c: Coordinates, offset: Coordinates): Coordinates {
+  return {
+    ...c,
+    x: c.x + offset.x,
+    y: c.y + offset.y,
+  };
+}
+
 export function cubicBezier(points: Coordinates[], numSegments: number): Coordinates[] {
   if (points.length !== 4) {
     throw new Error('Expected 4 control points to compute cubic bezier');

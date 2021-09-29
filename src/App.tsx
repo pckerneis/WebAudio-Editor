@@ -11,11 +11,12 @@ import {NodeState} from './state/NodeState';
 import {Subscription} from 'rxjs';
 import {GraphState} from './state/GraphState';
 import {ConnectionState} from './state/ConnectionState';
-import {PortRegistry} from './service/PortRegistry';
+import {PortComponentRegistry} from './service/PortComponentRegistry';
 import SelectedItemSet from './utils/SelectedItemSet';
 import Coordinates from './model/Coordinates';
-import {cubicBezier, rectangleCenter, translateY} from './utils/geometry';
+import {cubicBezier, rectangleCenter, translate} from './utils/geometry';
 import {ConnectionCurve, drawConnectionCurve, hitsConnectionCurve} from './ui-utils/ConnectionCurve';
+import {PortKind, PortState} from './state/PortState';
 
 const nodeDefinitionService = SingletonWrapper
   .create(NodeDefinitionService, getNodeDefinitions())
@@ -54,6 +55,7 @@ interface AppState {
   canvasRef: React.RefObject<HTMLCanvasElement>;
   selection: string[];
   connectionCurves: ConnectionCurve[];
+  mouseCoordinates: Coordinates | null;
 }
 
 class App extends React.Component<{}, AppState> {
@@ -68,6 +70,7 @@ class App extends React.Component<{}, AppState> {
       canvasRef: createRef(),
       selection: graphSelection.items,
       connectionCurves: [],
+      mouseCoordinates: null,
     };
 
     this._subscriptions.push(service.state$
@@ -124,7 +127,12 @@ class App extends React.Component<{}, AppState> {
           selected: graphSelection.isSelected(connectionCurve.id),
           connectionCurve
         }))
-        .forEach(({selected, connectionCurve}) => drawConnectionCurve(connectionCurve, selected, ctx));
+        .forEach(({selected, connectionCurve}) => drawConnectionCurve(connectionCurve.points, selected, ctx));
+
+      if (this.state.graphState.temporaryConnectionPort != null && this.state.mouseCoordinates != null) {
+        const points = computeTemporaryConnectionCurve(this.state.graphState.temporaryConnectionPort, this.state.mouseCoordinates, service);
+        drawConnectionCurve(points, true, ctx);
+      }
     }
   }
 
@@ -140,20 +148,44 @@ class App extends React.Component<{}, AppState> {
         y: evt.clientY,
       };
 
-      for (const c of this.state.connectionCurves) {
-        if (hitsConnectionCurve(mouseCoordinates, c, 8)) {
-          graphSelection.selectOnMouseDown(c.id, evt);
+      if (this.state.graphState.temporaryConnectionPort) {
+        const suitablePort = service.findSuitablePort(mouseCoordinates);
+
+        if (suitablePort) {
+          service.createOrApplyTemporaryConnection(suitablePort.id);
           somethingHit = true;
+        } else {
+          service.removeTemporaryConnection();
         }
       }
 
-      if (! somethingHit) {
+      if (!somethingHit) {
+        for (const c of this.state.connectionCurves) {
+          if (hitsConnectionCurve(mouseCoordinates, c, 8)) {
+            graphSelection.selectOnMouseDown(c.id, evt);
+            somethingHit = true;
+          }
+        }
+      }
+
+      if (!somethingHit) {
         graphSelection.clearSelection();
       }
     }
 
+    const handleMouseMove = (e: any) => {
+      this.setState(state => ({
+        ...state,
+        mouseCoordinates: {
+          x: e.clientX,
+          y: e.clientY,
+        },
+      }));
+    };
+
     return (
-      <div className="App">
+      <div className="App"
+           onMouseMove={handleMouseMove}>
         <div className="CanvasContainer">
           <canvas ref={this.state.canvasRef}/>
         </div>
@@ -179,7 +211,6 @@ function getGraphAnchorStyle(graphState: GraphState): any {
   return {transform: `translate(${x}px, ${y}px)`};
 }
 
-
 function buildNodes(graphState: GraphState): any {
   return graphState.nodeOrder
     .map((id: any) => ([id, graphState.nodes[id]] as [string, NodeState]))
@@ -198,21 +229,24 @@ function buildNodes(graphState: GraphState): any {
     });
 }
 
-function computeConnectionCurves(graphState: GraphState, portRegistry: PortRegistry): ConnectionCurve[] {
+function computeConnectionCurves(graphState: GraphState, portRegistry: PortComponentRegistry): ConnectionCurve[] {
   return graphState.connections.map(connectionState => ({
     id: connectionState.id,
     points: computeConnectionCurve(connectionState, portRegistry),
   }));
 }
 
-function computeConnectionCurve(connection: ConnectionState, registry: PortRegistry): Coordinates[] {
+function computeConnectionCurve(connection: ConnectionState, registry: PortComponentRegistry): Coordinates[] {
   const sourcePort = registry.getAllRegisteredPorts()
     .find(p => p.id === connection.source)?.ref.current;
 
   const targetPort = registry.getAllRegisteredPorts()
     .find(p => p.id === connection.target)?.ref.current;
 
-  if (!sourcePort || !targetPort) {
+  const sourcePortState = service.findPortState(connection.source);
+  const targetPortState = service.findPortState(connection.target);
+
+  if (!sourcePort || !targetPort || !sourcePortState || !targetPortState) {
     throw new Error('Cannot compute connection curve because either source port or target port could not be found.');
   }
 
@@ -221,10 +255,51 @@ function computeConnectionCurve(connection: ConnectionState, registry: PortRegis
 
   const start = rectangleCenter(sb);
   const end = rectangleCenter(tb);
-  const cp1 = translateY(start, 80);
-  const cp2 = translateY(end, -80);
+  const cp1 = translate(start, getControlPointOffset(sourcePortState.kind));
+  const cp2 = translate(end, getControlPointOffset(targetPortState.kind));
 
   const points = [start, cp1, cp2, end];
+  return cubicBezier(points, 100);
+}
+
+function getControlPointOffset(portKind: PortKind): Coordinates {
+  switch (portKind) {
+    case PortKind.OUTPUT:
+      return {x: 0, y: 80};
+    case PortKind.INPUT:
+      return {x: 0, y: -80};
+    case PortKind.AUDIO_PARAM:
+      return {x: -80, y: 0};
+  }
+}
+
+function computeTemporaryConnectionCurve(port: PortState, mouseCoordinates: Coordinates, service: GraphService): Coordinates[] {
+  const sourcePort = service.getAllRegisteredPorts().find(p => p.id === port.id)?.ref.current;
+  const portState = service.findPortState(port.id);
+
+  if (!sourcePort || !portState) {
+    throw new Error('Cannot compute temporary connection curve because source port could not be found.');
+  }
+
+  const sb = sourcePort.getBoundingClientRect();
+  const start = rectangleCenter(sb);
+
+  let points: Coordinates[];
+  const suitablePort = service.findSuitablePort(mouseCoordinates);
+
+  if (suitablePort != null) {
+    const end = rectangleCenter(suitablePort.ref.current!.getBoundingClientRect());
+    const cp1 = translate(start, getControlPointOffset(port.kind));
+    const suitablePortKind = service.findPortState(suitablePort.id)?.kind;
+    const cp2 = suitablePortKind == null ? end : translate(end, getControlPointOffset(suitablePortKind));
+    points = [start, cp1, cp2, end];
+
+  } else {
+    const end = mouseCoordinates;
+    const cp1 = translate(start, getControlPointOffset(port.kind));
+    points = [start, cp1, end, end];
+  }
+
   return cubicBezier(points, 100);
 }
 

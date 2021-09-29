@@ -1,5 +1,5 @@
 import React from 'react';
-import {PortId} from '../state/NodeState';
+import {PortId} from '../state/PortState';
 
 export interface ReferencedPort {
   id: PortId;
@@ -7,7 +7,7 @@ export interface ReferencedPort {
   template: JSX.Element;
 }
 
-export interface PortRegistry {
+export interface PortComponentRegistry {
   registerPorts(...referencedPorts: ReferencedPort[]): void;
   getAllRegisteredPorts(): ReferencedPort[];
 }

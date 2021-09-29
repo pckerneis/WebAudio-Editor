@@ -1,31 +1,32 @@
-import React, {createRef, useCallback, useLayoutEffect, useState} from 'react';
+import React, {useCallback, useLayoutEffect, useState} from 'react';
 import './Node.css';
 import DragToMove from '../../ui-utils/DragToMove';
 import PropTypes from 'prop-types';
 import EditableLabel from '../EditableLabel/EditableLabel';
 import FoldButton from '../FoldButton/FoldButton';
 import ParamPanel from '../ParamPanel/ParamPanel';
-import {NodeId, NodeState, PortId} from '../../state/NodeState';
+import {NodeId, NodeState} from '../../state/NodeState';
 import GraphService from '../../service/GraphService';
 import {NodeDefinitionModel} from '../../model/NodeDefinition.model';
-import {PortRegistry, ReferencedPort} from '../../service/PortRegistry';
+import {PortComponentRegistry, ReferencedPort} from '../../service/PortComponentRegistry';
 import SelectedItemSet from '../../utils/SelectedItemSet';
 import Coordinates from '../../model/Coordinates';
 import Bounds from '../../model/Bounds';
+import {buildReferencedPorts} from './Port';
 
 interface NodeProps {
   nodeState: NodeState;
   service: GraphService;
   definition: NodeDefinitionModel;
-  portRegistry: PortRegistry;
+  portRegistry: PortComponentRegistry;
   selected: boolean;
   style?: any;
   selectedItemSet: SelectedItemSet<string>;
 }
 
-function buildPorts(nodeState: NodeState): { bottomPorts: ReferencedPort[], topPorts: ReferencedPort[] } {
-  const topPorts = buildReferencedPorts(nodeState.inputPorts);
-  const bottomPorts = buildReferencedPorts(nodeState.outputPorts);
+function buildPorts(nodeState: NodeState, service: GraphService): { bottomPorts: ReferencedPort[], topPorts: ReferencedPort[] } {
+  const topPorts = buildReferencedPorts(nodeState.inputPorts.map(p => p.id), service);
+  const bottomPorts = buildReferencedPorts(nodeState.outputPorts.map(p => p.id), service);
   return {topPorts, bottomPorts};
 }
 
@@ -77,7 +78,7 @@ export default function Node(props: NodeProps) {
     setStartPosition(nodeState.display.bounds);
   }, [nodeState.display.bounds, selectedItemSet.items, service.snapshot.nodes]);
 
-  const {topPorts, bottomPorts} = buildPorts(nodeState);
+  const {topPorts, bottomPorts} = buildPorts(nodeState, service);
 
   useLayoutEffect(() => {
     portRegistry.registerPorts(...topPorts);
@@ -147,14 +148,4 @@ Node.propTypes = {
   selectedItemSet: shape({}).isRequired,
   style: shape({}),
   selected: bool,
-}
-
-function buildReferencedPorts(portIds: PortId[]): ReferencedPort[] {
-  return Array(portIds.length)
-    .fill(0)
-    .map((_, idx) => {
-      const ref = createRef<HTMLDivElement>();
-      const template = (<div key={idx} className="Port" ref={ref}></div>);
-      return {id: portIds[idx], ref, template};
-    });
 }

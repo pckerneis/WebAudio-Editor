@@ -6,12 +6,12 @@ export interface ConnectionCurve {
   points: Coordinates[];
 }
 
-export function drawConnectionCurve(connection: ConnectionCurve, selected: boolean, ctx: CanvasRenderingContext2D): void {
+export function drawConnectionCurve(points: Coordinates[], selected: boolean, ctx: CanvasRenderingContext2D): void {
   ctx.lineWidth = 2;
   ctx.strokeStyle = selected ? '#12acff' : 'grey';
   ctx.beginPath();
-  ctx.moveTo(connection.points[0].x, connection.points[0].y);
-  connection.points.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.moveTo(points[0].x, points[0].y);
+  points.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
   ctx.stroke();
 }
 

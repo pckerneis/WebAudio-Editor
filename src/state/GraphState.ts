@@ -1,6 +1,7 @@
 import Coordinates from '../model/Coordinates';
 import {NodeState} from './NodeState';
 import {ConnectionState} from './ConnectionState';
+import {PortState} from './PortState';
 
 type Id = string;
 
@@ -9,6 +10,7 @@ export interface GraphState {
   nodeOrder: string[];
   connections: ConnectionState[];
   viewportOffset: Coordinates;
+  temporaryConnectionPort: PortState | null;
 }
 
 export function getInitialGraphModel(): GraphState {
@@ -17,5 +19,6 @@ export function getInitialGraphModel(): GraphState {
     nodes: {},
     nodeOrder: [],
     viewportOffset: {x: 0, y: 0},
+    temporaryConnectionPort: null,
   };
 }
