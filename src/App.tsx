@@ -6,7 +6,7 @@ import Node from './components/Node/Node';
 import {NodeKind} from './model/NodeKind.model';
 import SingletonWrapper from './service/SingletonWrapper';
 import NodeDefinitionService from './service/NodeDefinitionService';
-import {getNodeDefinitions, NodeDefinitionModel} from './model/NodeDefinition.model';
+import {NodeDefinitionModel} from './model/NodeDefinition.model';
 import {NodeState} from './state/NodeState';
 import {Subscription} from 'rxjs';
 import {GraphState} from './state/GraphState';
@@ -17,6 +17,7 @@ import Coordinates from './model/Coordinates';
 import {cubicBezier, rectangleCenter, translate} from './utils/geometry';
 import {ConnectionCurve, drawConnectionCurve, hitsConnectionCurve} from './ui-utils/ConnectionCurve';
 import {PortKind, PortState} from './state/PortState';
+import {getNodeDefinitions} from './model/StandardNodesDefinitions';
 
 const nodeDefinitionService = SingletonWrapper
   .create(NodeDefinitionService, getNodeDefinitions())
@@ -29,23 +30,23 @@ const graphSelection = SingletonWrapper.create(SelectedItemSet).get() as Selecte
 if (!SingletonWrapper.hasInstance(GraphService)) {
   const s = serviceWrapper.get();
 
-  const n1 = s.createAndAddNode('node1',
+  const osc = s.createAndAddNode('osc',
     nodeDefinitionService.getNodeDefinition(NodeKind.osc)!,
     {x: 120, y: 20, width: 100, height: 20});
 
-  const n2 = s.createAndAddNode('node2',
-    nodeDefinitionService.getNodeDefinition(NodeKind.osc)!,
+  const gain1 = s.createAndAddNode('gain1',
+    nodeDefinitionService.getNodeDefinition(NodeKind.gain)!,
     {x: 150, y: 300, width: 100, height: 20});
 
-  const n3 = s.createAndAddNode('node3',
-    nodeDefinitionService.getNodeDefinition(NodeKind.osc)!,
+  const gain2 = s.createAndAddNode('gain2',
+    nodeDefinitionService.getNodeDefinition(NodeKind.gain)!,
     {x: 200, y: 150, width: 100, height: 20});
 
-  s.addConnection(n1.id, 0, n2.id, 0);
-  s.addConnection(n1.id, 0, n3.id, 0);
-  s.addConnection(n3.id, 0, n2.id, 0);
+  s.addConnection(osc.id, 0, gain1.id, 0);
+  s.addConnection(gain1.id, 0, gain2.id, 0);
+  s.addConnection(osc.id, 0, gain2.id, 0);
 
-  graphSelection.addToSelection(n1.id);
+  graphSelection.addToSelection(osc.id);
 }
 
 const service = serviceWrapper.get();
@@ -77,8 +78,13 @@ class App extends React.Component<{}, AppState> {
       .subscribe((graphState) => this.setState((prev) => ({
         ...prev,
         graphState,
-        connectionCurves: computeConnectionCurves(graphState, service),
-      }))));
+      }), () => {
+        this.setState(s => ({
+          ...s,
+          connectionCurves: computeConnectionCurves(graphState, service),
+        }));
+      }))
+    );
 
     this._subscriptions.push(graphSelection.selection$
       .subscribe((selection) => this.setState((prev) => ({
@@ -100,11 +106,11 @@ class App extends React.Component<{}, AppState> {
   componentDidMount(): void {
     this.resizeHandler = () => this.renderConnections();
     window.addEventListener('resize', this.resizeHandler);
+
     this.setState(state => ({
       ...state,
-      connectionCurves: computeConnectionCurves(service.snapshot, service),
-    }));
-    this.renderConnections();
+      connectionCurves: computeConnectionCurves(state.graphState, service),
+    }), () => this.renderConnections());
   }
 
   componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {

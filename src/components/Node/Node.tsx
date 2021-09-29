@@ -43,7 +43,7 @@ export default function Node(props: NodeProps) {
   const nodeStyle = {
     ...props.style,
     transform: `translate(${nodeState.display.bounds.x}px, ${nodeState.display.bounds.y}px)`,
-    width: nodeState.display.bounds.width,
+    minWidth: nodeState.display.bounds.width,
     minHeight: nodeState.display.bounds.height,
   };
 
@@ -121,8 +121,10 @@ export default function Node(props: NodeProps) {
             !nodeState.display.folded
             && hasParams
             && <ParamPanel
+              nodeId={nodeState.id}
               paramValues={nodeState.paramValues}
               paramDefinitions={definition.params}
+              service={service}
               style={({marginBottom: '5px'})}
             />
           }

@@ -7,22 +7,23 @@ export interface NodeDefinitionModel {
   outputPortCount: number;
 }
 
-export interface ParamDefinition {
+export interface ChoiceParamDefinition {
+  type: ParamType.choice;
   name: string;
-  type: ParamType;
+  possibleValues: string[];
+  defaultValue: string;
+}
+export interface AudioParamDefinition {
+  type: ParamType.AudioParam;
+  name: string;
+  defaultValue: number;
+  min?: number;
+  max?: number;
 }
 
-export type ParamType = 'string' | 'AudioParam';
+export type ParamDefinition = ChoiceParamDefinition | AudioParamDefinition;
 
-export function getNodeDefinitions(): NodeDefinitionModel[] {
-  return [
-    {
-      kind: NodeKind.osc,
-      inputPortCount: 1,
-      outputPortCount: 1,
-      params: [
-        {name: 'type', type: 'string'}
-      ],
-    }
-  ];
+export enum ParamType {
+  choice,
+  AudioParam,
 }

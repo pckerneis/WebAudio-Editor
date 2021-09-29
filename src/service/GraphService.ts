@@ -1,10 +1,10 @@
 import {BehaviorSubject, Observable} from 'rxjs';
 import {getInitialGraphModel, GraphState} from '../state/GraphState';
 import Coordinates from '../model/Coordinates';
-import {NodeDisplay, NodeState} from '../state/NodeState';
+import {NodeDisplay, NodeId, NodeState} from '../state/NodeState';
 import {ConnectionState} from '../state/ConnectionState';
 import {PortComponentRegistry, ReferencedPort} from './PortComponentRegistry';
-import {NodeDefinitionModel, ParamType} from '../model/NodeDefinition.model';
+import {NodeDefinitionModel} from '../model/NodeDefinition.model';
 import SequenceGenerator from '../utils/SequenceGenerator';
 import Bounds from '../model/Bounds';
 import {PortId, PortKind, PortState} from '../state/PortState';
@@ -50,7 +50,7 @@ export default class GraphService implements PortComponentRegistry {
       folded: false,
     };
     const paramValues = {} as any;
-    definition.params.forEach(p => paramValues[p.name] = getDefaultValueForType(p.type));
+    definition.params.forEach(p => paramValues[p.name] = p.defaultValue);
 
     return {
       id,
@@ -143,6 +143,10 @@ export default class GraphService implements PortComponentRegistry {
 
       return squaredDist(rectangleCenter(portBounds), mouseCoordinates) < checkDistSquared;
     }) ?? null;
+  }
+
+  setParamValue(nodeId: NodeId, paramName: string, value: any): void {
+    this._store.next(setParamValue(nodeId, paramName, value, this.snapshot));
   }
 }
 
@@ -308,11 +312,6 @@ function findParentNode(portId: PortId, state: GraphState): NodeState | null {
   return null;
 }
 
-function getDefaultValueForType(type: ParamType): any {
-  // TODO
-  return '';
-}
-
 function createOrApplyTemporaryConnection(portId: PortId, state: GraphState): GraphState {
   const port = findPortState(portId, state);
 
@@ -361,4 +360,14 @@ function findPortState(portId: PortId, state: GraphState): PortState | null {
   }
 
   return null;
+}
+
+function setParamValue(nodeId: NodeId, paramName: string, value: any, state: GraphState): GraphState {
+  return transformExistingNode(nodeId, state, n => ({
+    ...n,
+    paramValues: {
+      ...n.paramValues,
+      [paramName]: value,
+    },
+  }));
 }

@@ -1,18 +1,21 @@
 .ParamPanel {
     border: 1px solid #80808045;
     background: #00000014;
-    display: flex;
-    flex-direction: column;
-}
 
-.ParamRow {
-    display: flex;
-    font-family: monospace;
-    padding: 2px;
+    margin-bottom: 5px;
+    display: grid;
+    grid-template-columns: 40% 60%;
+    grid-gap: 2px;
+    justify-content: start;
+    justify-items: stretch;
+    align-content: space-around;
+    align-items: stretch;
+    text-align: right;
+    padding: 3px;
 }
 
 .ParamKey {
-    margin-right: auto;
+    margin-right: 8px;
 }
 
 .ParamValue {
