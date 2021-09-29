@@ -1,4 +1,4 @@
-import Identified from '../model/Identified';
+import Identified from './Identified';
 import {NodeKind} from '../model/NodeKind.model';
 import Bounds from '../model/Bounds';
 import {PortState} from './PortState';
@@ -13,10 +13,15 @@ export interface NodeState extends Identified<NodeId> {
   name: string;
   inputPorts: PortState[];
   outputPorts: PortState[];
+  paramPorts: ParamPorts;
 }
 
 export interface ParamValues {
   [paramName: string]: any;
+}
+
+export interface ParamPorts {
+  [paramName: string]: PortState;
 }
 
 export interface NodeDisplay {

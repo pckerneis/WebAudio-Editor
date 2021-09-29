@@ -1,4 +1,4 @@
-import Identified from '../model/Identified';
+import Identified from './Identified';
 import {PortId} from './PortState';
 
 export interface ConnectionState extends Identified<string> {

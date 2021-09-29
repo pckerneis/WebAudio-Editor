@@ -21,6 +21,7 @@ export function getNodeDefinitions(): NodeDefinitionModel[] {
           name: 'frequency',
           type: ParamType.AudioParam,
           defaultValue: 440,
+          acceptsInput: true,
         },
         {
           name: 'detune',
@@ -28,6 +29,7 @@ export function getNodeDefinitions(): NodeDefinitionModel[] {
           defaultValue: 0,
           min: -MAX_DETUNE,
           max: MAX_DETUNE,
+          acceptsInput: true,
         }
       ],
     },
@@ -40,6 +42,7 @@ export function getNodeDefinitions(): NodeDefinitionModel[] {
           name: 'gain',
           type: ParamType.AudioParam,
           defaultValue: 1,
+          acceptsInput: true,
         },
       ],
     }

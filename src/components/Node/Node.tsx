@@ -1,4 +1,4 @@
-import React, {useCallback, useLayoutEffect, useState} from 'react';
+import React, {createRef, useCallback, useLayoutEffect, useState} from 'react';
 import './Node.css';
 import DragToMove from '../../ui-utils/DragToMove';
 import PropTypes from 'prop-types';
@@ -87,11 +87,30 @@ export default function Node(props: NodeProps) {
 
   const hasParams = Object.keys(definition.params).length > 0;
 
+  const hiddenParamPorts = nodeState.display.folded ?
+    Object.values(nodeState.paramPorts).map((p) => {
+      const ref = createRef<HTMLDivElement>();
+      const template = (
+        <div className="HiddenParamPort"
+             ref={ref}
+             key={p.id + '_hiddenPort'}>
+        </div>);
+
+      return {id: p.id, ref, template};
+    }) : [];
+
+  service.registerPorts(...hiddenParamPorts);
+
   return (
     <div className={selected ? 'Node selected' : 'Node'}
          style={nodeStyle}
          onPointerDown={handlePointerDown}
     >
+      {
+        nodeState.display.folded
+        && hasParams
+        && hiddenParamPorts.map(p => p.template)
+      }
       <DragToMove
         onDragStart={handleDragStart}
         onDragMove={handleMoved}
@@ -123,6 +142,7 @@ export default function Node(props: NodeProps) {
             && <ParamPanel
               nodeId={nodeState.id}
               paramValues={nodeState.paramValues}
+              paramPorts={nodeState.paramPorts}
               paramDefinitions={definition.params}
               service={service}
               style={({marginBottom: '5px'})}

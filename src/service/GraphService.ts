@@ -1,10 +1,10 @@
 import {BehaviorSubject, Observable} from 'rxjs';
 import {getInitialGraphModel, GraphState} from '../state/GraphState';
 import Coordinates from '../model/Coordinates';
-import {NodeDisplay, NodeId, NodeState} from '../state/NodeState';
+import {NodeDisplay, NodeId, NodeState, ParamPorts, ParamValues} from '../state/NodeState';
 import {ConnectionState} from '../state/ConnectionState';
 import {PortComponentRegistry, ReferencedPort} from './PortComponentRegistry';
-import {NodeDefinitionModel} from '../model/NodeDefinition.model';
+import {NodeDefinitionModel, ParamType} from '../model/NodeDefinition.model';
 import SequenceGenerator from '../utils/SequenceGenerator';
 import Bounds from '../model/Bounds';
 import {PortId, PortKind, PortState} from '../state/PortState';
@@ -49,8 +49,17 @@ export default class GraphService implements PortComponentRegistry {
       bounds,
       folded: false,
     };
-    const paramValues = {} as any;
+
+    const paramValues = {} as ParamValues;
     definition.params.forEach(p => paramValues[p.name] = p.defaultValue);
+
+    const paramPorts = {} as ParamPorts;
+    definition.params
+      .filter(p => p.type === ParamType.AudioParam && p.acceptsInput)
+      .forEach((p) => paramPorts[p.name] = {
+        id: sequence.nextString(),
+        kind: PortKind.AUDIO_PARAM,
+      });
 
     return {
       id,
@@ -60,6 +69,7 @@ export default class GraphService implements PortComponentRegistry {
       outputPorts,
       name,
       paramValues,
+      paramPorts,
     };
   }
 
@@ -306,6 +316,8 @@ function findParentNode(portId: PortId, state: GraphState): NodeState | null {
       return n;
     } else if (n.outputPorts.map(p => p.id).includes(portId)) {
       return n;
+    } else if (Object.values(n.paramPorts).map(p => p.id).includes(portId)) {
+      return n;
     }
   }
 
@@ -353,6 +365,12 @@ function findPortState(portId: PortId, state: GraphState): PortState | null {
     }
 
     for (let p of n.outputPorts) {
+      if (p.id === portId) {
+        return p;
+      }
+    }
+
+    for (let p of Object.values(n.paramPorts)) {
       if (p.id === portId) {
         return p;
       }

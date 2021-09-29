@@ -19,6 +19,7 @@ export interface AudioParamDefinition {
   defaultValue: number;
   min?: number;
   max?: number;
+  acceptsInput: boolean,
 }
 
 export type ParamDefinition = ChoiceParamDefinition | AudioParamDefinition;

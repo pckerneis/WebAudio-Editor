@@ -1,6 +1,8 @@
 .ParamPanel {
-    border: 1px solid #80808045;
+    border-top: 1px solid #80808045;
+    border-bottom: 1px solid #80808045;
     background: #00000014;
+    overflow: hidden;
 
     margin-bottom: 5px;
     display: grid;
@@ -16,8 +18,20 @@
 
 .ParamKey {
     margin-right: 8px;
+    position: relative;
 }
 
 .ParamValue {
     margin-left: auto;
+}
+
+.ParamPort {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    top: 6px;
+    left: -7px;
+    background-color: grey;
+    cursor: pointer;
 }

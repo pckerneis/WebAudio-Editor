@@ -1,4 +1,4 @@
-import Identified from '../model/Identified';
+import Identified from './Identified';
 
 export type PortId = string;
 
