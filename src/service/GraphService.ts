@@ -1,17 +1,30 @@
 import {BehaviorSubject, Observable} from 'rxjs';
 import {getInitialGraphModel, GraphState} from '../state/GraphState';
 import Coordinates from '../model/Coordinates';
-import {NodeDisplay, NodeId, NodeState, ParamPorts, ParamValues} from '../state/NodeState';
-import {ConnectionState} from '../state/ConnectionState';
+import {NodeId, NodeState} from '../state/NodeState';
 import {PortComponentRegistry, ReferencedPort} from './PortComponentRegistry';
-import {NodeDefinitionModel, ParamType} from '../model/NodeDefinition.model';
-import SequenceGenerator from '../utils/SequenceGenerator';
+import {NodeDefinitionModel} from '../model/NodeDefinition.model';
 import Bounds from '../model/Bounds';
-import {PortId, PortKind, PortState} from '../state/PortState';
+import {PortId, PortState} from '../state/PortState';
 import {squaredDist} from '../utils/numbers';
 import {rectangleCenter} from '../utils/geometry';
-
-const sequence = new SequenceGenerator();
+import {
+  addNode,
+  createNode,
+  findPortState,
+  sendNodeToFront,
+  setNodeName,
+  setNodePosition,
+  setParamValue,
+  toggleNodeFoldState
+} from './commands/NodeCommands';
+import {
+  addConnection,
+  canConnect,
+  createOrApplyTemporaryConnection,
+  removeTemporaryConnection
+} from './commands/ConnectionCommands';
+import {translateViewport} from './commands/ViewportCommands';
 
 export default class GraphService implements PortComponentRegistry {
   public readonly state$: Observable<GraphState>;
@@ -33,44 +46,7 @@ export default class GraphService implements PortComponentRegistry {
   }
 
   createNode(name: string, definition: NodeDefinitionModel, bounds: Bounds): NodeState {
-    const id = sequence.nextString();
-
-    const inputPorts = new Array(definition.inputPortCount).fill('').map(() => ({
-      id: sequence.nextString(),
-      kind: PortKind.INPUT,
-    }));
-
-    const outputPorts = new Array(definition.outputPortCount).fill('').map(() => ({
-      id: sequence.nextString(),
-      kind: PortKind.OUTPUT,
-    }));
-
-    const display: NodeDisplay = {
-      bounds,
-      folded: false,
-    };
-
-    const paramValues = {} as ParamValues;
-    definition.params.forEach(p => paramValues[p.name] = p.defaultValue);
-
-    const paramPorts = {} as ParamPorts;
-    definition.params
-      .filter(p => p.type === ParamType.AudioParam && p.acceptsInput)
-      .forEach((p) => paramPorts[p.name] = {
-        id: sequence.nextString(),
-        kind: PortKind.AUDIO_PARAM,
-      });
-
-    return {
-      id,
-      kind: definition.kind,
-      display,
-      inputPorts,
-      outputPorts,
-      name,
-      paramValues,
-      paramPorts,
-    };
+    return createNode(definition, bounds, name);
   }
 
   addNode(node: NodeState): void {
@@ -158,234 +134,4 @@ export default class GraphService implements PortComponentRegistry {
   setParamValue(nodeId: NodeId, paramName: string, value: any): void {
     this._store.next(setParamValue(nodeId, paramName, value, this.snapshot));
   }
-}
-
-function translateViewport(coordinates: Coordinates, state: GraphState): GraphState {
-  return {
-    ...state,
-    viewportOffset: coordinates,
-  };
-}
-
-function addNode(id: string, nodeState: NodeState, state: GraphState): GraphState {
-  if (Object.keys(state.nodes).includes(id)) {
-    throw new Error('A node already exists with ID ' + id);
-  }
-
-  return {
-    ...state,
-    nodes: {...state.nodes, [id]: nodeState},
-    nodeOrder: [id, ...state.nodeOrder],
-  };
-}
-
-function setNodePosition(id: string, coordinates: Coordinates, state: GraphState): GraphState {
-  return transformExistingNode(id, state, (n) => ({
-    ...n,
-    display: {
-      ...n.display,
-      bounds: {
-        ...n.display.bounds,
-        ...coordinates,
-      }
-    }
-  }));
-}
-
-function transformExistingNode(id: string,
-                               state: GraphState,
-                               mapper: (n: NodeState) => NodeState): GraphState {
-  assertNodeExists(id, state);
-
-  return {
-    ...state,
-    nodes: {
-      ...state.nodes,
-      [id]: mapper(state.nodes[id]),
-    },
-  };
-}
-
-function sendNodeToFront(id: string, state: GraphState): GraphState {
-  return {
-    ...state,
-    nodeOrder: [...state.nodeOrder.filter(n => n !== id), id],
-  };
-}
-
-function setNodeName(id: string, name: string, state: GraphState): GraphState {
-  return transformExistingNode(id, state, (node) => ({
-    ...node,
-    name,
-  }));
-}
-
-function toggleNodeFoldState(id: string, state: GraphState): GraphState {
-  return transformExistingNode(id, state, (node) => ({
-    ...node,
-    display: {
-      ...node.display,
-      folded: !node.display.folded,
-    },
-  }));
-}
-
-function assertNodeExists(nodeId: string, state: GraphState): void {
-  if (!Object.keys(state.nodes).includes(nodeId)) {
-    throw new Error('There is no node with ID ' + nodeId);
-  }
-}
-
-function addConnection(sourceNodeId: string, sourcePortIndex: number,
-                       targetNodeId: string, targetPortIndex: number,
-                       state: GraphState): GraphState {
-  assertNodeExists(sourceNodeId, state);
-  assertNodeExists(targetNodeId, state);
-
-  const source = state.nodes[sourceNodeId].outputPorts[sourcePortIndex];
-  const target = state.nodes[targetNodeId].inputPorts[targetPortIndex];
-
-  if (!source || !target) {
-    throw new Error('Cannot find port.');
-  }
-
-  return doAddConnection(source.id, target.id, state);
-}
-
-function doAddConnection(source: PortId, target: PortId, state: GraphState): GraphState {
-  if (canConnect(source, target, state)) {
-    const newConnection: ConnectionState = {
-      id: sequence.nextString(),
-      source,
-      target
-    };
-
-    return {
-      ...state,
-      connections: [...state.connections, newConnection],
-    };
-  }
-
-  return state;
-}
-
-function canConnect(source: PortId, target: PortId, state: GraphState): boolean {
-  if (source === target) {
-    return false;
-  }
-
-  const sourceNode = findParentNode(source, state);
-  const targetNode = findParentNode(target, state);
-
-  if (sourceNode === null
-    || targetNode === null
-    || sourceNode === targetNode) {
-    return false;
-  }
-
-  if (areAlreadyConnected(source, target, state)) {
-    return false;
-  }
-
-  const sourcePort = findPortState(source, state);
-  const targetPort = findPortState(target, state);
-
-  if (sourcePort === null || targetPort === null) {
-    return false;
-  }
-
-  return portKindAllowedMapping[sourcePort.kind].includes(targetPort.kind)
-    && portKindAllowedMapping[targetPort.kind].includes(sourcePort.kind)
-}
-
-const portKindAllowedMapping: { [kind in PortKind]: PortKind[] } = {
-  [PortKind.INPUT]: [PortKind.OUTPUT],
-  [PortKind.OUTPUT]: [PortKind.AUDIO_PARAM, PortKind.INPUT],
-  [PortKind.AUDIO_PARAM]: [PortKind.OUTPUT],
-}
-
-function areAlreadyConnected(source: PortId, target: PortId, state: GraphState): Boolean {
-  return state.connections.find(c =>
-    (c.target === target && c.source === source)
-    || (c.target === source && c.source === target)) != null;
-}
-
-function findParentNode(portId: PortId, state: GraphState): NodeState | null {
-  for (let n of Object.values(state.nodes)) {
-    if (n.inputPorts.map(p => p.id).includes(portId)) {
-      return n;
-    } else if (n.outputPorts.map(p => p.id).includes(portId)) {
-      return n;
-    } else if (Object.values(n.paramPorts).map(p => p.id).includes(portId)) {
-      return n;
-    }
-  }
-
-  return null;
-}
-
-function createOrApplyTemporaryConnection(portId: PortId, state: GraphState): GraphState {
-  const port = findPortState(portId, state);
-
-  if (port == null) {
-    throw new Error('Could not find port with ID ' + portId);
-  }
-
-  if (state.temporaryConnectionPort == null) {
-    return {
-      ...state,
-      temporaryConnectionPort: port,
-    };
-  } else if (state.temporaryConnectionPort.id === port.id) {
-    return {
-      ...state,
-      temporaryConnectionPort: null,
-    }
-  } else {
-    return {
-      ...doAddConnection(state.temporaryConnectionPort.id, port.id, state),
-      temporaryConnectionPort: null,
-    };
-  }
-}
-
-function removeTemporaryConnection(state: GraphState): GraphState {
-  return {
-    ...state,
-    temporaryConnectionPort: null,
-  };
-}
-
-function findPortState(portId: PortId, state: GraphState): PortState | null {
-  for (let n of Object.values(state.nodes)) {
-    for (let p of n.inputPorts) {
-      if (p.id === portId) {
-        return p;
-      }
-    }
-
-    for (let p of n.outputPorts) {
-      if (p.id === portId) {
-        return p;
-      }
-    }
-
-    for (let p of Object.values(n.paramPorts)) {
-      if (p.id === portId) {
-        return p;
-      }
-    }
-  }
-
-  return null;
-}
-
-function setParamValue(nodeId: NodeId, paramName: string, value: any, state: GraphState): GraphState {
-  return transformExistingNode(nodeId, state, n => ({
-    ...n,
-    paramValues: {
-      ...n.paramValues,
-      [paramName]: value,
-    },
-  }));
 }
