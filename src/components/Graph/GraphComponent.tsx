@@ -7,7 +7,7 @@ import SingletonWrapper from '../../service/SingletonWrapper';
 import NodeDefinitionService from '../../service/NodeDefinitionService';
 import {NodeDefinitionModel} from '../../model/NodeDefinition.model';
 import {NodeState} from '../../state/NodeState';
-import {Subscription} from 'rxjs';
+import {Observable, Subscription, switchMap} from 'rxjs';
 import {GraphState} from '../../state/GraphState';
 import {PortComponentRegistry} from '../../service/PortComponentRegistry';
 import SelectedItemSet from '../../utils/SelectedItemSet';
@@ -58,16 +58,14 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
       connectionCurves: [],
       mouseCoordinates: null,
       subscriptions: [
-        graphService.state$.subscribe(graphState => {
-          this.setState(s => ({...s, graphState}), () =>
-            this.setState(s => ({
-              ...s,
-              connectionCurves: computeConnectionCurves(graphService, portRegistry),
-            }))
-          )
-        }),
-        graphSelection.selection$
-          .subscribe((selection) => this.setState(s => ({...s, selection})))
+        graphService.state$.pipe(
+          switchMap(s => this.updateGraphState$(s)),
+          switchMap(() => this.computeConnectionCurves$()),
+        ).subscribe(),
+
+        graphSelection.selection$.pipe(
+          switchMap(this.updateSelection$)
+        ).subscribe(),
       ]
     };
   }
@@ -86,10 +84,8 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
     this.resizeHandler = () => this.renderConnections();
     window.addEventListener('resize', this.resizeHandler);
 
-    this.setState(state => ({
-      ...state,
-      connectionCurves: computeConnectionCurves(graphService, portRegistry),
-    }), () => this.renderConnections());
+    this.computeConnectionCurves$()
+      .subscribe(() => this.renderConnections());
   }
 
   componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -186,6 +182,28 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
         </div>
       </div>
     );
+  }
+
+  private updateGraphState$ = (graphState: GraphState) => {
+    return this.update$(s => ({...s, graphState}));
+  }
+
+  private computeConnectionCurves$ = () => {
+    return this.update$(s => ({
+      ...s,
+      connectionCurves: computeConnectionCurves(graphService, portRegistry),
+    }));
+  }
+
+  private updateSelection$ = (selection: string[]) => this.update$(s => ({...s, selection}));
+
+  private update$ = (stateMapper: (s: GraphComponentState) => GraphComponentState) => {
+    return new Observable<GraphComponentState>(subscriber => {
+      this.setState(stateMapper, () => {
+        subscriber.next();
+        subscriber.complete();
+      });
+    });
   }
 }
 
