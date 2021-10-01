@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
+import GraphComponent from './components/Graph/GraphComponent';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <GraphComponent />
   </React.StrictMode>,
   document.getElementById('root')
 );

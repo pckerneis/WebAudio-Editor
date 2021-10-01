@@ -1,26 +1,26 @@
 import React, {createRef} from 'react';
-import './App.css';
-import DragToMove from './ui-utils/DragToMove';
-import GraphService from './service/GraphService';
-import Node from './components/Node/Node';
-import SingletonWrapper from './service/SingletonWrapper';
-import NodeDefinitionService from './service/NodeDefinitionService';
-import {NodeDefinitionModel} from './model/NodeDefinition.model';
-import {NodeState} from './state/NodeState';
+import './GraphComponent.css';
+import DragToMove from '../../ui-utils/DragToMove';
+import GraphService from '../../service/GraphService';
+import Node from '../Node/Node';
+import SingletonWrapper from '../../service/SingletonWrapper';
+import NodeDefinitionService from '../../service/NodeDefinitionService';
+import {NodeDefinitionModel} from '../../model/NodeDefinition.model';
+import {NodeState} from '../../state/NodeState';
 import {Subscription} from 'rxjs';
-import {GraphState} from './state/GraphState';
-import {PortComponentRegistry} from './service/PortComponentRegistry';
-import SelectedItemSet from './utils/SelectedItemSet';
-import Coordinates from './model/Coordinates';
+import {GraphState} from '../../state/GraphState';
+import {PortComponentRegistry} from '../../service/PortComponentRegistry';
+import SelectedItemSet from '../../utils/SelectedItemSet';
+import Coordinates from '../../model/Coordinates';
 import {
   computeConnectionCurves,
   computeTemporaryConnectionCurve,
   ConnectionCurve,
   drawConnectionCurve,
   hitsConnectionCurve
-} from './ui-utils/ConnectionCurve';
-import {getNodeDefinitions} from './model/StandardNodesDefinitions';
-import {loadDemoProject} from './project-setup';
+} from '../../ui-utils/ConnectionCurve';
+import {getNodeDefinitions} from '../../model/StandardNodesDefinitions';
+import {loadDemoProject} from '../../project-setup';
 
 const MAX_PORT_CLICK_DISTANCE = 8;
 
@@ -36,7 +36,7 @@ if (!isServiceInitialized) {
   loadDemoProject(graphService, graphSelection, nodeDefinitionService);
 }
 
-interface AppState {
+interface GraphComponentState {
   graphState: GraphState;
   canvasRef: React.RefObject<HTMLCanvasElement>;
   selection: string[];
@@ -45,7 +45,7 @@ interface AppState {
   subscriptions: Subscription[];
 }
 
-class App extends React.Component<{}, AppState> {
+class GraphComponent extends React.Component<{}, GraphComponentState> {
   private resizeHandler?: (() => void);
 
   constructor(props: {}) {
@@ -167,7 +167,7 @@ class App extends React.Component<{}, AppState> {
     };
 
     return (
-      <div className="App"
+      <div className="GraphComponent"
            onMouseMove={handleMouseMove}>
         <div className="CanvasContainer">
           <canvas ref={this.state.canvasRef}/>
@@ -212,4 +212,4 @@ function buildNodes(graphState: GraphState): any {
     });
 }
 
-export default App;
+export default GraphComponent;
