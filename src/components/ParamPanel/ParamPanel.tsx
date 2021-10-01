@@ -45,16 +45,23 @@ export default function ParamPanel(props: ParamPanelProps) {
         }) : [];
 
         const inputElement = isChoiceParam ?
-          <select key={paramName + '_select'} value={currentValue}
-                  onChange={handleInputChange}>
+          <select
+            key={paramName + '_select'}
+            value={currentValue}
+            onChange={handleInputChange}
+            onPointerDown={consumeEvent}
+          >
             {options}
           </select>
-          : <input key={paramName + '_input'}
-                   type="number"
-                   value={currentValue}
-                   min={definition.min}
-                   max={definition.max}
-                   onChange={handleInputChange}/>;
+          : <input
+            key={paramName + '_input'}
+            type="number"
+            value={currentValue}
+            min={definition.min}
+            max={definition.max}
+            onChange={handleInputChange}
+            onPointerDown={consumeEvent}
+          />;
 
         const acceptsInput = definition.type === ParamType.AudioParam
           && definition.acceptsInput;

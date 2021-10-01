@@ -50,7 +50,7 @@ export default function Node(props: NodeProps) {
   const [startPosition, setStartPosition] = useState({} as Bounds);
   const [positionByItem, setPositionByItem] = useState({} as { [id: NodeId]: Bounds });
 
-  const handlePointerDown = useCallback((evt: any) => {
+  const handlePointerUp = useCallback((evt: any) => {
     service.sendNodeToFront(nodeState.id);
     selectedItemSet.selectOnMouseDown(nodeState.id, evt);
   }, [service, selectedItemSet, nodeState.id]);
@@ -70,6 +70,10 @@ export default function Node(props: NodeProps) {
   }, [selectedItemSet, nodeState.id, positionByItem, service, startPosition.x, startPosition.y]);
 
   const handleDragStart = useCallback(() => {
+    if (! selectedItemSet.isSelected(nodeState.id)) {
+      selectedItemSet.setUniqueSelection(nodeState.id);
+    }
+
     const selectedNodes = selectedItemSet.items.map(id => service.snapshot.nodes[id]).filter(Boolean) as NodeState[];
     const positionByItem = {} as { [id: NodeId]: Bounds };
     selectedNodes.forEach(node => positionByItem[node.id] = node.display.bounds);
@@ -104,7 +108,7 @@ export default function Node(props: NodeProps) {
   return (
     <div className={selected ? 'Node selected' : 'Node'}
          style={nodeStyle}
-         onPointerDown={handlePointerDown}
+         onPointerUp={handlePointerUp}
     >
       {
         nodeState.display.folded
@@ -118,9 +122,7 @@ export default function Node(props: NodeProps) {
         buttons={[0]}
         style={({display: 'flex'})}
       >
-        <div className="NodeContent"
-             onPointerDown={handlePointerDown}
-        >
+        <div className="NodeContent">
           <div style={({display: 'flex', width: '100%'})}>
             {
               hasParams
