@@ -12,6 +12,12 @@ function nextNodeId(): NodeId {
   return `Node-${nodeIdSequence.nextString()}`;
 }
 
+export function isNodeId(candidate: any): candidate is NodeId {
+  return typeof candidate === 'string'
+    && candidate.split('-').length === 2
+    && candidate.split('-')[0] === 'Node';
+}
+
 const portIdSequence = new SequenceGenerator();
 
 function nextPortId(): NodeId {

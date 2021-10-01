@@ -9,6 +9,7 @@ import {
   addNode,
   createNode,
   findPortState,
+  isNodeId,
   sendNodeToFront,
   setNodeName,
   setNodePosition,
@@ -19,6 +20,8 @@ import {
   addConnection,
   canConnect,
   createOrApplyTemporaryConnection,
+  findParentNode,
+  isConnectionId,
   removeTemporaryConnection
 } from './commands/ConnectionCommands';
 import {translateViewport} from './commands/ViewportCommands';
@@ -94,4 +97,40 @@ export default class GraphService {
   setParamValue(nodeId: NodeId, paramName: string, value: any): void {
     this._store.next(setParamValue(nodeId, paramName, value, this.snapshot));
   }
+
+  remove(items: string[]): void {
+    this._store.next(remove(items, this.snapshot));
+  }
+}
+
+function remove(ids: string[], state: GraphState): GraphState {
+  const connectionsToRemove = ids.filter(isConnectionId);
+  const nodesToRemove = ids.filter(isNodeId);
+  const impactedConnections = state.connections
+    .filter(c => {
+      const sourceNode = findParentNode(c.source, state)?.id;
+      const targetNode = findParentNode(c.target, state)?.id;
+      return (sourceNode && nodesToRemove.includes(sourceNode))
+        || (targetNode && nodesToRemove.includes(targetNode));
+    })
+    .map(c => c.id);
+
+  const nodes: { [id: NodeId]: NodeState } = {};
+
+  Object.entries(state.nodes).forEach(([id, node]) => {
+    if (!nodesToRemove.includes(id)) {
+      nodes[id] = node;
+    }
+  });
+
+  const nodeOrder = state.nodeOrder.filter(id => !nodesToRemove.includes(id));
+  const connections = state.connections.filter(({id}) => !impactedConnections.includes(id)
+    && !connectionsToRemove.includes(id));
+
+  return {
+    ...state,
+    nodes,
+    nodeOrder,
+    connections,
+  };
 }

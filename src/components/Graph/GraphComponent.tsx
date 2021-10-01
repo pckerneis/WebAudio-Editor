@@ -162,9 +162,21 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
       }));
     };
 
+    const handleKeyUp = (e: any) => {
+      if (e.code === 'Delete' || e.code === 'Backspace') {
+        graphService.remove(graphSelection.items);
+      } else {
+        console.log(e.code);
+      }
+    }
+
     return (
-      <div className="GraphComponent"
-           onMouseMove={handleMouseMove}>
+      <div
+        className="GraphComponent"
+        onMouseMove={handleMouseMove}
+        onKeyUp={handleKeyUp}
+        tabIndex={0}
+      >
         <div className="CanvasContainer">
           <canvas ref={this.state.canvasRef}/>
         </div>

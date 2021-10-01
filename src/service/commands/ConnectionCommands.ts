@@ -11,6 +11,12 @@ function nextConnectionId(): ConnectionId {
   return `Connection-${sequence.nextString()}`;
 }
 
+export function isConnectionId(candidate: any): candidate is ConnectionId {
+  return typeof candidate === 'string'
+    && candidate.split('-').length === 2
+    && candidate.split('-')[0] === 'Connection';
+}
+
 export function addConnection(sourceNodeId: string, sourcePortIndex: number,
                        targetNodeId: string, targetPortIndex: number,
                        state: GraphState): GraphState {
