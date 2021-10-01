@@ -15,7 +15,7 @@ import {
   setNodePosition,
   setParamValue,
   toggleNodeFoldState
-} from './commands/NodeCommands';
+} from './actions/NodeCommands';
 import {
   addConnection,
   canConnect,
@@ -23,8 +23,8 @@ import {
   findParentNode,
   isConnectionId,
   removeTemporaryConnection
-} from './commands/ConnectionCommands';
-import {translateViewport} from './commands/ViewportCommands';
+} from './actions/ConnectionCommands';
+import {translateViewport} from './actions/ViewportCommands';
 
 export default class GraphService {
   public readonly state$: Observable<GraphState>;

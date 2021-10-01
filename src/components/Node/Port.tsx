@@ -5,7 +5,7 @@ import {PortId} from '../../state/PortState';
 import {consumeEvent} from '../../ui-utils/events';
 
 export function buildReferencedPorts(portIds: PortId[], service: GraphService): ReferencedPort[] {
-  const handleClick = (portId: PortId, evt: any) => {
+  const handlePointerDown = (portId: PortId, evt: any) => {
     service.createOrApplyTemporaryConnection(portId);
     consumeEvent(evt);
   };
@@ -19,7 +19,7 @@ export function buildReferencedPorts(portIds: PortId[], service: GraphService): 
         <div key={idx}
              className="Port"
              ref={ref}
-             onClick={evt => handleClick(id, evt)}>
+             onPointerDown={evt => handlePointerDown(id, evt)}>
         </div>
       );
       return {id, ref, template};

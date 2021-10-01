@@ -4,7 +4,7 @@ import Coordinates from '../model/Coordinates';
 import {squaredDist} from '../utils/numbers';
 import {rectangleCenter} from '../utils/geometry';
 import {GraphState} from '../state/GraphState';
-import {canConnect} from './commands/ConnectionCommands';
+import {canConnect} from './actions/ConnectionCommands';
 
 export interface ReferencedPort {
   id: PortId;

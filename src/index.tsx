@@ -3,10 +3,12 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import GraphComponent from './components/Graph/GraphComponent';
+import CommandPaletteComponent from './components/CommandPalette/CommandPaletteComponent';
 
 ReactDOM.render(
   <React.StrictMode>
     <GraphComponent />
+    <CommandPaletteComponent />
   </React.StrictMode>,
   document.getElementById('root')
 );
