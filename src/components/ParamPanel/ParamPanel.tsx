@@ -5,6 +5,7 @@ import {ParamDefinition, ParamType} from '../../model/NodeDefinition.model';
 import {NodeId, ParamPorts, ParamValues} from '../../state/NodeState';
 import GraphService from '../../service/GraphService';
 import {consumeEvent} from '../../ui-utils/events';
+import {PortComponentRegistry} from '../../service/PortComponentRegistry';
 
 interface ParamPanelProps {
   nodeId: NodeId;
@@ -12,6 +13,7 @@ interface ParamPanelProps {
   paramPorts: ParamPorts;
   paramDefinitions: ParamDefinition[];
   service: GraphService;
+  portRegistry: PortComponentRegistry;
   style: any;
 }
 
@@ -22,6 +24,7 @@ export default function ParamPanel(props: ParamPanelProps) {
     paramPorts,
     paramDefinitions,
     service,
+    portRegistry,
     style,
   } = props;
 
@@ -70,7 +73,7 @@ export default function ParamPanel(props: ParamPanelProps) {
         } : null;
 
         if (port != null) {
-          service.registerPorts(port);
+          portRegistry.registerPorts(port);
         }
 
         const handlePortClick = (evt: any) => {
@@ -106,6 +109,7 @@ ParamPanel.propTypes = {
   paramValues: shape({}).isRequired,
   paramPorts: shape({}).isRequired,
   paramDefinitions: array.isRequired,
+  portRegistry: shape({}).isRequired,
   nodeId: string.isRequired,
   service: shape({}).isRequired,
   style: shape({}),

@@ -10,10 +10,14 @@ export default class SingletonWrapper<T> {
     }
   }
 
-  public static create<C>(ctor: Ctor<C>, ...args: any[]): SingletonWrapper<C> {
+  public static get<C>(ctor: Ctor<C>, ...args: any[]): C {
     const wrapper = new SingletonWrapper<C>(ctor, args);
-    wrapper.instantiate();
-    return wrapper;
+
+    if (! this.hasInstance(ctor)) {
+      wrapper.instantiate();
+    }
+
+    return wrapper.get();
   }
 
   public static lazyWrap<C>(ctor: Ctor<C>, ...args: any[]): SingletonWrapper<C> {

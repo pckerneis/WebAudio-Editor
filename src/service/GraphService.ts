@@ -2,12 +2,9 @@ import {BehaviorSubject, Observable} from 'rxjs';
 import {getInitialGraphModel, GraphState} from '../state/GraphState';
 import Coordinates from '../model/Coordinates';
 import {NodeId, NodeState} from '../state/NodeState';
-import {PortComponentRegistry, ReferencedPort} from './PortComponentRegistry';
 import {NodeDefinitionModel} from '../model/NodeDefinition.model';
 import Bounds from '../model/Bounds';
 import {PortId, PortState} from '../state/PortState';
-import {squaredDist} from '../utils/numbers';
-import {rectangleCenter} from '../utils/geometry';
 import {
   addNode,
   createNode,
@@ -26,10 +23,8 @@ import {
 } from './commands/ConnectionCommands';
 import {translateViewport} from './commands/ViewportCommands';
 
-export default class GraphService implements PortComponentRegistry {
+export default class GraphService {
   public readonly state$: Observable<GraphState>;
-
-  private _registeredPorts: ReferencedPort[] = [];
 
   private _store = new BehaviorSubject<GraphState>(getInitialGraphModel());
 
@@ -80,16 +75,6 @@ export default class GraphService implements PortComponentRegistry {
     this._store.next(addConnection(sourceNodeId, sourcePortIndex, targetNodeId, targetPortIndex, this.snapshot));
   }
 
-  getAllRegisteredPorts(): ReferencedPort[] {
-    return [...this._registeredPorts];
-  }
-
-  registerPorts(...referencedPorts: ReferencedPort[]): void {
-    const addedIds = referencedPorts.map(rp => rp.id);
-    const untouched = this._registeredPorts.filter(rp => !addedIds.includes(rp.id));
-    this._registeredPorts = [...untouched, ...referencedPorts];
-  }
-
   createOrApplyTemporaryConnection(portId: PortId): any {
     this._store.next(createOrApplyTemporaryConnection(portId, this.snapshot));
   }
@@ -104,31 +89,6 @@ export default class GraphService implements PortComponentRegistry {
 
   canConnect(source: PortId, target: PortId): boolean {
     return canConnect(source, target, this.snapshot);
-  }
-
-  findSuitablePort(mouseCoordinates: Coordinates): ReferencedPort | null {
-    if (this.snapshot.temporaryConnectionPort == null) {
-      return null;
-    }
-
-    const sourcePort = this.snapshot.temporaryConnectionPort;
-    const checkDistSquared = 225;
-
-    return this.getAllRegisteredPorts().find(registeredPort => {
-      const component = registeredPort.ref.current;
-
-      if (component == null) {
-        return false;
-      }
-
-      const portBounds = component.getBoundingClientRect();
-
-      if (!this.canConnect(registeredPort.id, sourcePort.id)) {
-        return false;
-      }
-
-      return squaredDist(rectangleCenter(portBounds), mouseCoordinates) < checkDistSquared;
-    }) ?? null;
   }
 
   setParamValue(nodeId: NodeId, paramName: string, value: any): void {

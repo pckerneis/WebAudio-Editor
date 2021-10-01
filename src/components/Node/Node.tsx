@@ -99,7 +99,7 @@ export default function Node(props: NodeProps) {
       return {id: p.id, ref, template};
     }) : [];
 
-  service.registerPorts(...hiddenParamPorts);
+  portRegistry.registerPorts(...hiddenParamPorts);
 
   return (
     <div className={selected ? 'Node selected' : 'Node'}
@@ -144,6 +144,7 @@ export default function Node(props: NodeProps) {
               paramValues={nodeState.paramValues}
               paramPorts={nodeState.paramPorts}
               paramDefinitions={definition.params}
+              portRegistry={portRegistry}
               service={service}
               style={({marginBottom: '5px'})}
             />
