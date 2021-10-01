@@ -50,7 +50,7 @@ export default function CommandPaletteComponent(props: CommandPaletteComponentPr
   const hasFilter = filter.length > 0;
 
   return (
-    <div className="CommandPalette">
+    <div className="CommandPalette dark-theme">
       <input
         className="FilterInput"
         placeholder="Type to find a command"
@@ -60,6 +60,7 @@ export default function CommandPaletteComponent(props: CommandPaletteComponentPr
         && noCommandsFound
       }
       {
+        foundCommands.length > 0 &&
         <div className="CommandList">
           {commandList}
         </div>

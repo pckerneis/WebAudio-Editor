@@ -4,6 +4,7 @@ import './index.css';
 import reportWebVitals from './reportWebVitals';
 import GraphComponent from './components/Graph/GraphComponent';
 import CommandPaletteComponent from './components/CommandPalette/CommandPaletteComponent';
+import './themes.css'
 
 ReactDOM.render(
   <React.StrictMode>

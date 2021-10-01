@@ -6,7 +6,7 @@
     left: 50%;
     transform: translate(-50%, -60%);
     position: fixed;
-    background-color: #2d3034;
+    background-color: var(--primary-background-color);
     padding: 6px;
     display: flex;
     flex-direction: column;
@@ -18,18 +18,19 @@
     width: 100%;
     font-size: 14px;
     padding: 4px 4px;
-    background-color: #393a3e;
+    background-color: var(--secondary-background-color);
     border: none;
     border-radius: 2px;
-    color: #cfcfcf;
+    color: var(--primary-text-color);
 }
 
 .FilterInput::placeholder {
     font-style: italic;
+    color: var(--disabled-text-color);
 }
 
 .NoCommandsFound {
-    color: grey;
+    color: var(--disabled-text-color);
     font-size: 14px;
     text-align: center;
     margin-top: 10px;
@@ -39,14 +40,14 @@
     overflow-x: hidden;
     overflow-y: auto;
     margin-top: 6px;
-    background-color: #2a2a2c;
+    background-color: var(--secondary-background-color);
     padding: 3px;
 }
 
 .CommandRow {
     padding: 2px;
     font-size: 14px;
-    color: #cbcbcb;
+    color: var(--primary-text-color);
     user-select: none;
 }
 

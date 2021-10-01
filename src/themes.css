@@ -1,0 +1,13 @@
+.light-theme {
+    --primary-background-color: white;
+    --secondary-background-color: #e7e7e7;
+    --primary-text-color: #282828;
+    --disabled-text-color: #acacac;
+}
+
+.dark-theme {
+    --primary-background-color: #2e2f30;
+    --secondary-background-color: #272729;
+    --primary-text-color: #dedede;
+    --disabled-text-color: #999999;
+}
