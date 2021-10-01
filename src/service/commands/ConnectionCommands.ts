@@ -1,11 +1,15 @@
 import {GraphState} from '../../state/GraphState';
 import {PortId, PortKind} from '../../state/PortState';
-import {ConnectionState} from '../../state/ConnectionState';
+import {ConnectionId, ConnectionState} from '../../state/ConnectionState';
 import {NodeState} from '../../state/NodeState';
 import {assertNodeExists, findPortState} from './NodeCommands';
 import SequenceGenerator from '../../utils/SequenceGenerator';
 
 const sequence = new SequenceGenerator();
+
+function nextConnectionId(): ConnectionId {
+  return `Connection-${sequence.nextString()}`;
+}
 
 export function addConnection(sourceNodeId: string, sourcePortIndex: number,
                        targetNodeId: string, targetPortIndex: number,
@@ -26,7 +30,7 @@ export function addConnection(sourceNodeId: string, sourcePortIndex: number,
 export function doAddConnection(source: PortId, target: PortId, state: GraphState): GraphState {
   if (canConnect(source, target, state)) {
     const newConnection: ConnectionState = {
-      id: sequence.nextString(),
+      id: nextConnectionId(),
       source,
       target
     };

@@ -6,7 +6,17 @@ import {GraphState} from '../../state/GraphState';
 import Coordinates from '../../model/Coordinates';
 import SequenceGenerator from '../../utils/SequenceGenerator';
 
-const sequence = new SequenceGenerator();
+const nodeIdSequence = new SequenceGenerator();
+
+function nextNodeId(): NodeId {
+  return `Node-${nodeIdSequence.nextString()}`;
+}
+
+const portIdSequence = new SequenceGenerator();
+
+function nextPortId(): NodeId {
+  return `Port-${portIdSequence.nextString()}`;
+}
 
 export function assertNodeExists(nodeId: string, state: GraphState): void {
   if (!Object.keys(state.nodes).includes(nodeId)) {
@@ -15,15 +25,15 @@ export function assertNodeExists(nodeId: string, state: GraphState): void {
 }
 
 export function createNode(definition: NodeDefinitionModel, bounds: Bounds, name: string): NodeState {
-  const id = sequence.nextString();
+  const id = nextNodeId();
 
   const inputPorts = new Array(definition.inputPortCount).fill('').map(() => ({
-    id: sequence.nextString(),
+    id: nextPortId(),
     kind: PortKind.INPUT,
   }));
 
   const outputPorts = new Array(definition.outputPortCount).fill('').map(() => ({
-    id: sequence.nextString(),
+    id: nextPortId(),
     kind: PortKind.OUTPUT,
   }));
 
@@ -39,7 +49,7 @@ export function createNode(definition: NodeDefinitionModel, bounds: Bounds, name
   definition.params
     .filter(p => p.type === ParamType.AudioParam && p.acceptsInput)
     .forEach((p) => paramPorts[p.name] = {
-      id: sequence.nextString(),
+      id: nextPortId(),
       kind: PortKind.AUDIO_PARAM,
     });
 
