@@ -1,12 +1,12 @@
 import React, {createRef} from 'react';
 import './GraphComponent.css';
 import DragToMove from '../../ui-utils/DragToMove';
-import Node from '../Node/Node';
+import Node, {areNodesVisuallySimilar} from '../Node/Node';
 import {NodeDefinitionModel} from '../../model/NodeDefinition.model';
 import {NodeState} from '../../state/NodeState';
 import {Observable, Subscription, switchMap} from 'rxjs';
 import {GraphState} from '../../state/GraphState';
-import Coordinates from '../../model/Coordinates';
+import Coordinates, {areCoordinatesEqual} from '../../model/Coordinates';
 import {
   computeConnectionCurves,
   computeTemporaryConnectionCurve,
@@ -16,6 +16,7 @@ import {
 } from '../../ui-utils/ConnectionCurve';
 import {consumeEvent} from '../../ui-utils/events';
 import initializeOrGetServices from '../../service/initialize-services';
+import {arePrimitiveArraysEqual} from '../../utils/arrays';
 
 const MAX_PORT_CLICK_DISTANCE = 8;
 
@@ -31,7 +32,7 @@ interface GraphComponentState {
   canvasRef: React.RefObject<HTMLCanvasElement>;
   selection: string[];
   connectionCurves: ConnectionCurve[];
-  mouseCoordinates: Coordinates | null;
+  mouseCoordinates: Coordinates;
   subscriptions: Subscription[];
 }
 
@@ -46,7 +47,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
       canvasRef: createRef(),
       selection: graphSelection.items,
       connectionCurves: [],
-      mouseCoordinates: null,
+      mouseCoordinates: {x: 0, y:  0},
       subscriptions: [
         graphService.state$.pipe(
           switchMap(s => this.updateGraphState$(s)),
@@ -54,7 +55,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
         ).subscribe(),
 
         graphSelection.selection$.pipe(
-          switchMap(this.updateSelection$)
+          switchMap(this.updateSelection$),
         ).subscribe(),
       ]
     };
@@ -82,6 +83,27 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
     this.renderConnections();
   }
 
+  shouldComponentUpdate(nextProps: Readonly<{}>, nextState: Readonly<GraphComponentState>, nextContext: any): boolean {
+    const hasNodesChanges = () => Object.keys(nextState.graphState.nodes).length !== Object.keys(this.state.graphState.nodes).length
+    || ! arePrimitiveArraysEqual(Object.keys(nextState.graphState.nodes), Object.keys(this.state.graphState.nodes))
+    || ! areNodesVisuallySimilar(nextState.graphState.nodes, this.state.graphState.nodes);
+
+    const hasNodeOrderChanged = () => ! arePrimitiveArraysEqual(nextState.graphState.nodeOrder, this.state.graphState.nodeOrder);
+
+    const temporaryConnectionMoved = () => {
+      const hasTemporaryConnection = nextState.graphState.temporaryConnectionPort != null;
+      return hasTemporaryConnection
+        && ! areCoordinatesEqual(nextState.mouseCoordinates, this.state.mouseCoordinates);
+    };
+
+    return nextState.graphState.viewportOffset !== this.state.graphState.viewportOffset
+      || nextState.selection !== this.state.selection
+      || nextState.connectionCurves !== this.state.connectionCurves
+      || hasNodesChanges()
+      || hasNodeOrderChanged()
+      || temporaryConnectionMoved();
+  }
+
   private renderConnections(): void {
     const canvas = this.state.canvasRef.current;
 
@@ -98,7 +120,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
         drawConnectionCurve(connectionCurve.points, selected, ctx);
       });
 
-      if (this.state.graphState.temporaryConnectionPort != null && this.state.mouseCoordinates != null) {
+      if (this.state.graphState.temporaryConnectionPort != null) {
         const points = computeTemporaryConnectionCurve(this.state.mouseCoordinates, graphService, portRegistry);
         drawConnectionCurve(points, true, ctx);
       }
@@ -213,14 +235,14 @@ function getGraphAnchorStyle(graphState: GraphState): any {
   return {transform: `translate(${x}px, ${y}px)`};
 }
 
-function buildNodes(graphState: GraphState): any {
-  return graphState.nodeOrder
-    .map((id: any) => ([id, graphState.nodes[id]] as [string, NodeState]))
+function buildNodes(graphState: GraphState): JSX.Element[] {
+  return Object.entries(graphState.nodes)
     .map(([id, nodeState]: [string, NodeState]) => {
       const definition = nodeDefinitionService.getNodeDefinition(nodeState.kind) as NodeDefinitionModel;
       return (
         <Node key={id}
               nodeState={nodeState}
+              zIndex={graphState.nodeOrder.indexOf(id)}
               service={graphService}
               definition={definition}
               portRegistry={portRegistry}

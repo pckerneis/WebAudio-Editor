@@ -6,6 +6,7 @@ import {NodeId, ParamPorts, ParamValues} from '../../state/NodeState';
 import GraphService from '../../service/GraphService';
 import {consumeEvent} from '../../ui-utils/events';
 import {PortComponentRegistry} from '../../service/PortComponentRegistry';
+import SelectedItemSet from '../../utils/SelectedItemSet';
 
 interface ParamPanelProps {
   nodeId: NodeId;
@@ -14,10 +15,10 @@ interface ParamPanelProps {
   paramDefinitions: ParamDefinition[];
   service: GraphService;
   portRegistry: PortComponentRegistry;
-  style: any;
+  graphSelection: SelectedItemSet<string>;
 }
 
-export default function ParamPanel(props: ParamPanelProps) {
+function ParamPanel(props: ParamPanelProps) {
   const {
     nodeId,
     paramValues,
@@ -25,8 +26,17 @@ export default function ParamPanel(props: ParamPanelProps) {
     paramDefinitions,
     service,
     portRegistry,
-    style,
+    graphSelection,
   } = props;
+
+  const handleInputPointerDown = (evt: any) => {
+    consumeEvent(evt);
+    service.sendNodeToFront(nodeId);
+
+    if (! graphSelection.isSelected(nodeId)) {
+      graphSelection.setUniqueSelection(nodeId);
+    }
+  };
 
   const paramElements = paramDefinitions
     .map(definition => {
@@ -49,7 +59,7 @@ export default function ParamPanel(props: ParamPanelProps) {
             key={paramName + '_select'}
             value={currentValue}
             onChange={handleInputChange}
-            onPointerDown={consumeEvent}
+            onPointerDown={handleInputPointerDown}
           >
             {options}
           </select>
@@ -60,7 +70,7 @@ export default function ParamPanel(props: ParamPanelProps) {
             min={definition.min}
             max={definition.max}
             onChange={handleInputChange}
-            onPointerDown={consumeEvent}
+            onPointerDown={handleInputPointerDown}
           />;
 
         const acceptsInput = definition.type === ParamType.AudioParam
@@ -104,7 +114,7 @@ export default function ParamPanel(props: ParamPanelProps) {
     );
 
   return (
-    <div className="ParamPanel" style={style}>
+    <div className="ParamPanel">
       {paramElements}
     </div>
   );
@@ -117,7 +127,9 @@ ParamPanel.propTypes = {
   paramPorts: shape({}).isRequired,
   paramDefinitions: array.isRequired,
   portRegistry: shape({}).isRequired,
+  graphSelection: shape({}).isRequired,
   nodeId: string.isRequired,
   service: shape({}).isRequired,
-  style: shape({}),
 }
+
+export default React.memo(ParamPanel);

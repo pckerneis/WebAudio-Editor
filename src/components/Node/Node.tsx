@@ -11,7 +11,7 @@ import {NodeDefinitionModel} from '../../model/NodeDefinition.model';
 import {PortComponentRegistry, ReferencedPort} from '../../service/PortComponentRegistry';
 import SelectedItemSet from '../../utils/SelectedItemSet';
 import Coordinates from '../../model/Coordinates';
-import Bounds from '../../model/Bounds';
+import Bounds, {areBoundsEqual} from '../../model/Bounds';
 import {buildReferencedPorts} from './Port';
 
 interface NodeProps {
@@ -20,8 +20,8 @@ interface NodeProps {
   definition: NodeDefinitionModel;
   portRegistry: PortComponentRegistry;
   selected: boolean;
-  style?: any;
   selectedItemSet: SelectedItemSet<string>;
+  zIndex: number;
 }
 
 function buildPorts(nodeState: NodeState, service: GraphService): { bottomPorts: ReferencedPort[], topPorts: ReferencedPort[] } {
@@ -30,27 +30,28 @@ function buildPorts(nodeState: NodeState, service: GraphService): { bottomPorts:
   return {topPorts, bottomPorts};
 }
 
-export default function Node(props: NodeProps) {
+function Node(props: NodeProps) {
   const {
     nodeState,
     service,
     definition,
     portRegistry,
     selected,
-    selectedItemSet
+    selectedItemSet,
+    zIndex,
   } = props;
 
   const nodeStyle = {
-    ...props.style,
     transform: `translate(${nodeState.display.bounds.x}px, ${nodeState.display.bounds.y}px)`,
     minWidth: nodeState.display.bounds.width,
     minHeight: nodeState.display.bounds.height,
+    zIndex,
   };
 
   const [startPosition, setStartPosition] = useState({} as Bounds);
   const [positionByItem, setPositionByItem] = useState({} as { [id: NodeId]: Bounds });
 
-  const handlePointerUp = useCallback((evt: any) => {
+  const handlePointerDown = useCallback((evt: any) => {
     service.sendNodeToFront(nodeState.id);
     selectedItemSet.selectOnMouseDown(nodeState.id, evt);
   }, [service, selectedItemSet, nodeState.id]);
@@ -108,7 +109,7 @@ export default function Node(props: NodeProps) {
   return (
     <div className={selected ? 'Node selected' : 'Node'}
          style={nodeStyle}
-         onPointerUp={handlePointerUp}
+         onPointerDown={handlePointerDown}
     >
       {
         nodeState.display.folded
@@ -122,7 +123,8 @@ export default function Node(props: NodeProps) {
         buttons={[0]}
         style={({display: 'flex'})}
       >
-        <div className="NodeContent">
+        <div className="NodeContent"
+             onPointerDown={handlePointerDown}>
           <div style={({display: 'flex', width: '100%'})}>
             {
               hasParams
@@ -148,7 +150,7 @@ export default function Node(props: NodeProps) {
               paramDefinitions={definition.params}
               portRegistry={portRegistry}
               service={service}
-              style={({marginBottom: '5px'})}
+              graphSelection={selectedItemSet}
             />
           }
         </div>
@@ -163,7 +165,7 @@ export default function Node(props: NodeProps) {
   );
 }
 
-const {shape, bool} = PropTypes;
+const {shape, bool, number} = PropTypes;
 
 Node.propTypes = {
   nodeState: shape({}).isRequired,
@@ -173,4 +175,26 @@ Node.propTypes = {
   selectedItemSet: shape({}).isRequired,
   style: shape({}),
   selected: bool,
+  zIndex: number,
 }
+
+type Nodes = {[id: NodeId]: NodeState};
+
+export function areNodesVisuallySimilar(previous: Nodes, next: Nodes): boolean {
+  return Object.values(previous).every(first => {
+    const second = next[first.id];
+
+    if (!second) {
+      return false;
+    }
+
+    if (first.display.folded !== second.display.folded) {
+      return false;
+    }
+
+    return areBoundsEqual(first.display.bounds, second.display.bounds);
+  });
+}
+
+export default React.memo(Node);
+// export default Node;
