@@ -2,14 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
-import GraphComponent from './components/Graph/GraphComponent';
-import CommandPaletteComponent from './components/CommandPalette/CommandPaletteComponent';
 import './themes.css'
+import {App} from './components/App/App';
 
 ReactDOM.render(
   <React.StrictMode>
-    <GraphComponent />
-    <CommandPaletteComponent />
+    <App/>
   </React.StrictMode>,
   document.getElementById('root')
 );

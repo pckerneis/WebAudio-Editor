@@ -43,9 +43,10 @@ export function createNode(definition: NodeDefinitionModel, bounds: Bounds, name
     kind: PortKind.OUTPUT,
   }));
 
+
   const display: NodeDisplay = {
     bounds,
-    folded: false,
+    folded: true,
   };
 
   const paramValues = {} as ParamValues;
@@ -79,7 +80,7 @@ export function addNode(id: string, nodeState: NodeState, state: GraphState): Gr
   return {
     ...state,
     nodes: {...state.nodes, [id]: nodeState},
-    nodeOrder: [id, ...state.nodeOrder],
+    nodeOrder: [...state.nodeOrder, id],
   };
 }
 

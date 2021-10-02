@@ -1,16 +1,11 @@
 import React, {createRef} from 'react';
 import './GraphComponent.css';
 import DragToMove from '../../ui-utils/DragToMove';
-import GraphService from '../../service/GraphService';
 import Node from '../Node/Node';
-import SingletonWrapper from '../../service/SingletonWrapper';
-import NodeDefinitionService from '../../service/NodeDefinitionService';
 import {NodeDefinitionModel} from '../../model/NodeDefinition.model';
 import {NodeState} from '../../state/NodeState';
 import {Observable, Subscription, switchMap} from 'rxjs';
 import {GraphState} from '../../state/GraphState';
-import {PortComponentRegistry} from '../../service/PortComponentRegistry';
-import SelectedItemSet from '../../utils/SelectedItemSet';
 import Coordinates from '../../model/Coordinates';
 import {
   computeConnectionCurves,
@@ -19,22 +14,17 @@ import {
   drawConnectionCurve,
   hitsConnectionCurve
 } from '../../ui-utils/ConnectionCurve';
-import {getNodeDefinitions} from '../../model/StandardNodesDefinitions';
-import {loadDemoProject} from '../../project-setup';
+import {consumeEvent} from '../../ui-utils/events';
+import initializeOrGetServices from '../../service/initialize-services';
 
 const MAX_PORT_CLICK_DISTANCE = 8;
 
-const isServiceInitialized = SingletonWrapper.hasInstance(GraphService);
-
-const graphService = SingletonWrapper.get(GraphService);
-const graphSelection = SingletonWrapper.get(SelectedItemSet) as SelectedItemSet<string>;
-const portRegistry = SingletonWrapper.get(PortComponentRegistry);
-const nodeDefinitionService = SingletonWrapper
-  .get(NodeDefinitionService, getNodeDefinitions());
-
-if (!isServiceInitialized) {
-  loadDemoProject(graphService, graphSelection, nodeDefinitionService);
-}
+const {
+  graphService,
+  nodeDefinitionService,
+  portRegistry,
+  graphSelection
+} = initializeOrGetServices();
 
 interface GraphComponentState {
   graphState: GraphState;
@@ -165,8 +155,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
     const handleKeyUp = (e: any) => {
       if (e.code === 'Delete' || e.code === 'Backspace') {
         graphService.remove(graphSelection.items);
-      } else {
-        console.log(e.code);
+        consumeEvent(e);
       }
     }
 

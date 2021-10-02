@@ -1,81 +1,121 @@
 import './CommandPaletteComponent.css';
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
+import {consumeEvent} from '../../ui-utils/events';
+import {Command} from '../../service/CommandService';
+import initializeOrGetServices from '../../service/initialize-services';
 
-export default function CommandPaletteComponent(props: CommandPaletteComponentProps) {
+const {commandService} = initializeOrGetServices();
 
-  const commands: Command[] = useMemo(() => [
-    {
-      path: 'Create/Node/OscillatorNode',
-      label: 'Create OscillatorNode',
-      description: 'Creates an OscillatorNode'
-    },
-    {
-      path: 'Create/Node/GainNode',
-      label: 'Create GainNode',
-      description: 'Creates an GainNode'
-    },
-    {
-      path: 'Create/Node/DelayNode',
-      label: 'Create DelayNode',
-      description: 'Creates an DelayNode'
-    },
-  ], []);
+export default function CommandPaletteComponent(props: {}): JSX.Element {
+  const [
+    isCommandPaletteVisible,
+    setCommandPaletteVisible
+  ] = useState(false);
 
-  const [foundCommands, setFoundCommands] = useState<Command[]>(commands);
+  const [foundCommands, setFoundCommands] = useState<Command[]>(commandService.commands);
+
   const [filter, setFilter] = useState('');
 
-  const handleInput = useCallback((evt) => {
+  const handleInputChange = useCallback((evt) => {
     const text = evt.target.value ?? '';
+    const hasFilter = text.trim().length > 0;
 
     setFilter(text);
 
-    const hasFilter = text.trim().length > 0;
-
     if (hasFilter) {
       const lowerCaseText = text.toLocaleLowerCase();
-      setFoundCommands(commands.filter(cmd => cmd.path.toLocaleLowerCase().includes(lowerCaseText)
-        || cmd.label.toLocaleLowerCase().includes(lowerCaseText)));
+      setFoundCommands(commandService.commands
+        .filter(cmd => cmd.path.toLocaleLowerCase().includes(lowerCaseText)
+          || cmd.label.toLocaleLowerCase().includes(lowerCaseText)));
     } else {
-      setFoundCommands(commands);
+      setFoundCommands(commandService.commands);
     }
-  }, [commands, setFoundCommands]);
+  }, [setFoundCommands]);
+
+  const resetAndClose = () => {
+    setFoundCommands(commandService.commands);
+    setCommandPaletteVisible(false);
+  };
+
+  useEffect(() => {
+    const handleKeyPress = (evt: any) => {
+      if (!isCommandPaletteVisible) {
+        if (evt.code === 'Space') {
+          if (foundCommands.length > 0) {
+            setCommandPaletteVisible(true);
+            consumeEvent(evt);
+          }
+        }
+
+        return;
+      }
+
+      if (evt.code === 'Enter') {
+        if (foundCommands.length > 0) {
+          commandService.executeCommand(foundCommands[0].path);
+          resetAndClose();
+          consumeEvent(evt);
+        }
+      } else if (evt.code === 'Escape') {
+        resetAndClose();
+        consumeEvent(evt);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress, false);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress, false);
+    };
+  });
 
   const commandList = foundCommands.map(cmd => (
     <div key={cmd.path}
-         className="CommandRow">
+         className="CommandRow"
+         onClick={evt => handleCommandRowClick(evt, cmd)}
+    >
       {withBoldFilterMatch(cmd.label, filter, cmd.path)}
     </div>
   ));
 
   const hasFilter = filter.length > 0;
 
+  const handleBackdropClick = (evt: any) => {
+    resetAndClose();
+    consumeEvent(evt);
+  };
+
+  const handleCommandRowClick = (evt: any, cmd: Command) => {
+    commandService.executeCommand(cmd.path);
+    resetAndClose();
+    consumeEvent(evt);
+  };
+
   return (
-    <div className="CommandPalette dark-theme">
-      <input
-        className="FilterInput"
-        placeholder="Type to find a command"
-        onChange={handleInput}/>
-      {
-        hasFilter && foundCommands.length === 0
-        && noCommandsFound
-      }
-      {
-        foundCommands.length > 0 &&
-        <div className="CommandList">
-          {commandList}
-        </div>
-      }
+    isCommandPaletteVisible &&
+    <div className="CommandPaletteBackdrop"
+         onClick={handleBackdropClick}
+    >
+      <div className="CommandPalette dark-theme" onClick={consumeEvent}>
+        <input
+          className="FilterInput"
+          placeholder="Type to find a command"
+          onChange={handleInputChange}
+          autoFocus={true}
+        />
+        {
+          hasFilter && foundCommands.length === 0
+          && noCommandsFound
+        }
+        {
+          foundCommands.length > 0 &&
+          <div className="CommandList">
+            {commandList}
+          </div>
+        }
+      </div>
     </div>
-  );
-}
-
-interface CommandPaletteComponentProps {
-}
-
-interface Command {
-  label: string;
-  path: string;
-  description: string;
+  ) as JSX.Element;
 }
 
 const noCommandsFound = (
