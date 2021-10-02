@@ -1,7 +1,18 @@
+export interface RegisteredCommand extends Command {
+  disabled: boolean;
+}
+
 export default class CommandService {
   private _handlers: CommandHandler[] = [];
 
-  constructor(public readonly commands: Command[]) {
+  constructor(private readonly commands: Command[]) {
+  }
+
+  get registeredCommands(): RegisteredCommand[] {
+    return this.commands.map(cmd => ({
+      ...cmd,
+      disabled: ! this._handlers.some(handler => handler.canExecute(cmd.path)),
+    }))
   }
 
   executeCommand(commandPath: string): void {
@@ -18,11 +29,12 @@ export default class CommandService {
 }
 
 export interface CommandHandler {
+  canExecute(commandPath: string): boolean;
   executeCommand(commandPath: string): boolean;
 }
 
 export interface Command {
   label: string;
   path: string;
-  description: string;
+  keyboardShortcuts?: string[][];
 }

@@ -8,7 +8,7 @@
 
 .CommandPalette {
     box-sizing: border-box;
-    width: 300px;
+    width: 400px;
     height: 220px;
     top: 50%;
     left: 50%;
@@ -58,6 +58,13 @@
     font-size: 14px;
     color: var(--primary-text-color);
     user-select: none;
+    display: flex;
+    place-content: space-between;
+    white-space: pre-wrap;
+}
+
+.CommandRow.disabled {
+    color: var(--disabled-text-color);
 }
 
 .CommandRow:hover {
@@ -66,4 +73,19 @@
 
 .FocusedText {
     font-weight: bold;
+}
+
+.CommandRow .KeyShortcuts {
+    margin-left: auto;
+}
+
+.CommandRow .ShortcutSeparator {
+    margin: 0 4px;
+}
+
+.CommandRow .KeyCode {
+    border: 1px grey solid;
+    border-radius: 4px;
+    padding: 1px;
+    font-size: smaller;
 }

@@ -1,8 +1,11 @@
 import GraphComponent from '../Graph/GraphComponent';
 import CommandPaletteComponent from '../CommandPalette/CommandPaletteComponent';
 import React, {useCallback, useState} from 'react';
+import initializeOrGetServices from '../../service/initialize-services';
 
-export function App(props: {}) {
+const {commandService} = initializeOrGetServices();
+
+export function App() {
   const [isCommandPaletteVisible, setCommandPaletteVisible] = useState(false);
 
   const handleKeyUp = useCallback((evt) => {
@@ -16,7 +19,9 @@ export function App(props: {}) {
   return (
     <div onKeyUp={handleKeyUp} tabIndex={-1}>
       <GraphComponent/>
-      <CommandPaletteComponent/>
+      <CommandPaletteComponent
+        commandService={commandService}
+      />
     </div>
   );
 }

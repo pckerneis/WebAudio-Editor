@@ -33,7 +33,7 @@ function ParamPanel(props: ParamPanelProps) {
     consumeEvent(evt);
     service.sendNodeToFront(nodeId);
 
-    if (! graphSelection.isSelected(nodeId)) {
+    if (!graphSelection.isSelected(nodeId)) {
       graphSelection.setUniqueSelection(nodeId);
     }
   };
@@ -54,24 +54,54 @@ function ParamPanel(props: ParamPanelProps) {
           return (<option key={value} value={value}>{value}</option>);
         }) : [];
 
-        const inputElement = isChoiceParam ?
-          <select
-            key={paramName + '_select'}
-            value={currentValue}
-            onChange={handleInputChange}
-            onPointerDown={handleInputPointerDown}
-          >
-            {options}
-          </select>
-          : <input
-            key={paramName + '_input'}
-            type="number"
-            value={currentValue}
-            min={definition.min}
-            max={definition.max}
-            onChange={handleInputChange}
-            onPointerDown={handleInputPointerDown}
-          />;
+        let inputElement: JSX.Element;
+
+        switch (definition.type) {
+          case ParamType.choice:
+            inputElement = <select
+              key={paramName + '_select'}
+              value={currentValue}
+              onChange={handleInputChange}
+              onPointerDown={handleInputPointerDown}
+            >
+              {options}
+            </select>;
+            break;
+          case ParamType.AudioParam:
+            inputElement = <input
+              key={paramName + '_input'}
+              type="number"
+              value={currentValue}
+              min={definition.min}
+              max={definition.max}
+              onChange={handleInputChange}
+              onPointerDown={handleInputPointerDown}
+            />;
+            break;
+          case ParamType.boolean:
+            inputElement = <input
+              key={paramName + '_input'}
+              type="checkbox"
+              value={currentValue}
+              onChange={handleInputChange}
+              onPointerDown={handleInputPointerDown}
+            />;
+            break;
+          case ParamType.number:
+            inputElement = <input
+              key={paramName + '_input'}
+              type="number"
+              value={currentValue}
+              min={definition?.min}
+              max={definition?.max}
+              onChange={handleInputChange}
+              onPointerDown={handleInputPointerDown}
+            />;
+            break;
+          default:
+            inputElement = <span>
+            </span>;
+        }
 
         const acceptsInput = definition.type === ParamType.AudioParam
           && definition.acceptsInput;

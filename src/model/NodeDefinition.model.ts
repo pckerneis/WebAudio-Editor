@@ -13,6 +13,7 @@ export interface ChoiceParamDefinition {
   possibleValues: string[];
   defaultValue: string;
 }
+
 export interface AudioParamDefinition {
   type: ParamType.AudioParam;
   name: string;
@@ -22,9 +23,29 @@ export interface AudioParamDefinition {
   acceptsInput: boolean,
 }
 
-export type ParamDefinition = ChoiceParamDefinition | AudioParamDefinition;
+export interface NumberParamDefinition {
+  type: ParamType.number;
+  name: string;
+  defaultValue: number;
+  min?: number;
+  max?: number;
+}
+
+export interface BooleanParamDefinition {
+  type: ParamType.boolean;
+  name: string;
+  defaultValue: boolean;
+}
+
+export type ParamDefinition =
+  ChoiceParamDefinition
+  | AudioParamDefinition
+  | NumberParamDefinition
+  | BooleanParamDefinition;
 
 export enum ParamType {
-  choice,
-  AudioParam,
+  choice = 'choice',
+  AudioParam = 'AudioParam',
+  number = 'number',
+  boolean = 'boolean',
 }

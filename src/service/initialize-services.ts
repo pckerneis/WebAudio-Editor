@@ -6,7 +6,7 @@ import SelectedItemSet from '../utils/SelectedItemSet';
 import SingletonWrapper from './SingletonWrapper';
 import {getNodeDefinitions} from '../model/StandardNodesDefinitions';
 import {loadDemoProject} from '../project-setup';
-import CreateNodeCommandHandler from './command-handlers/CreateNodeCommandHandler';
+import GraphServiceCommandHandler from './command-handlers/GraphServiceCommandHandler';
 import getAllCommands from './commands/Commands';
 
 export default function initializeOrGetServices(): Services {
@@ -23,7 +23,7 @@ export default function initializeOrGetServices(): Services {
     loadDemoProject(graphService, graphSelection, nodeDefinitionService);
 
     commandService.registerCommandHandler(
-      new CreateNodeCommandHandler(graphService, nodeDefinitionService),
+      new GraphServiceCommandHandler(graphService, nodeDefinitionService, graphSelection),
     );
   }
 

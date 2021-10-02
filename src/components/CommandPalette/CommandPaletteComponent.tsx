@@ -1,18 +1,21 @@
 import './CommandPaletteComponent.css';
 import React, {useCallback, useEffect, useState} from 'react';
 import {consumeEvent} from '../../ui-utils/events';
-import {Command} from '../../service/CommandService';
-import initializeOrGetServices from '../../service/initialize-services';
+import CommandService, {RegisteredCommand} from '../../service/CommandService';
 
-const {commandService} = initializeOrGetServices();
+export default function CommandPaletteComponent(props: CommandPaletteComponentProps): JSX.Element {
+  const {
+    commandService
+  } = props;
 
-export default function CommandPaletteComponent(props: {}): JSX.Element {
   const [
     isCommandPaletteVisible,
     setCommandPaletteVisible
   ] = useState(false);
 
-  const [foundCommands, setFoundCommands] = useState<Command[]>(commandService.commands);
+  const commands = commandService.registeredCommands;
+
+  const [foundCommands, setFoundCommands] = useState<string[]>(commands.map(cmd => cmd.path));
 
   const [filter, setFilter] = useState('');
 
@@ -24,16 +27,17 @@ export default function CommandPaletteComponent(props: {}): JSX.Element {
 
     if (hasFilter) {
       const lowerCaseText = text.toLocaleLowerCase();
-      setFoundCommands(commandService.commands
+      setFoundCommands(commands
         .filter(cmd => cmd.path.toLocaleLowerCase().includes(lowerCaseText)
-          || cmd.label.toLocaleLowerCase().includes(lowerCaseText)));
+          || cmd.label.toLocaleLowerCase().includes(lowerCaseText))
+        .map(cmd => cmd.path));
     } else {
-      setFoundCommands(commandService.commands);
+      setFoundCommands(commands.map(cmd => cmd.path));
     }
-  }, [setFoundCommands]);
+  }, [setFoundCommands, commands]);
 
   const resetAndClose = () => {
-    setFoundCommands(commandService.commands);
+    setFoundCommands(commands.map(cmd => cmd.path));
     setCommandPaletteVisible(false);
   };
 
@@ -52,7 +56,7 @@ export default function CommandPaletteComponent(props: {}): JSX.Element {
 
       if (evt.code === 'Enter') {
         if (foundCommands.length > 0) {
-          commandService.executeCommand(foundCommands[0].path);
+          commandService.executeCommand(foundCommands[0]);
           resetAndClose();
           consumeEvent(evt);
         }
@@ -69,14 +73,38 @@ export default function CommandPaletteComponent(props: {}): JSX.Element {
     };
   });
 
-  const commandList = foundCommands.map(cmd => (
-    <div key={cmd.path}
-         className="CommandRow"
-         onClick={evt => handleCommandRowClick(evt, cmd)}
-    >
-      {withBoldFilterMatch(cmd.label, filter, cmd.path)}
-    </div>
-  ));
+  const commandList = foundCommands.map(cmdPath => {
+    const cmd = commands.find(cmd => cmd.path === cmdPath);
+
+    if (cmd == null) {
+      return undefined;
+    }
+
+    const shortcutSet = cmd.keyboardShortcuts;
+
+    const keyShortcuts = shortcutSet && shortcutSet.map((shortcut, idx) => {
+        return [
+          shortcut.map((key, keyIdx) => [
+            <span key={idx + '-' + keyIdx} className="KeyCode">{key}</span>,
+            keyIdx < shortcut.length - 1 && (<span key={idx + '-' + keyIdx + 'plus'}>+</span>)
+          ]),
+          idx < shortcutSet.length - 1 && (<span key={idx + 'slash'} className="ShortcutSeparator">/</span>),
+        ];
+      });
+
+
+    return (
+      <div key={cmd.path}
+           className={"CommandRow" + (cmd.disabled ? " disabled" : "")}
+           onClick={evt => handleCommandRowClick(evt, cmd)}
+      >
+        {withBoldFilterMatch(cmd.label, filter, cmd.path)}
+        <div className="KeyShortcuts">
+          {keyShortcuts}
+        </div>
+      </div>
+    )
+  });
 
   const hasFilter = filter.length > 0;
 
@@ -85,9 +113,11 @@ export default function CommandPaletteComponent(props: {}): JSX.Element {
     consumeEvent(evt);
   };
 
-  const handleCommandRowClick = (evt: any, cmd: Command) => {
-    commandService.executeCommand(cmd.path);
-    resetAndClose();
+  const handleCommandRowClick = (evt: any, cmd: RegisteredCommand) => {
+    if (! cmd.disabled) {
+      commandService.executeCommand(cmd.path);
+      resetAndClose();
+    }
     consumeEvent(evt);
   };
 
@@ -149,4 +179,8 @@ const withBoldFilterMatch = (text: string, filterValue: string, path: string) =>
   });
 
   return result;
+}
+
+interface CommandPaletteComponentProps {
+  commandService: CommandService;
 }
