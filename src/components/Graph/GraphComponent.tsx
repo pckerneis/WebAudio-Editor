@@ -139,17 +139,6 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
         y: evt.clientY,
       };
 
-      if (this.state.graphState.temporaryConnectionPort) {
-        const suitablePort = portRegistry.findSuitablePort(mouseCoordinates, this.state.graphState);
-
-        if (suitablePort) {
-          graphService.createOrApplyTemporaryConnection(suitablePort.id);
-          somethingHit = true;
-        } else {
-          graphService.removeTemporaryConnection();
-        }
-      }
-
       if (!somethingHit) {
         for (const c of this.state.connectionCurves) {
           if (hitsConnectionCurve(mouseCoordinates, c, MAX_PORT_CLICK_DISTANCE)) {
@@ -163,6 +152,23 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
         graphSelection.clearSelection();
       }
     }
+
+    const handlePointerUp = (evt: any) => {
+      const mouseCoordinates = {
+        x: evt.clientX,
+        y: evt.clientY,
+      };
+
+      if (this.state.graphState.temporaryConnectionPort) {
+        const suitablePort = portRegistry.findSuitablePort(mouseCoordinates, this.state.graphState);
+
+        if (suitablePort) {
+          graphService.applyTemporaryConnection(suitablePort.id);
+        } else {
+          graphService.removeTemporaryConnection();
+        }
+      }
+    };
 
     const handleMouseMove = (e: any) => {
       this.setState(state => ({
@@ -186,6 +192,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
         className="GraphComponent"
         onMouseMove={handleMouseMove}
         onKeyUp={handleKeyUp}
+        onPointerUp={handlePointerUp}
         tabIndex={0}
       >
         <div className="CanvasContainer">

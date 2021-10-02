@@ -101,7 +101,7 @@ function Node(props: NodeProps) {
              key={p.id + '_hiddenPort'}>
         </div>);
 
-      return {id: p.id, ref, template};
+      return {id: p.id, ref, template, hidden: true};
     }) : [];
 
   portRegistry.registerPorts(...hiddenParamPorts);

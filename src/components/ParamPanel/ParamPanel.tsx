@@ -85,7 +85,7 @@ function ParamPanel(props: ParamPanelProps) {
             <div key={paramName + '_port'}
                  className="ParamPort"
                  ref={portRef}
-                 onClick={evt => handlePortClick(evt)}>
+                 onPointerDown={evt => handlePointerDown(evt)}>
             </div>),
         } : null;
 
@@ -93,9 +93,9 @@ function ParamPanel(props: ParamPanelProps) {
           portRegistry.registerPorts(port);
         }
 
-        const handlePortClick = (evt: any) => {
+        const handlePointerDown = (evt: any) => {
           if (port) {
-            service.createOrApplyTemporaryConnection(port.id);
+            service.createTemporaryConnection(port.id);
           }
 
           consumeEvent(evt);

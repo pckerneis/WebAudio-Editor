@@ -18,8 +18,9 @@ import {
 } from './actions/NodeCommands';
 import {
   addConnection,
+  applyTemporaryConnection,
   canConnect,
-  createOrApplyTemporaryConnection,
+  createTemporaryConnection,
   findParentNode,
   isConnectionId,
   removeTemporaryConnection
@@ -78,8 +79,12 @@ export default class GraphService {
     this._store.next(addConnection(sourceNodeId, sourcePortIndex, targetNodeId, targetPortIndex, this.snapshot));
   }
 
-  createOrApplyTemporaryConnection(portId: PortId): any {
-    this._store.next(createOrApplyTemporaryConnection(portId, this.snapshot));
+  createTemporaryConnection(portId: PortId): any {
+    this._store.next(createTemporaryConnection(portId, this.snapshot));
+  }
+
+  applyTemporaryConnection(portId: PortId): any {
+    this._store.next(applyTemporaryConnection(portId, this.snapshot));
   }
 
   removeTemporaryConnection(): void {
@@ -100,6 +105,10 @@ export default class GraphService {
 
   remove(items: string[]): void {
     this._store.next(remove(items, this.snapshot));
+  }
+
+  hasTemporaryConnection(): boolean {
+    return this.snapshot.temporaryConnectionPort != null;
   }
 }
 

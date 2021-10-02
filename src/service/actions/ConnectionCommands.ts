@@ -105,7 +105,20 @@ export function findParentNode(portId: PortId, state: GraphState): NodeState | n
   return null;
 }
 
-export function createOrApplyTemporaryConnection(portId: PortId, state: GraphState): GraphState {
+export function createTemporaryConnection(portId: PortId, state: GraphState): GraphState {
+  const port = findPortState(portId, state);
+
+  if (port == null) {
+    throw new Error('Could not find port with ID ' + portId);
+  }
+
+  return {
+    ...state,
+    temporaryConnectionPort: port,
+  };
+}
+
+export function applyTemporaryConnection(portId: PortId, state: GraphState): GraphState {
   const port = findPortState(portId, state);
 
   if (port == null) {
@@ -113,21 +126,13 @@ export function createOrApplyTemporaryConnection(portId: PortId, state: GraphSta
   }
 
   if (state.temporaryConnectionPort == null) {
-    return {
-      ...state,
-      temporaryConnectionPort: port,
-    };
-  } else if (state.temporaryConnectionPort.id === port.id) {
-    return {
-      ...state,
-      temporaryConnectionPort: null,
-    }
-  } else {
-    return {
-      ...doAddConnection(state.temporaryConnectionPort.id, port.id, state),
-      temporaryConnectionPort: null,
-    };
+    throw new Error('Cannot apply temporary connection without a temporary source port set.');
   }
+
+  return {
+    ...doAddConnection(state.temporaryConnectionPort.id, port.id, state),
+    temporaryConnectionPort: null,
+  };
 }
 
 export function removeTemporaryConnection(state: GraphState): GraphState {

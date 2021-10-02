@@ -10,6 +10,7 @@ export interface ReferencedPort {
   id: PortId;
   ref: React.RefObject<HTMLDivElement>;
   template: JSX.Element;
+  hidden?: boolean;
 }
 
 export class PortComponentRegistry {
@@ -34,20 +35,22 @@ export class PortComponentRegistry {
     const sourcePort = graphState.temporaryConnectionPort;
     const checkDistSquared = 225;
 
-    return this.getAllRegisteredPorts().find(registeredPort => {
-      const component = registeredPort.ref.current;
+    return this.getAllRegisteredPorts()
+      .filter(registeredPort => !registeredPort.hidden)
+      .find(registeredPort => {
+        const component = registeredPort.ref.current;
 
-      if (component == null) {
-        return false;
-      }
+        if (component == null) {
+          return false;
+        }
 
-      const portBounds = component.getBoundingClientRect();
+        const portBounds = component.getBoundingClientRect();
 
-      if (!canConnect(registeredPort.id, sourcePort.id, graphState)) {
-        return false;
-      }
+        if (!canConnect(registeredPort.id, sourcePort.id, graphState)) {
+          return false;
+        }
 
-      return squaredDist(rectangleCenter(portBounds), mouseCoordinates) < checkDistSquared;
-    }) ?? null;
+        return squaredDist(rectangleCenter(portBounds), mouseCoordinates) < checkDistSquared;
+      }) ?? null;
   }
 }
