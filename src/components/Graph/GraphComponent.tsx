@@ -17,6 +17,8 @@ import {
 import {consumeEvent} from '../../ui-utils/events';
 import initializeOrGetServices from '../../service/initialize-services';
 import {arePrimitiveArraysEqual} from '../../utils/arrays';
+import MiniMap, {computeMiniMapState} from '../MiniMap/MiniMap';
+import {getEmptyMiniMapState, MiniMapState} from '../../state/MiniMapState';
 
 const MAX_PORT_CLICK_DISTANCE = 8;
 
@@ -34,6 +36,7 @@ interface GraphComponentState {
   connectionCurves: ConnectionCurve[];
   mouseCoordinates: Coordinates;
   subscriptions: Subscription[];
+  miniMapState: MiniMapState;
 }
 
 class GraphComponent extends React.Component<{}, GraphComponentState> {
@@ -51,13 +54,15 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
       subscriptions: [
         graphService.state$.pipe(
           switchMap(s => this.updateGraphState$(s)),
+          switchMap(() => this.updateMiniMapState$()),
           switchMap(() => this.computeConnectionCurves$()),
         ).subscribe(),
 
         graphSelection.selection$.pipe(
           switchMap(this.updateSelection$),
         ).subscribe(),
-      ]
+      ],
+      miniMapState: getEmptyMiniMapState(),
     };
   }
 
@@ -210,6 +215,10 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
             </div>
           </DragToMove>
         </div>
+        <MiniMap
+          miniMapState={this.state.miniMapState}
+          graphService={graphService}
+        />
       </div>
     );
   }
@@ -226,6 +235,13 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
   }
 
   private updateSelection$ = (selection: string[]) => this.update$(s => ({...s, selection}));
+
+  private updateMiniMapState$ = () => {
+    return this.update$(s => ({
+      ...s,
+      miniMapState: computeMiniMapState(graphService.snapshot),
+    }));
+  }
 
   private update$ = (stateMapper: (s: GraphComponentState) => GraphComponentState) => {
     return new Observable<GraphComponentState>(subscriber => {

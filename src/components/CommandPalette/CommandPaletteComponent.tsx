@@ -17,7 +17,7 @@ export default function CommandPaletteComponent(props: {}): JSX.Element {
   const [filter, setFilter] = useState('');
 
   const handleInputChange = useCallback((evt) => {
-    const text = evt.target.value ?? '';
+    const text = evt.target.value.trim() ?? '';
     const hasFilter = text.trim().length > 0;
 
     setFilter(text);
