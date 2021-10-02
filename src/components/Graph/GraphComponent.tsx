@@ -19,6 +19,7 @@ import initializeOrGetServices from '../../service/initialize-services';
 import {arePrimitiveArraysEqual} from '../../utils/arrays';
 import MiniMap, {computeMiniMapState} from '../MiniMap/MiniMap';
 import {getEmptyMiniMapState, MiniMapState} from '../../state/MiniMapState';
+import {areBoundsEqual} from '../../model/Bounds';
 
 const MAX_PORT_CLICK_DISTANCE = 8;
 
@@ -76,7 +77,10 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
   }
 
   componentDidMount(): void {
-    this.resizeHandler = () => this.renderConnections();
+    this.resizeHandler = () => {
+      this.renderConnections();
+      this.updateMiniMapState$().subscribe();
+    }
     window.addEventListener('resize', this.resizeHandler);
 
     this.computeConnectionCurves$()
@@ -102,12 +106,17 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
         && ! areCoordinatesEqual(nextState.mouseCoordinates, this.state.mouseCoordinates);
     };
 
+    const viewportBoundsChanged = () => {
+      return ! areBoundsEqual(nextState.miniMapState.viewportBounds, this.state.miniMapState.viewportBounds);
+    }
+
     return nextState.graphState.viewportOffset !== this.state.graphState.viewportOffset
       || nextState.selection !== this.state.selection
       || nextState.connectionCurves !== this.state.connectionCurves
       || hasNodesChanges()
       || hasNodeOrderChanged()
-      || temporaryConnectionMoved();
+      || temporaryConnectionMoved()
+      || viewportBoundsChanged();
   }
 
   private renderConnections(): void {

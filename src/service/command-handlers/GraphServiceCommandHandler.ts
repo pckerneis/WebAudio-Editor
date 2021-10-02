@@ -53,6 +53,8 @@ export default class GraphServiceCommandHandler implements CommandHandler {
   private createAndAddNode(nodeKind: NodeKind): void {
     const nodeDefinition = this.nodeDefinitionService.getNodeDefinition(nodeKind);
     const viewportOffset = this.graphService.snapshot.viewportOffset;
+
+    // TODO use graph bounds instead of window
     const bounds = {
       x: window.innerWidth / 2 - viewportOffset.x - 50,
       y: window.innerHeight / 2 - viewportOffset.y - 10,

@@ -23,8 +23,9 @@ export default function MiniMap(props: MiniMapProps) {
     const canvas = canvasRef.current;
 
     if (canvas != null) {
-      canvas.width = canvas.clientWidth ?? 0;
-      canvas.height = canvas.clientHeight ?? 0;
+      const size = canvas.clientWidth ?? 0;
+      canvas.width = size;
+      canvas.height = size;
 
       const scaledElements = scaleToMiniMap(nodes,
         viewportBounds,
@@ -178,11 +179,12 @@ export function computeMiniMapState(graphState: GraphState): MiniMapState {
       bounds: n.display.bounds,
       id: n.id,
     })),
+    // TODO: use viewport bounds instead of window
     viewportBounds: {
       x: graphState.viewportOffset.x,
       y: graphState.viewportOffset.y,
-      width: document.body.clientWidth,
-      height: document.body.clientHeight,
+      width: window.innerWidth,
+      height: window.innerHeight,
     }
   };
 }
