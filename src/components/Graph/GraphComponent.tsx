@@ -72,7 +72,6 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
     if (this.resizeHandler != null) {
       window.removeEventListener('resize', this.resizeHandler!);
       this.resizeHandler = undefined;
-
     }
   }
 
@@ -82,6 +81,8 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
 
     this.computeConnectionCurves$()
       .subscribe(() => this.renderConnections());
+
+    this.updateMiniMapState$().subscribe();
   }
 
   componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -156,7 +157,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
       if (!somethingHit) {
         graphSelection.clearSelection();
       }
-    }
+    };
 
     const handlePointerUp = (evt: any) => {
       const mouseCoordinates = {
@@ -190,7 +191,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
         graphService.remove(graphSelection.items);
         consumeEvent(e);
       }
-    }
+    };
 
     return (
       <div

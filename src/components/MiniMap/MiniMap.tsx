@@ -1,4 +1,4 @@
-import React, {createRef, useCallback, useLayoutEffect} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import './MiniMap.css';
 import {MiniMapNode, MiniMapState} from '../../state/MiniMapState';
 import {GraphState} from '../../state/GraphState';
@@ -11,61 +11,83 @@ export default function MiniMap(props: MiniMapProps) {
     miniMapState,
   } = props;
 
-  const canvasRef = createRef<HTMLCanvasElement>();
+  const {
+    viewportBounds,
+    nodes,
+  } = miniMapState;
 
-  useLayoutEffect(() => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [dragging, setDragging] = useState(false);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
 
     if (canvas != null) {
       canvas.width = canvas.clientWidth ?? 0;
       canvas.height = canvas.clientHeight ?? 0;
 
-      const scaledElements = scaleToMiniMap(miniMapState.nodes,
-        miniMapState.viewportBounds,
+      const scaledElements = scaleToMiniMap(nodes,
+        viewportBounds,
         canvas.width, canvas.height);
 
-      render(canvas, miniMapState, scaledElements.scaledNodeBounds, scaledElements.scaledViewportBounds);
+      render(canvas, scaledElements.scaledNodeBounds, scaledElements.scaledViewportBounds);
     }
-  }, [canvasRef, miniMapState]);
+  }, [canvasRef, nodes, viewportBounds]);
 
-  const handlePointerMove = useCallback((evt) => {
+  const handlePointerUp = useCallback(() => {
+    setDragging(false);
+  }, [setDragging]);
+
+  const moveViewPortToPointer = useCallback((pointerX: number, pointerY: number) => {
     const canvas = canvasRef.current;
 
     if (canvas == null) {
       return;
     }
 
-    if (evt.pressure > 0) {
-      const positionInMap = {
-        x: evt.clientX - canvas.getBoundingClientRect().x,
-        y: evt.clientY - canvas.getBoundingClientRect().y,
-      };
+    const positionInMap = {
+      x: pointerX - canvas.getBoundingClientRect().x,
+      y: pointerY - canvas.getBoundingClientRect().y,
+    };
 
-      const {displayRatio, expandedBounds} = getScalingInfo(miniMapState.nodes, canvas.width, canvas.height);
+    const {displayRatio, expandedBounds} = getScalingInfo(nodes, canvas.width, canvas.height);
 
-      const realPosition = {
-        x: positionInMap.x / displayRatio + expandedBounds.x,
-        y: positionInMap.y / displayRatio + expandedBounds.y,
-      };
+    const realPosition = {
+      x: positionInMap.x / displayRatio + expandedBounds.x,
+      y: positionInMap.y / displayRatio + expandedBounds.y,
+    };
 
-      const newViewportOffset = {
-        x: -realPosition.x + miniMapState.viewportBounds.width / 2,
-        y: -realPosition.y + miniMapState.viewportBounds.height / 2,
-      }
-
-      graphService.setViewportTranslate(newViewportOffset);
+    const newViewportOffset = {
+      x: -realPosition.x + viewportBounds.width / 2,
+      y: -realPosition.y + viewportBounds.height / 2,
     }
-  }, [
-    canvasRef,
-    graphService,
-    miniMapState.nodes,
-    miniMapState.viewportBounds.height,
-    miniMapState.viewportBounds.width]);
+
+    graphService.setViewportTranslate(newViewportOffset);
+  }, [graphService, nodes, viewportBounds.height, viewportBounds.width]);
+
+  const handlePointerMove = useCallback((evt) => {
+    if (! dragging) {
+      return;
+    }
+
+    if (evt.pressure > 0) {
+      moveViewPortToPointer(evt.clientX, evt.clientY);
+    }
+  }, [dragging, moveViewPortToPointer]);
+
+  const handlePointerDown = useCallback((evt) => {
+    setDragging(true);
+    moveViewPortToPointer(evt.clientX, evt.clientY);
+  }, [setDragging, moveViewPortToPointer]);
 
   return (
     <div className="MiniMap">
-      <canvas ref={canvasRef}
-              onPointerMove={handlePointerMove}/>
+      <canvas
+        ref={canvasRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+      />
     </div>
   );
 }
@@ -103,8 +125,8 @@ function scaleToMiniMap(nodes: MiniMapNode[],
   });
 
   const scaledViewportBounds = {
-    x: (- viewportBounds.x - expandedBounds.x) * displayRatio,
-    y: (- viewportBounds.y - expandedBounds.y) * displayRatio,
+    x: (-viewportBounds.x - expandedBounds.x) * displayRatio,
+    y: (-viewportBounds.y - expandedBounds.y) * displayRatio,
     width: viewportBounds.width * displayRatio,
     height: viewportBounds.height * displayRatio,
   };
@@ -116,7 +138,6 @@ function scaleToMiniMap(nodes: MiniMapNode[],
 }
 
 function render(canvas: HTMLCanvasElement,
-                state: MiniMapState,
                 scaledNodeBounds: Bounds[],
                 scaledViewportBounds: Bounds): void {
   const ctx = canvas.getContext('2d');
