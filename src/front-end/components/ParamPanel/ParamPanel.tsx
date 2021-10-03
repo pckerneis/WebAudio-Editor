@@ -1,21 +1,18 @@
 import React, {createRef} from 'react';
 import './ParamPanel.css'
 import PropTypes from 'prop-types';
-import GraphService from '../../service/GraphService';
 import {consumeEvent} from '../../ui-utils/events';
-import {PortComponentRegistry} from '../../service/PortComponentRegistry';
-import SelectedItemSet from '../../utils/SelectedItemSet';
 import {ParamDefinition, ParamType} from '../../../document/node-definitions/NodeDefinition';
 import {ParamPorts, ParamValues} from '../../../document/models/NodeModel';
+import initializeOrGetServices from '../../service/initialize-services';
+
+const {graphService, portRegistry, graphSelection} = initializeOrGetServices();
 
 interface ParamPanelProps {
   nodeId: string;
   paramValues: ParamValues;
   paramPorts: ParamPorts;
   paramDefinitions: ParamDefinition[];
-  service: GraphService;
-  portRegistry: PortComponentRegistry;
-  graphSelection: SelectedItemSet<string>;
 }
 
 function ParamPanel(props: ParamPanelProps) {
@@ -24,14 +21,11 @@ function ParamPanel(props: ParamPanelProps) {
     paramValues,
     paramPorts,
     paramDefinitions,
-    service,
-    portRegistry,
-    graphSelection,
   } = props;
 
   const handleInputPointerDown = (evt: any) => {
     consumeEvent(evt);
-    service.sendNodeToFront(nodeId);
+    graphService.sendNodeToFront(nodeId);
 
     if (!graphSelection.isSelected(nodeId)) {
       graphSelection.setUniqueSelection(nodeId);
@@ -45,7 +39,7 @@ function ParamPanel(props: ParamPanelProps) {
 
         const handleInputChange = (evt: any) => {
           const value = evt.target.value;
-          service.setParamValue(nodeId, paramName, value);
+          graphService.setParamValue(nodeId, paramName, value);
         };
 
         const isChoiceParam = definition.type === ParamType.choice;
@@ -125,7 +119,7 @@ function ParamPanel(props: ParamPanelProps) {
 
         const handlePointerDown = (evt: any) => {
           if (port) {
-            service.createTemporaryConnection(port.id);
+            graphService.createTemporaryConnection(port.id);
           }
 
           consumeEvent(evt);
@@ -156,10 +150,7 @@ ParamPanel.propTypes = {
   paramValues: shape({}).isRequired,
   paramPorts: shape({}).isRequired,
   paramDefinitions: array.isRequired,
-  portRegistry: shape({}).isRequired,
-  graphSelection: shape({}).isRequired,
   nodeId: string.isRequired,
-  service: shape({}).isRequired,
 }
 
 export default React.memo(ParamPanel);

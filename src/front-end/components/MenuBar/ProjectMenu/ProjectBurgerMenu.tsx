@@ -25,7 +25,7 @@ export default function ProjectBurgerMenu() {
 
   const downloadAsJson = useCallback(() => {
     downloadJsonFile(projectName, persistenceService.getStateAsJsonString());
-  }, [persistenceService, projectName]);
+  }, [projectName]);
 
   const handleFileChange = useCallback((evt: React.ChangeEvent<HTMLInputElement>) => {
     const fileContent = evt.target.files?.[0];
@@ -41,7 +41,7 @@ export default function ProjectBurgerMenu() {
 
       reader.readAsText(fileContent);
     }
-  }, [persistenceService]);
+  }, []);
 
   const loadFromJsonKeyHandler = (evt: React.KeyboardEvent<HTMLLIElement>) => {
     if (isEnterKeyEvent(evt)) {

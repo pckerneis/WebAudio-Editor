@@ -15,7 +15,7 @@ import {buildReferencedPorts} from './Port';
 import {NodeDefinition} from '../../../document/node-definitions/NodeDefinition';
 import initializeOrGetServices from '../../service/initialize-services';
 
-const {historyService} = initializeOrGetServices();
+const {historyService, graphService, graphSelection, portRegistry} = initializeOrGetServices();
 
 interface NodeProps {
   nodeState: NodeState;
@@ -36,11 +36,8 @@ function buildPorts(nodeState: NodeState, service: GraphService): { bottomPorts:
 function Node(props: NodeProps) {
   const {
     nodeState,
-    service,
     definition,
-    portRegistry,
     selected,
-    selectedItemSet,
     zIndex,
   } = props;
 
@@ -55,38 +52,38 @@ function Node(props: NodeProps) {
   const [positionByItem, setPositionByItem] = useState({} as { [id: string]: Bounds });
 
   const handlePointerDown = useCallback((evt: any) => {
-    service.sendNodeToFront(nodeState.id);
-    selectedItemSet.selectOnMouseDown(nodeState.id, evt);
-  }, [service, selectedItemSet, nodeState.id]);
+    graphService.sendNodeToFront(nodeState.id);
+    graphSelection.selectOnMouseDown(nodeState.id, evt);
+  }, [nodeState.id]);
 
   const handleMoved = useCallback((coordinates: Coordinates) => {
-    if (selectedItemSet.isSelected(nodeState.id)) {
+    if (graphSelection.isSelected(nodeState.id)) {
       const offsetX = startPosition.x - coordinates.x;
       const offsetY = startPosition.y - coordinates.y;
 
       Object.entries(positionByItem).forEach(([id, bounds]) => {
-        service.setNodePosition(id, {
+        graphService.setNodePosition(id, {
           x: bounds.x - offsetX,
           y: bounds.y - offsetY,
         });
       });
     }
-  }, [selectedItemSet, nodeState.id, positionByItem, service, startPosition.x, startPosition.y]);
+  }, [nodeState.id, positionByItem, startPosition.x, startPosition.y]);
 
   const handleDragStart = useCallback(() => {
-    if (! selectedItemSet.isSelected(nodeState.id)) {
-      selectedItemSet.setUniqueSelection(nodeState.id);
+    if (!graphSelection.isSelected(nodeState.id)) {
+      graphSelection.setUniqueSelection(nodeState.id);
     }
 
-    const selectedNodes = selectedItemSet.items.map(id => service.snapshot.nodes[id]).filter(Boolean) as NodeState[];
+    const selectedNodes = graphSelection.items.map(id => graphService.snapshot.nodes[id]).filter(Boolean) as NodeState[];
     const positionByItem = {} as { [id: string]: Bounds };
     selectedNodes.forEach(node => positionByItem[node.id] = node.display.bounds);
     setPositionByItem(positionByItem);
 
     setStartPosition(nodeState.display.bounds);
-  }, [nodeState.display.bounds, service.snapshot.nodes, nodeState.id, selectedItemSet]);
+  }, [nodeState.display.bounds, nodeState.id]);
 
-  const {topPorts, bottomPorts} = buildPorts(nodeState, service);
+  const {topPorts, bottomPorts} = buildPorts(nodeState, graphService);
 
   useLayoutEffect(() => {
     portRegistry.registerPorts(...topPorts);
@@ -142,13 +139,13 @@ function Node(props: NodeProps) {
               && <FoldButton
                 style={({margin: '0 4px'})}
                 folded={nodeState.display.folded}
-                onButtonClick={() => service.toggleNodeFoldState(nodeState.id)}
+                onButtonClick={() => graphService.toggleNodeFoldState(nodeState.id)}
               />
             }
             <EditableLabel
               className="NodeLabel"
               value={nodeState.name}
-              onChange={(name) => service.setNodeName(nodeState.id, name)}
+              onChange={(name) => graphService.setNodeName(nodeState.id, name)}
             />
           </div>
           {
@@ -159,9 +156,6 @@ function Node(props: NodeProps) {
               paramValues={nodeState.paramValues}
               paramPorts={nodeState.paramPorts}
               paramDefinitions={definition.params}
-              portRegistry={portRegistry}
-              service={service}
-              graphSelection={selectedItemSet}
             />
           }
         </div>
@@ -181,15 +175,12 @@ const {shape, bool, number} = PropTypes;
 Node.propTypes = {
   nodeState: shape({}).isRequired,
   definition: shape({}).isRequired,
-  service: shape({}).isRequired,
-  portRegistry: shape({}).isRequired,
-  selectedItemSet: shape({}).isRequired,
   style: shape({}),
   selected: bool,
   zIndex: number,
 }
 
-type Nodes = {[id: string]: NodeState};
+type Nodes = { [id: string]: NodeState };
 
 export function areNodesVisuallySimilar(previous: Nodes, next: Nodes): boolean {
   return Object.values(previous).every(first => {
@@ -208,4 +199,3 @@ export function areNodesVisuallySimilar(previous: Nodes, next: Nodes): boolean {
 }
 
 export default React.memo(Node);
-// export default Node;
