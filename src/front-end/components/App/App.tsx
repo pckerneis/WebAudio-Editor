@@ -3,6 +3,7 @@ import CommandPaletteComponent from '../CommandPalette/CommandPaletteComponent';
 import React, {useCallback, useState} from 'react';
 import initializeOrGetServices from '../../service/initialize-services';
 import MenuBar from '../MenuBar/MenuBar';
+import MessageQueue from '../MessageQueue/MessageQueue';
 
 const {commandService, persistenceService} = initializeOrGetServices();
 
@@ -29,6 +30,7 @@ export function App() {
       <CommandPaletteComponent
         commandService={commandService}
       />
+      <MessageQueue/>
     </div>
   );
 }

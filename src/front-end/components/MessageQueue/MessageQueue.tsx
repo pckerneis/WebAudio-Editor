@@ -1,0 +1,37 @@
+import React, {useCallback, useEffect, useState} from 'react';
+import './MessageQueue.css';
+import {consumeEvent} from '../../ui-utils/events';
+import initializeOrGetServices from '../../service/initialize-services';
+import {Message} from '../../service/MessageService';
+
+const { messageService } = initializeOrGetServices();
+
+export default function MessageQueue() {
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  useEffect(() => {
+    const sub = messageService.messages$.subscribe((msgs) => {
+      setMessages(msgs);
+    });
+
+    return () => sub.unsubscribe();
+  }, []);
+
+  const handleCloseClick = useCallback((msg: Message, evt: any) => {
+    messageService.close(msg.id);
+    consumeEvent(evt);
+  }, []);
+
+  const messageElements = () => messages.map((msg: any, idx) => {
+    return <div key={idx} className="MessageBox drop-shadow">
+      <span className={msg.level}>{msg.text}</span>
+      <button onClick={(evt) => handleCloseClick(msg, evt)}>x</button>
+    </div>;
+  });
+
+  return (
+    <div className="MessageQueue">
+      {messageElements()}
+    </div>
+  );
+}

@@ -1,0 +1,56 @@
+.MessageQueue {
+    box-sizing: border-box;
+    position: fixed;
+    right: 0;
+    top: 0;
+    min-width: 220px;
+    max-width: 40%;
+    height: 100vh;
+    padding: 10px 20px 10px 40px;
+    color: var(--primary-text-color);
+    pointer-events: none;
+
+    overflow: auto;
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.MessageQueue::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+}
+
+.MessageQueue .MessageBox {
+    pointer-events: all;
+    cursor: default;
+    background-color: var(--primary-background-color);
+    padding: 5px;
+    border-radius: 3px;
+    display: flex;
+    font-size: smaller;
+    margin-top: 10px;
+}
+
+.MessageQueue .MessageBox span {
+    padding: 6px;
+    flex-grow: 1;
+}
+
+.MessageQueue .MessageBox span.error {
+    color: #ee3535;
+}
+
+.MessageQueue .MessageBox span.warning {
+    color: #ffd744;
+}
+
+.MessageQueue .MessageBox button {
+    color: var(--primary-text-color);
+    opacity: 0.5;
+    background: none;
+    border: none;
+    font-size: 20px;
+}
+
+.MessageQueue .MessageBox button:hover {
+    opacity: 0.8;
+}

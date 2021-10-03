@@ -3,13 +3,15 @@ import ProjectService from './ProjectService';
 import SelectedItemSet from '../utils/SelectedItemSet';
 import {ProjectDocument} from '../../document/ProjectDocument';
 import {isValidProjectDocument} from '../../document/validation/project-document-validation';
+import MessageService from './MessageService';
 
 const DOC_VERSION = '0';
 
 export default class PersistenceService {
   constructor(public readonly graphService: GraphService,
               public readonly projectService: ProjectService,
-              public readonly graphSelection: SelectedItemSet<string>) {
+              public readonly graphSelection: SelectedItemSet<string>,
+              public readonly messageService: MessageService) {
   }
 
   getStateAsJsonString(): string {
@@ -40,10 +42,14 @@ export default class PersistenceService {
           temporaryConnectionPort: null,
         });
       } else {
-        console.error('Invalid project state.');
+        this.messageService.post('Invalid project document.', 'error');
       }
-    } catch(e) {
-      console.error(e);
+    } catch(e: any) {
+      if (e?.message) {
+        this.messageService.post('Could not load project:\n' + e?.message, 'error');
+      } else {
+        console.error(e);
+      }
     }
   }
 }

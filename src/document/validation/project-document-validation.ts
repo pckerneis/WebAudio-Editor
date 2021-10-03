@@ -28,7 +28,7 @@ export function isValidProjectDocument(candidate: any): candidate is ProjectDocu
 
 function assertIsValidAppVersion(candidate: any): void {
   if (!KNOWN_DOC_VERSIONS.includes(candidate)) {
-    throw new Error('Unhandled document version ' + candidate);
+    throw new Error(`Unhandled document version "${candidate}"`);
   }
 }
 
@@ -99,17 +99,17 @@ function assertIsValidConnection(candidate: any, nodes: NodeModel[]): void {
   assertIsString(candidate.id, '[connection].id');
 
   if (candidate.source === candidate.target) {
-    throw new Error(`A connection's source cannot be its target (id: ${candidate.id}).`);
+    throw new Error(`A connection's source cannot be its target (id: "${candidate.id}").`);
   }
 
   const allPorts = extractAllPortIds(nodes);
 
   if (!allPorts.includes(candidate.source)) {
-    throw new Error('Cannot find source port for connection ' + candidate.id);
+    throw new Error(`Cannot find source port for connection "${candidate.id}".`);
   }
 
   if (!allPorts.includes(candidate.target)) {
-    throw new Error('Cannot find target port for connection ' + candidate.id);
+    throw new Error(`Cannot find target port for connection "${candidate.id}".`);
   }
 }
 
@@ -156,18 +156,18 @@ function assertIsValidNode(candidate: any, candidateId: string): candidate is No
   assertIsString(id, `[${candidateId}].id`);
 
   if (id !== candidateId) {
-    throw new Error(`Found ID property mismatch for node with key ${candidateId}.`)
+    throw new Error(`Found ID property mismatch for node with key "${candidateId}".`)
   }
 
   if (!isNodeKind(kind)) {
-    throw new Error(`Expect [${candidateId}].kind to have type NodeKind.`);
+    throw new Error(`"Expect ["${candidateId}].kind" to have type NodeKind.`);
   }
 
   assertIsObject(paramValues, `[${candidateId}].paramValues`);
   assertIsObject(display, `[${candidateId}].display`);
 
   if (!isBounds(display.bounds)) {
-    throw new Error(`Expect [${candidateId}].bounds to be a Bounds object.`);
+    throw new Error(`Expect "[${candidateId}].bounds" to be a Bounds object.`);
   }
 
   assertIsBoolean(display.folded, `[${candidateId}].display.folded`);
@@ -187,7 +187,7 @@ function assertIsValidPort(candidate: any, name: string): void {
   assertIsObject(candidate, name);
 
   if (!isPortKind(candidate.kind)) {
-    throw new Error(`One of ${name} has invalid PortKind.`)
+    throw new Error(`One of "${name}" node's ports has invalid PortKind.`)
   }
 }
 
@@ -196,7 +196,7 @@ function assertIsValidParamPorts(candidate: any, node: NodeModel): void {
   assertIsValidPortArray(Object.values(candidate), `[${node.id}].paramPorts`);
 
   if (!Object.keys(candidate).every(key => hasParam(key, node))) {
-    throw new Error('Found invalid param port key for node ' + node.id);
+    throw new Error(`Found invalid param port key for node "${node.id}".`);
   }
 }
 
@@ -268,7 +268,7 @@ function assertIsValidGraphSelection(candidate: any, maybeGraph: any): void {
 }
 
 function reportTypeError(propertyName: string, expectedType: string): void {
-  reportError(`Expect ${propertyName} to have type ${expectedType}`);
+  reportError(`Expect "${propertyName}" to have type "${expectedType}".`);
 }
 
 function reportError(message: string): void {
