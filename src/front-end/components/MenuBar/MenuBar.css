@@ -1,6 +1,8 @@
 .MenuBar {
     position: fixed;
-    width: 500px;
+    max-width: 500px;
+    min-width: 320px;
+    width: 50%;
     height: 40px;
     background: var(--primary-background-color);
     top: 20px;
@@ -10,11 +12,36 @@
 }
 
 .ProjectNameInput {
-    font-size: 20px;
+    font-size: 18px;
     color: var(--primary-text-color);
     background: none;
     border: none;
     margin: auto 8px;
     padding: 4px 8px;
     flex-grow: 1;
+}
+
+.UndoIcon,
+.RedoIcon {
+    filter: var(--icon-filter);
+    opacity: 0.5;
+}
+
+.UndoIcon:hover:not(.disabled),
+.RedoIcon:hover:not(.disabled) {
+    opacity: 0.8;
+}
+
+.UndoIcon.disabled,
+.RedoIcon.disabled {
+    opacity: 0.25;
+}
+
+.UndoIcon {
+    transform: scaleX(-1);
+}
+
+.RedoIcon {
+    filter: var(--icon-filter);
+    opacity: 0.5;
 }

@@ -3,8 +3,9 @@ import React, {ChangeEvent, useEffect, useState} from 'react';
 import ProjectBurgerMenu from './ProjectMenu/ProjectBurgerMenu';
 import PersistenceService from '../../service/PersistenceService';
 import initializeOrGetServices from '../../service/initialize-services';
+import right from './right.svg';
 
-const {projectService} = initializeOrGetServices();
+const {projectService, historyService} = initializeOrGetServices();
 
 export default function MenuBar(props: MenuBarProps) {
   const {persistenceService} = props;
@@ -33,6 +34,18 @@ export default function MenuBar(props: MenuBarProps) {
       <input className="ProjectNameInput"
              value={projectName}
              onChange={handleChange}
+      />
+      <img
+        className={"UndoIcon" + (historyService.canUndo ? '' : ' disabled')}
+        src={right}
+        tabIndex={0}
+        alt="Undo"
+      />
+      <img
+        className={'RedoIcon' + (historyService.canRedo ? '' : ' disabled')}
+        src={right}
+        tabIndex={0}
+        alt="Redo"
       />
     </div>
   );

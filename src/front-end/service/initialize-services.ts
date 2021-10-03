@@ -11,6 +11,7 @@ import getAllCommands from './commands/Commands';
 import PersistenceService from './PersistenceService';
 import ProjectService from './ProjectService';
 import MessageService from './MessageService';
+import HistoryService from './HistoryService';
 
 export default function initializeOrGetServices(): Services {
   const firstInitialization = ! SingletonWrapper.hasInstance(GraphService);
@@ -24,6 +25,7 @@ export default function initializeOrGetServices(): Services {
   const projectService = SingletonWrapper.get(ProjectService);
   const messageService = SingletonWrapper.get(MessageService);
   const persistenceService = SingletonWrapper.get(PersistenceService, graphService, projectService, graphSelection, messageService);
+  const historyService = SingletonWrapper.get(HistoryService, graphService, graphSelection);
 
   if (firstInitialization) {
     loadDemoProject(graphService, graphSelection, nodeDefinitionService);
@@ -42,6 +44,7 @@ export default function initializeOrGetServices(): Services {
     projectService,
     persistenceService,
     messageService,
+    historyService,
   }
 }
 
@@ -54,4 +57,5 @@ export interface Services {
   projectService: ProjectService;
   persistenceService: PersistenceService;
   messageService: MessageService;
+  historyService: HistoryService;
 }

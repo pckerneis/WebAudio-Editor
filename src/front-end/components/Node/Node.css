@@ -21,6 +21,7 @@
 }
 
 .TopPortsContainer {
+    pointer-events: none;
     position: absolute;
     left: 0;
     right: 0;
@@ -31,6 +32,7 @@
 }
 
 .BottomPortsContainer {
+    pointer-events: none;
     position: absolute;
     left: 0;
     right: 0;
@@ -41,6 +43,7 @@
 }
 
 .Port {
+    pointer-events: all;
     margin: auto;
     width: 10px;
     height: 10px;

@@ -1,8 +1,7 @@
-
-
 .BurgerMenuIcon {
     filter: var(--icon-filter);
     opacity: 0.5;
+    width: 38px;
 }
 
 .BurgerMenuIcon:hover {
