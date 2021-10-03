@@ -1,21 +1,14 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback} from 'react';
 import './MessageQueue.css';
 import {consumeEvent} from '../../ui-utils/events';
 import initializeOrGetServices from '../../service/initialize-services';
 import {Message} from '../../service/MessageService';
+import WrapAsState from '../../ui-utils/WrapAsState';
 
-const { messageService } = initializeOrGetServices();
+const {messageService} = initializeOrGetServices();
 
 export default function MessageQueue() {
-  const [messages, setMessages] = useState<Message[]>([]);
-
-  useEffect(() => {
-    const sub = messageService.messages$.subscribe((msgs) => {
-      setMessages(msgs);
-    });
-
-    return () => sub.unsubscribe();
-  }, []);
+  const [messages] = WrapAsState(messageService.messages$, []);
 
   const handleCloseClick = useCallback((msg: Message, evt: any) => {
     messageService.close(msg.id);

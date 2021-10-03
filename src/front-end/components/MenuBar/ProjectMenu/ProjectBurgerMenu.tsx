@@ -2,13 +2,17 @@ import burger from './burger.svg';
 import React, {useCallback, useRef, useState} from 'react';
 import {consumeEvent, isEnterKeyEvent} from '../../../ui-utils/events';
 import './ProjectBurgerMenu.css'
-import PersistenceService from '../../../service/PersistenceService';
+import WrapAsState from '../../../ui-utils/WrapAsState';
+import initializeOrGetServices from '../../../service/initialize-services';
+import {pluck} from 'rxjs';
 
-export default function ProjectBurgerMenu(props: ProjectBurgerMenuProps) {
-  const {persistenceService, projectName} = props;
+const {projectService, persistenceService} = initializeOrGetServices();
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+export default function ProjectBurgerMenu() {
+  const projectName$ = projectService.state$.pipe(pluck('projectName'));
+  const [projectName] = WrapAsState(projectName$, '');
   const [isMenuVisible, setMenuVisible] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleBackDropPointerDown = useCallback((evt: React.PointerEvent<HTMLDivElement>) => {
     setMenuVisible(false);
@@ -17,17 +21,10 @@ export default function ProjectBurgerMenu(props: ProjectBurgerMenuProps) {
 
   const loadFromJson = useCallback(() => {
     fileInputRef.current?.click();
-  }, []);
+  }, [fileInputRef]);
 
   const downloadAsJson = useCallback(() => {
-    const blob = new Blob([persistenceService.getStateAsJsonString()],{type:'application/json'});
-    const href = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = href;
-    link.download = projectName + '.json';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    downloadJsonFile(projectName, persistenceService.getStateAsJsonString());
   }, [persistenceService, projectName]);
 
   const handleFileChange = useCallback((evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,10 +74,12 @@ export default function ProjectBurgerMenu(props: ProjectBurgerMenuProps) {
         <ul className="drop-shadow">
           <li tabIndex={0}
               onPointerDown={loadFromJson}
-              onKeyDown={loadFromJsonKeyHandler}>Load from JSON</li>
+              onKeyDown={loadFromJsonKeyHandler}>Load from JSON
+          </li>
           <li tabIndex={0}
               onPointerDown={downloadAsJson}
-              onKeyDown={downloadAsJsonKeyHandler}>Download as JSON</li>
+              onKeyDown={downloadAsJsonKeyHandler}>Download as JSON
+          </li>
         </ul>
       </div>
       }
@@ -93,7 +92,13 @@ export default function ProjectBurgerMenu(props: ProjectBurgerMenuProps) {
     </div>);
 }
 
-interface ProjectBurgerMenuProps {
-  projectName: string;
-  persistenceService: PersistenceService;
+function downloadJsonFile(fileName: string, fileContent: string) {
+  const blob = new Blob([fileContent], {type: 'application/json'});
+  const href = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = href;
+  link.download = fileName + '.json';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }

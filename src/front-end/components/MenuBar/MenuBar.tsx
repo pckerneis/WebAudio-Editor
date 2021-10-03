@@ -1,7 +1,6 @@
 import './MenuBar.css';
 import React, {ChangeEvent} from 'react';
 import ProjectBurgerMenu from './ProjectMenu/ProjectBurgerMenu';
-import PersistenceService from '../../service/PersistenceService';
 import initializeOrGetServices from '../../service/initialize-services';
 import right from './right.svg';
 import {pluck} from 'rxjs';
@@ -10,8 +9,7 @@ import {emptyHistory} from '../../service/HistoryService';
 
 const {projectService, historyService} = initializeOrGetServices();
 
-export default function MenuBar(props: MenuBarProps) {
-  const {persistenceService} = props;
+export default function MenuBar() {
   const projectName$ = projectService.state$.pipe(pluck('projectName'))
   const [projectName] = WrapAsState(projectName$, '');
   WrapAsState(historyService.state$, emptyHistory());
@@ -24,10 +22,7 @@ export default function MenuBar(props: MenuBarProps) {
 
   return (
     <div className="MenuBar drop-shadow">
-      <ProjectBurgerMenu
-        projectName={projectName}
-        persistenceService={persistenceService}
-      />
+      <ProjectBurgerMenu/>
       <input className="ProjectNameInput"
              value={projectName}
              onChange={handleChange}
@@ -48,8 +43,4 @@ export default function MenuBar(props: MenuBarProps) {
       />
     </div>
   );
-}
-
-interface MenuBarProps {
-  persistenceService: PersistenceService;
 }

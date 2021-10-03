@@ -1,13 +1,14 @@
 import './CommandPaletteComponent.css';
 import React, {useCallback, useEffect, useState} from 'react';
 import {consumeEvent, isEnterKeyEvent, isEscapeKeyEvent} from '../../ui-utils/events';
-import CommandService, {RegisteredCommand} from '../../service/CommandService';
+import {RegisteredCommand} from '../../service/CommandService';
+import initializeOrGetServices from '../../service/initialize-services';
 
-export default function CommandPaletteComponent(props: CommandPaletteComponentProps): JSX.Element {
-  const {
-    commandService
-  } = props;
+const {
+  commandService
+} = initializeOrGetServices();
 
+export default function CommandPaletteComponent(): JSX.Element {
   const [
     isCommandPaletteVisible,
     setCommandPaletteVisible
@@ -186,8 +187,4 @@ const withBoldFilterMatch = (text: string, filterValue: string, path: string) =>
   });
 
   return result;
-}
-
-interface CommandPaletteComponentProps {
-  commandService: CommandService;
 }
