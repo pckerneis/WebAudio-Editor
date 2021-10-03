@@ -22,12 +22,10 @@ export default function MiniMap(props: MiniMapProps) {
   useEffect(() => {
     const canvas = canvasRef.current;
 
-
     if (canvas != null) {
       canvas.style.width = '';
       canvas.style.height = '';
       const size = Math.min(canvas.clientHeight, canvas.clientWidth, window.innerHeight / 2) ?? 0;
-      console.log(size)
       canvas.width = size;
       canvas.height = size;
       canvas.style.width = `${size}px`;

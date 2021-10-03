@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, {useState} from 'react';
-import {consumeEvent} from '../../ui-utils/events';
+import {consumeEvent, isEnterKeyEvent} from '../../ui-utils/events';
 
 export default function EditableLabel(props: any) {
   const {
@@ -18,7 +18,7 @@ export default function EditableLabel(props: any) {
   };
 
   const handleKeyUp = (event: any) => {
-    if (event.key === 'Enter') {
+    if (isEnterKeyEvent(event)) {
       sendValueAndClose();
       event.stopPropagation();
     }

@@ -1,6 +1,6 @@
 import './CommandPaletteComponent.css';
 import React, {useCallback, useEffect, useState} from 'react';
-import {consumeEvent} from '../../ui-utils/events';
+import {consumeEvent, isEnterKeyEvent, isEscapeKeyEvent} from '../../ui-utils/events';
 import CommandService, {RegisteredCommand} from '../../service/CommandService';
 
 export default function CommandPaletteComponent(props: CommandPaletteComponentProps): JSX.Element {
@@ -54,13 +54,13 @@ export default function CommandPaletteComponent(props: CommandPaletteComponentPr
         return;
       }
 
-      if (evt.code === 'Enter') {
+      if (isEnterKeyEvent(evt)) {
         if (foundCommands.length > 0) {
           commandService.executeCommand(foundCommands[0]);
           resetAndClose();
           consumeEvent(evt);
         }
-      } else if (evt.code === 'Escape') {
+      } else if (isEscapeKeyEvent(evt)) {
         resetAndClose();
         consumeEvent(evt);
       }
@@ -93,7 +93,7 @@ export default function CommandPaletteComponent(props: CommandPaletteComponentPr
     });
 
     const handleKeyPress = (evt: React.KeyboardEvent<HTMLDivElement>) => {
-      if (evt.code === 'Enter') {
+      if (isEnterKeyEvent(evt)) {
         handleCommandRowClick(evt, cmd);
       }
     };

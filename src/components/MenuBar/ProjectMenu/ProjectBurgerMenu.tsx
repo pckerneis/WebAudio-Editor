@@ -1,6 +1,6 @@
 import burger from './burger.svg';
 import React, {useCallback, useRef, useState} from 'react';
-import {consumeEvent} from '../../../ui-utils/events';
+import {consumeEvent, isEnterKeyEvent} from '../../../ui-utils/events';
 import './ProjectBurgerMenu.css'
 import PersistenceService from '../../../service/PersistenceService';
 
@@ -44,7 +44,22 @@ export default function ProjectBurgerMenu(props: ProjectBurgerMenuProps) {
 
       reader.readAsText(fileContent);
     }
-  }, []);
+  }, [persistenceService]);
+
+  const loadFromJsonKeyHandler = (evt: React.KeyboardEvent<HTMLLIElement>) => {
+    if (isEnterKeyEvent(evt)) {
+      loadFromJson();
+      consumeEvent(evt);
+    }
+  };
+
+  const downloadAsJsonKeyHandler = useCallback((evt: React.KeyboardEvent<HTMLLIElement>) => {
+    if (isEnterKeyEvent(evt)) {
+      downloadAsJson();
+      setMenuVisible(false);
+      consumeEvent(evt);
+    }
+  }, [setMenuVisible, downloadAsJson]);
 
   return (
     <div style={{width: 38}}>
@@ -60,8 +75,12 @@ export default function ProjectBurgerMenu(props: ProjectBurgerMenuProps) {
            onPointerDown={handleBackDropPointerDown}
       >
         <ul className="drop-shadow">
-          <li onPointerDown={loadFromJson}>Load from JSON</li>
-          <li onPointerDown={downloadAsJson}>Download as JSON</li>
+          <li tabIndex={0}
+              onPointerDown={loadFromJson}
+              onKeyDown={loadFromJsonKeyHandler}>Load from JSON</li>
+          <li tabIndex={0}
+              onPointerDown={downloadAsJson}
+              onKeyDown={downloadAsJsonKeyHandler}>Download as JSON</li>
         </ul>
       </div>
       }
