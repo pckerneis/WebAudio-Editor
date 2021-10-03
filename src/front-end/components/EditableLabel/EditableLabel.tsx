@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {consumeEvent, isEnterKeyEvent} from '../../ui-utils/events';
 
 export default function EditableLabel(props: any) {
@@ -10,11 +10,13 @@ export default function EditableLabel(props: any) {
     className,
   } = props;
 
+  const inputRef = useRef<HTMLInputElement>(null);
   const [editable, setEditable] = useState(false);
   const [transientValue, setTransientValue] = useState(value);
 
   const handleDoubleClick = () => {
     setEditable(true);
+    setTimeout(() => inputRef.current?.select());
   };
 
   const handleKeyUp = (event: any) => {
@@ -31,6 +33,7 @@ export default function EditableLabel(props: any) {
 
   const content = editable ? (
     <input
+      ref={inputRef}
       value={transientValue}
       autoFocus
       onPointerDown={consumeEvent}
