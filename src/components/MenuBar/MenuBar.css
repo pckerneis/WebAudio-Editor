@@ -1,0 +1,20 @@
+.MenuBar {
+    position: fixed;
+    width: 500px;
+    height: 40px;
+    background: var(--primary-background-color);
+    top: 20px;
+    left: 20px;
+    border-radius: 4px;
+    display: flex;
+}
+
+.ProjectNameInput {
+    font-size: 20px;
+    color: var(--primary-text-color);
+    background: none;
+    border: none;
+    margin: auto 0 auto 8px;
+    padding: 4px 8px;
+    flex-grow: 1;
+}

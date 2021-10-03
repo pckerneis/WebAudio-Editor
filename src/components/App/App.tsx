@@ -2,8 +2,9 @@ import GraphComponent from '../Graph/GraphComponent';
 import CommandPaletteComponent from '../CommandPalette/CommandPaletteComponent';
 import React, {useCallback, useState} from 'react';
 import initializeOrGetServices from '../../service/initialize-services';
+import MenuBar from '../MenuBar/MenuBar';
 
-const {commandService} = initializeOrGetServices();
+const {commandService, persistenceService} = initializeOrGetServices();
 
 export function App() {
   const [isCommandPaletteVisible, setCommandPaletteVisible] = useState(false);
@@ -17,8 +18,13 @@ export function App() {
   }, [isCommandPaletteVisible, setCommandPaletteVisible]);
 
   return (
-    <div onKeyUp={handleKeyUp} tabIndex={-1}>
+    <div className="dark-theme"
+         onKeyUp={handleKeyUp}
+         tabIndex={-1}>
       <GraphComponent/>
+      <MenuBar
+        persistenceService={persistenceService}
+      />
       <CommandPaletteComponent
         commandService={commandService}
       />

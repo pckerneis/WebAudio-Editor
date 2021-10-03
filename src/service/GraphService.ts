@@ -110,6 +110,11 @@ export default class GraphService {
   hasTemporaryConnection(): boolean {
     return this.snapshot.temporaryConnectionPort != null;
   }
+
+  loadState(graphState: GraphState): void {
+    console.debug('loading graph state', graphState);
+    this._store.next(graphState);
+  }
 }
 
 function remove(ids: string[], state: GraphState): GraphState {

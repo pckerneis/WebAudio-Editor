@@ -3,6 +3,8 @@
     --secondary-background-color: #e7e7e7;
     --primary-text-color: #282828;
     --disabled-text-color: #acacac;
+    --item-hilight: #00000020;
+    --item-focus: #00000050;
 }
 
 .dark-theme {
@@ -10,4 +12,6 @@
     --secondary-background-color: #272729;
     --primary-text-color: #dedede;
     --disabled-text-color: #999999;
+    --item-hilight: #ffffff20;
+    --item-focus: #ffffff40;
 }

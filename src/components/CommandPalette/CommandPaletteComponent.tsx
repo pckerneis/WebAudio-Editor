@@ -42,7 +42,7 @@ export default function CommandPaletteComponent(props: CommandPaletteComponentPr
   };
 
   useEffect(() => {
-    const handleKeyPress = (evt: any) => {
+    const handleKeyDown = (evt: any) => {
       if (!isCommandPaletteVisible) {
         if (evt.code === 'Space') {
           if (foundCommands.length > 0) {
@@ -66,10 +66,10 @@ export default function CommandPaletteComponent(props: CommandPaletteComponentPr
       }
     };
 
-    document.addEventListener('keydown', handleKeyPress, false);
+    document.addEventListener('keydown', handleKeyDown, false);
 
     return () => {
-      document.removeEventListener('keydown', handleKeyPress, false);
+      document.removeEventListener('keydown', handleKeyDown, false);
     };
   });
 
@@ -83,20 +83,27 @@ export default function CommandPaletteComponent(props: CommandPaletteComponentPr
     const shortcutSet = cmd.keyboardShortcuts;
 
     const keyShortcuts = shortcutSet && shortcutSet.map((shortcut, idx) => {
-        return [
-          shortcut.map((key, keyIdx) => [
-            <span key={idx + '-' + keyIdx} className="KeyCode">{key}</span>,
-            keyIdx < shortcut.length - 1 && (<span key={idx + '-' + keyIdx + 'plus'}>+</span>)
-          ]),
-          idx < shortcutSet.length - 1 && (<span key={idx + 'slash'} className="ShortcutSeparator">/</span>),
-        ];
-      });
+      return [
+        shortcut.map((key, keyIdx) => [
+          <span key={idx + '-' + keyIdx} className="KeyCode">{key}</span>,
+          keyIdx < shortcut.length - 1 && (<span key={idx + '-' + keyIdx + 'plus'}>+</span>)
+        ]),
+        idx < shortcutSet.length - 1 && (<span key={idx + 'slash'} className="ShortcutSeparator">/</span>),
+      ];
+    });
 
+    const handleKeyPress = (evt: React.KeyboardEvent<HTMLDivElement>) => {
+      if (evt.code === 'Enter') {
+        handleCommandRowClick(evt, cmd);
+      }
+    };
 
     return (
       <div key={cmd.path}
-           className={"CommandRow" + (cmd.disabled ? " disabled" : "")}
+           className={'CommandRow' + (cmd.disabled ? ' disabled' : '')}
            onClick={evt => handleCommandRowClick(evt, cmd)}
+           onKeyDown={handleKeyPress}
+           tabIndex={0}
       >
         {withBoldFilterMatch(cmd.label, filter, cmd.path)}
         <div className="KeyShortcuts">
@@ -114,7 +121,7 @@ export default function CommandPaletteComponent(props: CommandPaletteComponentPr
   };
 
   const handleCommandRowClick = (evt: any, cmd: RegisteredCommand) => {
-    if (! cmd.disabled) {
+    if (!cmd.disabled) {
       commandService.executeCommand(cmd.path);
       resetAndClose();
     }
@@ -126,7 +133,7 @@ export default function CommandPaletteComponent(props: CommandPaletteComponentPr
     <div className="CommandPaletteBackdrop"
          onClick={handleBackdropClick}
     >
-      <div className="CommandPalette dark-theme" onClick={consumeEvent}>
+      <div className="CommandPalette drop-shadow" onClick={consumeEvent}>
         <input
           className="FilterInput"
           placeholder="Type to find a command"

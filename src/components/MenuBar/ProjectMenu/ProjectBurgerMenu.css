@@ -1,0 +1,37 @@
+
+
+.BurgerMenuIcon {
+    filter: invert(100%);
+    opacity: 80%;
+}
+
+.BurgerMenuIcon:hover {
+    opacity: 1;
+}
+
+.ProjectMenuBackDrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.ProjectMenuBackDrop ul {
+    position: fixed;
+    background: var(--primary-background-color);
+    top: 44px;
+    left: 22px;
+    padding: 6px 0;
+}
+
+.ProjectMenuBackDrop ul li {
+    list-style: none;
+    padding: 4px 18px;
+    color: var(--primary-text-color);
+    user-select: none;
+}
+
+.ProjectMenuBackDrop ul li:hover {
+    background: var(--item-hilight);
+}
