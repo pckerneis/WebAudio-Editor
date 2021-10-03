@@ -13,6 +13,9 @@ import Coordinates from '../../../document/models/Coordinates';
 import Bounds, {areBoundsEqual} from '../../../document/models/Bounds';
 import {buildReferencedPorts} from './Port';
 import {NodeDefinition} from '../../../document/node-definitions/NodeDefinition';
+import initializeOrGetServices from '../../service/initialize-services';
+
+const {historyService} = initializeOrGetServices();
 
 interface NodeProps {
   nodeState: NodeState;
@@ -108,6 +111,11 @@ function Node(props: NodeProps) {
 
   const nodeClassName = selected ? 'Node node-shadow selected' : 'Node node-shadow';
 
+  const handleDragEnd = () => {
+    historyService.pushState('move selection');
+    console.log('drag end')
+  };
+
   return (
     <div className={nodeClassName}
          style={nodeStyle}
@@ -121,6 +129,7 @@ function Node(props: NodeProps) {
       <DragToMove
         onDragStart={handleDragStart}
         onDragMove={handleMoved}
+        onDragEnd={handleDragEnd}
         elementPosition={nodeState.display.bounds}
         buttons={[0]}
         style={({display: 'flex'})}

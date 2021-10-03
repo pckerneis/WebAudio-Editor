@@ -6,6 +6,7 @@ export default function DragToMove(props: any) {
     elementPosition,
     onDragMove,
     onDragStart,
+    onDragEnd,
     children,
     style,
     className,
@@ -26,9 +27,12 @@ export default function DragToMove(props: any) {
     }
   };
 
-  const handlePointerUp = () => {
-    setIsDragging(false);
-  };
+  const handlePointerUp = useCallback(() => {
+    if (isDragging) {
+      setIsDragging(false);
+      if (onDragEnd) onDragEnd();
+    }
+  }, [isDragging, setIsDragging, onDragEnd]);
 
   const handlePointerMove = useCallback((e: any) => {
     if (isDragging) {
@@ -48,7 +52,7 @@ export default function DragToMove(props: any) {
       window.removeEventListener('pointerup', handlePointerUp);
       window.removeEventListener('pointermove', handlePointerMove);
     };
-  }, [handlePointerMove]);
+  }, [handlePointerMove, handlePointerUp]);
 
   return (
     <div
@@ -67,6 +71,7 @@ const {func, element, shape, string, array} = PropTypes;
 DragToMove.propTypes = {
   onDragMove: func.isRequired,
   onDragStart: func,
+  onDragEnd: func,
   elementPosition: shape({}).isRequired,
   buttons: array.isRequired,
   children: element,

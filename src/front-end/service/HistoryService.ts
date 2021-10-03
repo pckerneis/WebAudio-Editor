@@ -28,7 +28,7 @@ export default class HistoryService {
     return this.state.redoStack.length > 0;
   }
 
-  public pushHistory(description: string): void {
+  public pushState(description: string): void {
     const newItem: HistoryState = {
       id: this.sequenceGenerator.nextString(),
       description,
@@ -74,7 +74,7 @@ export interface History {
   redoStack: HistoryState[];
 }
 
-function emptyHistory(): History {
+export function emptyHistory(): History {
   return {
     undoStack: [],
     redoStack: [],
