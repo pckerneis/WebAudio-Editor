@@ -1,15 +1,28 @@
 import './MenuBar.css';
-import React, {ChangeEvent, useState} from 'react';
+import React, {ChangeEvent, useEffect, useState} from 'react';
 import ProjectBurgerMenu from './ProjectMenu/ProjectBurgerMenu';
 import PersistenceService from '../../service/PersistenceService';
+import initializeOrGetServices from '../../service/initialize-services';
+
+const {projectService} = initializeOrGetServices();
 
 export default function MenuBar(props: MenuBarProps) {
   const {persistenceService} = props;
-  const [projectName, setProjectName] = useState('Untitled audio graph');
+  const [projectName, setProjectName] = useState('');
 
   const handleChange = (evt: ChangeEvent<HTMLInputElement>) => {
-    setProjectName(evt.target.value.trim());
+    projectService.setProjectName(evt.target.value.trim());
   };
+
+  useEffect(() => {
+    const sub = projectService.state$.subscribe(s => {
+      setProjectName(s.projectName);
+    });
+
+     return () => {
+       sub.unsubscribe();
+     };
+  });
 
   return (
     <div className="MenuBar drop-shadow">

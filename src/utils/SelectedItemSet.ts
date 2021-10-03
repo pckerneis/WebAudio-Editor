@@ -81,4 +81,8 @@ export default class SelectedItemSet<T> {
   private static hasToggleModifier(e: MouseEvent): boolean {
     return e.ctrlKey;
   }
+
+  setSelection(selection: T[]): void {
+    this._selection.next(selection);
+  }
 }

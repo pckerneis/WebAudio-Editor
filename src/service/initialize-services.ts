@@ -9,6 +9,7 @@ import {loadDemoProject} from '../project-setup';
 import GraphServiceCommandHandler from './command-handlers/GraphServiceCommandHandler';
 import getAllCommands from './commands/Commands';
 import PersistenceService from './PersistenceService';
+import ProjectService from './ProjectService';
 
 export default function initializeOrGetServices(): Services {
   const firstInitialization = ! SingletonWrapper.hasInstance(GraphService);
@@ -19,7 +20,8 @@ export default function initializeOrGetServices(): Services {
   const nodeDefinitionService = SingletonWrapper
     .get(NodeDefinitionService, getNodeDefinitions());
   const commandService = SingletonWrapper.get(CommandService, getAllCommands());
-  const persistenceService = SingletonWrapper.get(PersistenceService, graphService);
+  const projectService = SingletonWrapper.get(ProjectService);
+  const persistenceService = SingletonWrapper.get(PersistenceService, graphService, projectService, graphSelection);
 
   if (firstInitialization) {
     loadDemoProject(graphService, graphSelection, nodeDefinitionService);
@@ -35,6 +37,7 @@ export default function initializeOrGetServices(): Services {
     portRegistry,
     nodeDefinitionService,
     commandService,
+    projectService,
     persistenceService,
   }
 }
@@ -45,5 +48,6 @@ export interface Services {
   portRegistry: PortComponentRegistry;
   commandService: CommandService;
   graphSelection: SelectedItemSet<string>;
+  projectService: ProjectService;
   persistenceService: PersistenceService;
 }
