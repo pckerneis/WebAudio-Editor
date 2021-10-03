@@ -85,7 +85,7 @@ const desiredNames: DesiredNames = {
   [NodeKind.mediaElementAudioSource]: 'mediaElementAudioSource',
   [NodeKind.mediaStreamAudioDestination]: 'mediaStreamAudioDestination',
   [NodeKind.mediaStreamAudioSource]: 'mediaStreamAudioSource',
-  [NodeKind.mediaStreamTrackAudioSource]: 'mediaStreamTrackAudioSource',
+  // [NodeKind.mediaStreamTrackAudioSource]: 'mediaStreamTrackAudioSource',
   [NodeKind.osc]: 'osc',
   [NodeKind.panner]: 'panner',
 };

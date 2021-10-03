@@ -251,12 +251,12 @@ export function getNodeDefinitions(): NodeDefinition[] {
       params: [],
     },
 
-    {
-      kind: NodeKind.mediaStreamTrackAudioSource,
-      inputPortCount: 0,
-      outputPortCount: 1,
-      params: [],
-    },
+    // {
+    //   kind: NodeKind.mediaStreamTrackAudioSource,
+    //   inputPortCount: 0,
+    //   outputPortCount: 1,
+    //   params: [],
+    // },
 
     {
       kind: NodeKind.panner,

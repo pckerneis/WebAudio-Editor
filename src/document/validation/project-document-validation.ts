@@ -155,6 +155,10 @@ function assertIsValidNode(candidate: any, candidateId: string): candidate is No
 
   assertIsString(id, `[${candidateId}].id`);
 
+  if (id !== candidateId) {
+    throw new Error(`Found ID property mismatch for node with key ${candidateId}.`)
+  }
+
   if (!isNodeKind(kind)) {
     throw new Error(`Expect [${candidateId}].kind to have type NodeKind.`);
   }

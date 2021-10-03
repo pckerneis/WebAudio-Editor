@@ -14,7 +14,7 @@ export enum NodeKind {
   mediaElementAudioSource = 'mediaElementAudioSource',
   mediaStreamAudioDestination = 'mediaStreamAudioDestination',
   mediaStreamAudioSource = 'mediaStreamAudioSource',
-  mediaStreamTrackAudioSource = 'mediaStreamTrackAudioSource',
+  // mediaStreamTrackAudioSource = 'mediaStreamTrackAudioSource',
   panner = 'panner',
 }
 
