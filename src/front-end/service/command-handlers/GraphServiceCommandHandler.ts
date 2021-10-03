@@ -72,7 +72,7 @@ type DesiredNames = {
 
 const desiredNames: DesiredNames = {
   [NodeKind.analyser]: 'analyser',
-  [NodeKind.audioBufferSource]: 'audioBufferSource',
+  [NodeKind.bufferSource]: 'audioBufferSource',
   [NodeKind.biquadFilter]: 'biquadFilter',
   [NodeKind.channelMerger]: 'channelMerger',
   [NodeKind.channelSplitter]: 'channelSplitter',
@@ -82,9 +82,9 @@ const desiredNames: DesiredNames = {
   [NodeKind.dynamicsCompressor]: 'dynamicsCompressor',
   [NodeKind.gain]: 'gain',
   [NodeKind.iirFilter]: 'iirFilter',
-  [NodeKind.mediaElementAudioSource]: 'mediaElementAudioSource',
-  [NodeKind.mediaStreamAudioDestination]: 'mediaStreamAudioDestination',
-  [NodeKind.mediaStreamAudioSource]: 'mediaStreamAudioSource',
+  [NodeKind.mediaElementSource]: 'mediaElementAudioSource',
+  [NodeKind.mediaStreamDestination]: 'mediaStreamAudioDestination',
+  [NodeKind.mediaStreamSource]: 'mediaStreamAudioSource',
   // [NodeKind.mediaStreamTrackAudioSource]: 'mediaStreamTrackAudioSource',
   [NodeKind.osc]: 'osc',
   [NodeKind.panner]: 'panner',

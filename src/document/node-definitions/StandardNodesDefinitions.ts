@@ -89,7 +89,7 @@ export function getNodeDefinitions(): NodeDefinition[] {
     },
 
     {
-      kind: NodeKind.audioBufferSource,
+      kind: NodeKind.bufferSource,
       inputPortCount: 0,
       outputPortCount: 1,
       params: [
@@ -231,32 +231,25 @@ export function getNodeDefinitions(): NodeDefinition[] {
     },
 
     {
-      kind: NodeKind.mediaElementAudioSource,
+      kind: NodeKind.mediaElementSource,
       inputPortCount: 0,
       outputPortCount: 1,
       params: [],
     },
 
     {
-      kind: NodeKind.mediaStreamAudioDestination,
+      kind: NodeKind.mediaStreamDestination,
       inputPortCount: 1,
       outputPortCount: 0,
       params: [],
     },
 
     {
-      kind: NodeKind.mediaStreamAudioSource,
+      kind: NodeKind.mediaStreamSource,
       inputPortCount: 0,
       outputPortCount: 1,
       params: [],
     },
-
-    // {
-    //   kind: NodeKind.mediaStreamTrackAudioSource,
-    //   inputPortCount: 0,
-    //   outputPortCount: 1,
-    //   params: [],
-    // },
 
     {
       kind: NodeKind.panner,
