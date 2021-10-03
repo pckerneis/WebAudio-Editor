@@ -1,3 +1,10 @@
+export enum ThemeProperty {
+  selectionOutlineColor = '--selection-outline-color',
+  defaultNodeColor = '--default-node-color',
+  primaryTextColor = '--primary-text-color',
+  secondaryBackgroundColor = '--secondary-background-color',
+  defaultConnectionColor = '--default-connection-color',
+}
 
 export function getSelectionOutlineColor(): string {
   return getValueOrDefault(ThemeProperty.selectionOutlineColor);
@@ -31,14 +38,6 @@ function getValueOrDefault(property: ThemeProperty): string {
   }
 
   return window.getComputedStyle(themeHolder).getPropertyValue(property);
-}
-
-export enum ThemeProperty {
-  selectionOutlineColor = '--selection-outline-color',
-  defaultNodeColor = '--default-node-color',
-  primaryTextColor = '--primary-text-color',
-  secondaryBackgroundColor = '--secondary-background-color',
-  defaultConnectionColor = '--default-connection-color',
 }
 
 type DefaultValues = {

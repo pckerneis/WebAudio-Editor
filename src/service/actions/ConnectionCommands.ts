@@ -80,9 +80,9 @@ export function canConnect(source: PortId, target: PortId, state: GraphState): b
 }
 
 const portKindAllowedMapping: { [kind in PortKind]: PortKind[] } = {
-  [PortKind.INPUT]: [PortKind.OUTPUT],
-  [PortKind.OUTPUT]: [PortKind.AUDIO_PARAM, PortKind.INPUT],
-  [PortKind.AUDIO_PARAM]: [PortKind.OUTPUT],
+  [PortKind.input]: [PortKind.output],
+  [PortKind.output]: [PortKind.audioParam, PortKind.input],
+  [PortKind.audioParam]: [PortKind.output],
 }
 
 export function areAlreadyConnected(source: PortId, target: PortId, state: GraphState): Boolean {

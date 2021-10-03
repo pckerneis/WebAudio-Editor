@@ -1,9 +1,9 @@
 import GraphService from './GraphService';
-import {GraphState} from '../state/GraphState';
 import ProjectService from './ProjectService';
 import SelectedItemSet from '../utils/SelectedItemSet';
+import {isValidPersistedProjectState, PersistedProjectState} from '../persistence/PersistedProjectState';
 
-const APP_VERSION = '0.0.1';
+const DOC_VERSION = '0';
 
 export default class PersistenceService {
   constructor(public readonly graphService: GraphService,
@@ -12,18 +12,17 @@ export default class PersistenceService {
   }
 
   getStateAsJsonString(): string {
-    console.log('Saving state', this.getState());
     return JSON.stringify(this.getState());
   }
 
-  private getState(): ProjectState {
+  private getState(): PersistedProjectState {
     const {temporaryConnectionPort, ...graphState} = this.graphService.snapshot;
     const projectName = this.projectService.snapshot.projectName;
 
     return {
       projectName,
       graphState,
-      appVersion: APP_VERSION,
+      docVersion: DOC_VERSION,
       selection: this.graphSelection.items,
     }
   }
@@ -32,18 +31,13 @@ export default class PersistenceService {
     try{
       const parsed = JSON.parse(jsonString);
 
-      if (isValidProjectState(parsed)) {
-        if (typeof parsed.graphState === 'object') {
-          this.graphService.loadState(parsed.graphState);
-        }
-
-        if (typeof parsed.projectName === 'string') {
-          this.projectService.setProjectName(parsed.projectName);
-        }
-
-        if (Array.isArray(parsed.selection)) {
-          this.graphSelection.setSelection(parsed.selection);
-        }
+      if (isValidPersistedProjectState(parsed)) {
+        this.projectService.setProjectName(parsed.projectName);
+        this.graphSelection.setSelection(parsed.selection);
+        this.graphService.loadState({
+          ...parsed.graphState,
+          temporaryConnectionPort: null,
+        });
       } else {
         console.error('Invalid project state.');
       }
@@ -51,16 +45,4 @@ export default class PersistenceService {
       console.error(e);
     }
   }
-}
-
-interface ProjectState {
-  projectName: string;
-  appVersion: string;
-  graphState: Omit<GraphState, 'temporaryConnectionPort'>;
-  selection: string[];
-}
-
-function isValidProjectState(parsed: any): boolean {
-  // TODO
-  return true;
 }

@@ -72,11 +72,11 @@ export function computeConnectionCurve(connection: ConnectionState,
 
 export function getControlPointOffset(portKind: PortKind): Coordinates {
   switch (portKind) {
-    case PortKind.OUTPUT:
+    case PortKind.output:
       return {x: 0, y: 80};
-    case PortKind.INPUT:
+    case PortKind.input:
       return {x: 0, y: -80};
-    case PortKind.AUDIO_PARAM:
+    case PortKind.audioParam:
       return {x: -80, y: 0};
   }
 }

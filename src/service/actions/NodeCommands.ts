@@ -35,12 +35,12 @@ export function createNode(definition: NodeDefinitionModel, bounds: Bounds, name
 
   const inputPorts = new Array(definition.inputPortCount).fill('').map(() => ({
     id: nextPortId(),
-    kind: PortKind.INPUT,
+    kind: PortKind.input,
   }));
 
   const outputPorts = new Array(definition.outputPortCount).fill('').map(() => ({
     id: nextPortId(),
-    kind: PortKind.OUTPUT,
+    kind: PortKind.output,
   }));
 
 
@@ -57,7 +57,7 @@ export function createNode(definition: NodeDefinitionModel, bounds: Bounds, name
     .filter(p => p.type === ParamType.AudioParam && p.acceptsInput)
     .forEach((p) => paramPorts[p.name] = {
       id: nextPortId(),
-      kind: PortKind.AUDIO_PARAM,
+      kind: PortKind.audioParam,
     });
 
   return {
