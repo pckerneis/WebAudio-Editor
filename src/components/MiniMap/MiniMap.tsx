@@ -4,6 +4,7 @@ import {MiniMapNode, MiniMapState} from '../../state/MiniMapState';
 import {GraphState} from '../../state/GraphState';
 import Bounds, {expandBounds, getOuterBounds} from '../../model/Bounds';
 import GraphService from '../../service/GraphService';
+import {getDefaultNodeColor, getSecondaryBackgroundColor} from '../../ui-utils/themes';
 
 export default function MiniMap(props: MiniMapProps) {
   const {
@@ -71,7 +72,7 @@ export default function MiniMap(props: MiniMapProps) {
   }, [graphService, nodes, viewportBounds.height, viewportBounds.width]);
 
   const handlePointerMove = useCallback((evt) => {
-    if (! dragging) {
+    if (!dragging) {
       return;
     }
 
@@ -148,14 +149,14 @@ function render(canvas: HTMLCanvasElement,
   const ctx = canvas.getContext('2d');
 
   if (ctx != null) {
-    ctx.fillStyle = 'grey';
+    ctx.fillStyle = getDefaultNodeColor();
 
     scaledNodeBounds.forEach(n => {
       const {x, y, width, height} = n;
       ctx.fillRect(x, y, width, height);
     });
 
-    ctx.strokeStyle = 'white';
+    ctx.strokeStyle = getSecondaryBackgroundColor();
     ctx.strokeRect(
       scaledViewportBounds.x,
       scaledViewportBounds.y,

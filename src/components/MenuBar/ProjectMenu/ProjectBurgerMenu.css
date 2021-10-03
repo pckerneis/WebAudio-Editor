@@ -1,12 +1,12 @@
 
 
 .BurgerMenuIcon {
-    filter: invert(100%);
-    opacity: 80%;
+    filter: var(--icon-filter);
+    opacity: 0.5;
 }
 
 .BurgerMenuIcon:hover {
-    opacity: 1;
+    opacity: 0.8;
 }
 
 .ProjectMenuBackDrop {
@@ -35,8 +35,9 @@
 .ProjectMenuBackDrop ul li:hover {
     background: var(--item-hilight);
 }
+
 .ProjectMenuBackDrop ul li:focus {
     background: var(--item-focus);
     outline: none;
-    box-shadow: 0 0 2px 2px #12acff;
+    box-shadow: 0 0 2px 2px var(--selection-outline-color);
 }

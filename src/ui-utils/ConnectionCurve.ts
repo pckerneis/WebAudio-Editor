@@ -4,6 +4,7 @@ import {PortComponentRegistry} from '../service/PortComponentRegistry';
 import {ConnectionState} from '../state/ConnectionState';
 import {PortKind} from '../state/PortState';
 import GraphService from '../service/GraphService';
+import {getDefaultConnectionColor, getSelectionOutlineColor} from './themes';
 
 export interface ConnectionCurve {
   id: string;
@@ -12,7 +13,7 @@ export interface ConnectionCurve {
 
 export function drawConnectionCurve(points: Coordinates[], selected: boolean, ctx: CanvasRenderingContext2D): void {
   ctx.lineWidth = 2;
-  ctx.strokeStyle = selected ? '#12acff' : 'grey';
+  ctx.strokeStyle = selected ? getSelectionOutlineColor() : getDefaultConnectionColor();
   ctx.beginPath();
   ctx.moveTo(points[0].x, points[0].y);
   points.slice(1).forEach(p => ctx.lineTo(p.x, p.y));

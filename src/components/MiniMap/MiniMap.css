@@ -1,6 +1,6 @@
 .MiniMap canvas {
     box-sizing: border-box;
-    background: #17191cf5;
+    background: var(--mini-map-background-color);
     display: flex;
     position: fixed;
     right: 20px;

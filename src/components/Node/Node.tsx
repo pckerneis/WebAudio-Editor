@@ -106,8 +106,10 @@ function Node(props: NodeProps) {
 
   portRegistry.registerPorts(...hiddenParamPorts);
 
+  const nodeClassName = selected ? 'Node node-shadow selected' : 'Node node-shadow';
+
   return (
-    <div className={selected ? 'Node selected' : 'Node'}
+    <div className={nodeClassName}
          style={nodeStyle}
          onPointerDown={handlePointerDown}
     >

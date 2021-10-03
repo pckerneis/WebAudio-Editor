@@ -3,8 +3,22 @@
     --secondary-background-color: #e7e7e7;
     --primary-text-color: #282828;
     --disabled-text-color: #acacac;
-    --item-hilight: #00000020;
-    --item-focus: #00000050;
+    --item-hilight: #00000010;
+    --item-focus: #00000020;
+    --selection-outline-color: #12acff;
+
+    --default-node-color: #f8f8f8;
+    --node-shadow: 0 0 4px 2px #00000010;
+    --selected-node-shadow: 0 0 2px 2px var(--selection-outline-color);
+    --default-connection-color: #a5a5a5;
+
+    --mini-map-background-color: rgba(169, 169, 169, 0.95);
+
+    --icon-filter: none;
+}
+
+.light-theme .drop-shadow {
+    box-shadow: #00000015 0 0 30px 0;
 }
 
 .dark-theme {
@@ -14,4 +28,18 @@
     --disabled-text-color: #999999;
     --item-hilight: #ffffff20;
     --item-focus: #ffffff40;
+    --selection-outline-color: #12acff;
+
+    --default-node-color: #f8f8f8;
+    --node-shadow: 0 0 4px 2px #00000010;
+    --selected-node-shadow: 0 0 2px 2px var(--selection-outline-color);
+    --default-connection-color: grey;
+
+    --mini-map-background-color: #2e2f30fa;
+
+    --icon-filter: invert(100%);
+}
+
+.dark-theme .drop-shadow {
+    box-shadow: #00000050 0 0 30px 0;
 }

@@ -18,7 +18,8 @@ export function App() {
   }, [isCommandPaletteVisible, setCommandPaletteVisible]);
 
   return (
-    <div className="dark-theme"
+    <div id="theme-holder"
+         className="dark-theme"
          onKeyUp={handleKeyUp}
          tabIndex={-1}>
       <GraphComponent/>

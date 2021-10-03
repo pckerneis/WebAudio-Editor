@@ -73,7 +73,7 @@
 .CommandRow:focus {
     background-color: var(--item-focus);
     outline: none;
-    box-shadow: 0 0 2px 2px #12acff;
+    box-shadow: 0 0 2px 2px var(--selection-outline-color);
 }
 
 .FocusedText {

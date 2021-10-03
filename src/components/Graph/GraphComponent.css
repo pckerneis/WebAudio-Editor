@@ -1,6 +1,6 @@
 .GraphComponent {
   text-align: center;
-  background-color: #282c34;
+  background-color: var(--secondary-background-color);
   height: 100vh;
   overflow: hidden;
 }

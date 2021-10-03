@@ -3,14 +3,14 @@
     border-radius: 2px;
     border: 0;
     font-size: 14px;
-    background-color: #f8f8f8;
-    box-shadow: #00000085 2px 2px 9px 1px;
+    background-color: var(--default-node-color);
+    box-shadow: var(--node-shadow);
     user-select: none;
     overflow: hidden;
 }
 
 .Node.selected {
-    box-shadow: 0 0 2px 2px #12acff;
+    box-shadow: var(--selected-node-shadow);
 }
 
 .NodeContent {
