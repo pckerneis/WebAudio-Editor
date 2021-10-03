@@ -5,7 +5,7 @@ import CommandService from './CommandService';
 import SelectedItemSet from '../utils/SelectedItemSet';
 import SingletonWrapper from './SingletonWrapper';
 import {getNodeDefinitions} from '../model/StandardNodesDefinitions';
-import {loadDemoProject} from '../project-setup';
+import {loadDemoProject} from '../../project-setup';
 import GraphServiceCommandHandler from './command-handlers/GraphServiceCommandHandler';
 import getAllCommands from './commands/Commands';
 import PersistenceService from './PersistenceService';
