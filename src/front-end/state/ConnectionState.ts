@@ -1,9 +1,4 @@
-import Identified from './Identified';
-import {PortId} from './PortState';
+import {ConnectionModel} from '../../document/models/ConnectionModel';
 
-export type ConnectionId = string;
-
-export interface ConnectionState extends Identified<ConnectionId> {
-  source: PortId;
-  target: PortId;
+export interface ConnectionState extends ConnectionModel {
 }

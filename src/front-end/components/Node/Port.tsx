@@ -1,16 +1,15 @@
 import {ReferencedPort} from '../../service/PortComponentRegistry';
 import React, {createRef} from 'react';
 import GraphService from '../../service/GraphService';
-import {PortId} from '../../state/PortState';
 import {consumeEvent} from '../../ui-utils/events';
 
-export function buildReferencedPorts(portIds: PortId[], service: GraphService): ReferencedPort[] {
-  const handlePointerDown = (portId: PortId, evt: any) => {
+export function buildReferencedPorts(portIds: string[], service: GraphService): ReferencedPort[] {
+  const handlePointerDown = (portId: string, evt: any) => {
     service.createTemporaryConnection(portId);
     consumeEvent(evt);
   };
 
-  const handlePointerUp = (portId: PortId, evt: any) => {
+  const handlePointerUp = (portId: string, evt: any) => {
     if (service.hasTemporaryConnection()) {
       service.applyTemporaryConnection(portId);
     }

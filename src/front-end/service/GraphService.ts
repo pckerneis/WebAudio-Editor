@@ -1,10 +1,9 @@
 import {BehaviorSubject, Observable} from 'rxjs';
 import {getInitialGraphModel, GraphState} from '../state/GraphState';
-import Coordinates from '../model/Coordinates';
-import {NodeId, NodeState} from '../state/NodeState';
-import {NodeDefinitionModel} from '../model/NodeDefinition.model';
-import Bounds from '../model/Bounds';
-import {PortId, PortState} from '../state/PortState';
+import Coordinates from '../../document/models/Coordinates';
+import {NodeState} from '../state/NodeState';
+import Bounds from '../../document/models/Bounds';
+import {PortModel} from '../../document/models/PortModel';
 import {
   addNode,
   createNode,
@@ -26,6 +25,7 @@ import {
   removeTemporaryConnection
 } from './actions/ConnectionCommands';
 import {translateViewport} from './actions/ViewportCommands';
+import {NodeDefinition} from '../../document/node-definitions/NodeDefinition';
 
 export default class GraphService {
   public readonly state$: Observable<GraphState>;
@@ -44,7 +44,7 @@ export default class GraphService {
     this._store.next(translateViewport(coordinates, this.snapshot));
   }
 
-  createNode(name: string, definition: NodeDefinitionModel, bounds: Bounds): NodeState {
+  createNode(name: string, definition: NodeDefinition, bounds: Bounds): NodeState {
     return createNode(definition, bounds, name);
   }
 
@@ -52,7 +52,7 @@ export default class GraphService {
     this._store.next(addNode(node.id, node, this.snapshot));
   }
 
-  createAndAddNode(name: string, definition: NodeDefinitionModel, bounds: Bounds): NodeState {
+  createAndAddNode(name: string, definition: NodeDefinition, bounds: Bounds): NodeState {
     const n = this.createNode(name, definition, bounds);
     this.addNode(n);
     return n;
@@ -79,11 +79,11 @@ export default class GraphService {
     this._store.next(addConnection(sourceNodeId, sourcePortIndex, targetNodeId, targetPortIndex, this.snapshot));
   }
 
-  createTemporaryConnection(portId: PortId): any {
+  createTemporaryConnection(portId: string): any {
     this._store.next(createTemporaryConnection(portId, this.snapshot));
   }
 
-  applyTemporaryConnection(portId: PortId): any {
+  applyTemporaryConnection(portId: string): any {
     this._store.next(applyTemporaryConnection(portId, this.snapshot));
   }
 
@@ -91,15 +91,15 @@ export default class GraphService {
     this._store.next(removeTemporaryConnection(this.snapshot));
   }
 
-  findPortState(id: PortId): PortState | null {
+  findPortState(id: string): PortModel | null {
     return findPortState(id, this.snapshot);
   }
 
-  canConnect(source: PortId, target: PortId): boolean {
+  canConnect(source: string, target: string): boolean {
     return canConnect(source, target, this.snapshot);
   }
 
-  setParamValue(nodeId: NodeId, paramName: string, value: any): void {
+  setParamValue(nodeId: string, paramName: string, value: any): void {
     this._store.next(setParamValue(nodeId, paramName, value, this.snapshot));
   }
 
@@ -112,7 +112,6 @@ export default class GraphService {
   }
 
   loadState(graphState: GraphState): void {
-    console.debug('loading graph state', graphState);
     this._store.next(graphState);
   }
 }
@@ -129,7 +128,7 @@ function remove(ids: string[], state: GraphState): GraphState {
     })
     .map(c => c.id);
 
-  const nodes: { [id: NodeId]: NodeState } = {};
+  const nodes: { [id: string]: NodeState } = {};
 
   Object.entries(state.nodes).forEach(([id, node]) => {
     if (!nodesToRemove.includes(id)) {

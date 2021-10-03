@@ -1,7 +1,7 @@
-import Coordinates from '../model/Coordinates';
+import Coordinates from '../../document/models/Coordinates';
 import {NodeState} from './NodeState';
 import {ConnectionState} from './ConnectionState';
-import {PortState} from './PortState';
+import {PortModel} from '../../document/models/PortModel';
 
 type Id = string;
 
@@ -10,7 +10,7 @@ export interface GraphState {
   nodeOrder: string[];
   connections: ConnectionState[];
   viewportOffset: Coordinates;
-  temporaryConnectionPort: PortState | null;
+  temporaryConnectionPort: PortModel | null;
 }
 
 export function getInitialGraphModel(): GraphState {

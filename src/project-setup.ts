@@ -1,7 +1,7 @@
 import GraphService from './front-end/service/GraphService';
 import SelectedItemSet from './front-end/utils/SelectedItemSet';
 import NodeDefinitionService from './front-end/service/NodeDefinitionService';
-import {NodeKind} from './front-end/model/NodeKind.model';
+import {NodeKind} from './document/models/NodeKind';
 
 export function loadDemoProject(service: GraphService, graphSelection: SelectedItemSet<string>,
                          nodeDefinitionService: NodeDefinitionService): void {

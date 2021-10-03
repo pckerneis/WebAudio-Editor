@@ -1,18 +1,19 @@
-import {NodeDefinitionModel, ParamType} from '../../model/NodeDefinition.model';
-import Bounds from '../../model/Bounds';
-import {NodeDisplay, NodeId, NodeState, ParamPorts, ParamValues} from '../../state/NodeState';
-import {PortId, PortKind, PortState} from '../../state/PortState';
+import Bounds from '../../../document/models/Bounds';
+import {PortKind, PortModel} from '../../../document/models/PortModel';
 import {GraphState} from '../../state/GraphState';
-import Coordinates from '../../model/Coordinates';
+import Coordinates from '../../../document/models/Coordinates';
 import SequenceGenerator from '../../utils/SequenceGenerator';
+import {NodeDefinition, ParamType} from '../../../document/node-definitions/NodeDefinition';
+import {NodeDisplay, ParamPorts, ParamValues} from '../../../document/models/NodeModel';
+import {NodeState} from '../../state/NodeState';
 
 const nodeIdSequence = new SequenceGenerator();
 
-function nextNodeId(): NodeId {
+function nextNodeId(): string {
   return `Node-${nodeIdSequence.nextString()}`;
 }
 
-export function isNodeId(candidate: any): candidate is NodeId {
+export function isNodeId(candidate: any): candidate is string {
   return typeof candidate === 'string'
     && candidate.split('-').length === 2
     && candidate.split('-')[0] === 'Node';
@@ -20,7 +21,7 @@ export function isNodeId(candidate: any): candidate is NodeId {
 
 const portIdSequence = new SequenceGenerator();
 
-function nextPortId(): NodeId {
+function nextPortId(): string {
   return `Port-${portIdSequence.nextString()}`;
 }
 
@@ -30,7 +31,7 @@ export function assertNodeExists(nodeId: string, state: GraphState): void {
   }
 }
 
-export function createNode(definition: NodeDefinitionModel, bounds: Bounds, name: string): NodeState {
+export function createNode(definition: NodeDefinition, bounds: Bounds, name: string): NodeState {
   const id = nextNodeId();
 
   const inputPorts = new Array(definition.inputPortCount).fill('').map(() => ({
@@ -135,7 +136,7 @@ export function toggleNodeFoldState(id: string, state: GraphState): GraphState {
   }));
 }
 
-export function findPortState(portId: PortId, state: GraphState): PortState | null {
+export function findPortState(portId: string, state: GraphState): PortModel | null {
   for (let n of Object.values(state.nodes)) {
     for (let p of n.inputPorts) {
       if (p.id === portId) {
@@ -159,7 +160,7 @@ export function findPortState(portId: PortId, state: GraphState): PortState | nu
   return null;
 }
 
-export function setParamValue(nodeId: NodeId, paramName: string, value: any, state: GraphState): GraphState {
+export function setParamValue(nodeId: string, paramName: string, value: any, state: GraphState): GraphState {
   return transformExistingNode(nodeId, state, n => ({
     ...n,
     paramValues: {

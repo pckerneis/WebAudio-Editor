@@ -1,13 +1,12 @@
 import React from 'react';
-import {PortId} from '../state/PortState';
-import Coordinates from '../model/Coordinates';
+import Coordinates from '../../document/models/Coordinates';
 import {squaredDist} from '../utils/numbers';
 import {rectangleCenter} from '../utils/geometry';
 import {GraphState} from '../state/GraphState';
 import {canConnect} from './actions/ConnectionCommands';
 
 export interface ReferencedPort {
-  id: PortId;
+  id: string;
   ref: React.RefObject<HTMLDivElement>;
   template: JSX.Element;
   hidden?: boolean;

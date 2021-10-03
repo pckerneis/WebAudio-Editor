@@ -1,17 +1,17 @@
 import {GraphState} from '../../state/GraphState';
-import {PortId, PortKind} from '../../state/PortState';
-import {ConnectionId, ConnectionState} from '../../state/ConnectionState';
+import {PortKind} from '../../../document/models/PortModel';
+import {ConnectionState} from '../../state/ConnectionState';
 import {NodeState} from '../../state/NodeState';
 import {assertNodeExists, findPortState} from './NodeCommands';
 import SequenceGenerator from '../../utils/SequenceGenerator';
 
 const sequence = new SequenceGenerator();
 
-function nextConnectionId(): ConnectionId {
+function nextConnectionId(): string {
   return `Connection-${sequence.nextString()}`;
 }
 
-export function isConnectionId(candidate: any): candidate is ConnectionId {
+export function isConnectionId(candidate: any): candidate is string {
   return typeof candidate === 'string'
     && candidate.split('-').length === 2
     && candidate.split('-')[0] === 'Connection';
@@ -33,7 +33,7 @@ export function addConnection(sourceNodeId: string, sourcePortIndex: number,
   return doAddConnection(source.id, target.id, state);
 }
 
-export function doAddConnection(source: PortId, target: PortId, state: GraphState): GraphState {
+export function doAddConnection(source: string, target: string, state: GraphState): GraphState {
   if (canConnect(source, target, state)) {
     const newConnection: ConnectionState = {
       id: nextConnectionId(),
@@ -50,7 +50,7 @@ export function doAddConnection(source: PortId, target: PortId, state: GraphStat
   return state;
 }
 
-export function canConnect(source: PortId, target: PortId, state: GraphState): boolean {
+export function canConnect(source: string, target: string, state: GraphState): boolean {
   if (source === target) {
     return false;
   }
@@ -85,13 +85,13 @@ const portKindAllowedMapping: { [kind in PortKind]: PortKind[] } = {
   [PortKind.audioParam]: [PortKind.output],
 }
 
-export function areAlreadyConnected(source: PortId, target: PortId, state: GraphState): Boolean {
+export function areAlreadyConnected(source: string, target: string, state: GraphState): Boolean {
   return state.connections.find(c =>
     (c.target === target && c.source === source)
     || (c.target === source && c.source === target)) != null;
 }
 
-export function findParentNode(portId: PortId, state: GraphState): NodeState | null {
+export function findParentNode(portId: string, state: GraphState): NodeState | null {
   for (let n of Object.values(state.nodes)) {
     if (n.inputPorts.map(p => p.id).includes(portId)) {
       return n;
@@ -105,7 +105,7 @@ export function findParentNode(portId: PortId, state: GraphState): NodeState | n
   return null;
 }
 
-export function createTemporaryConnection(portId: PortId, state: GraphState): GraphState {
+export function createTemporaryConnection(portId: string, state: GraphState): GraphState {
   const port = findPortState(portId, state);
 
   if (port == null) {
@@ -118,7 +118,7 @@ export function createTemporaryConnection(portId: PortId, state: GraphState): Gr
   };
 }
 
-export function applyTemporaryConnection(portId: PortId, state: GraphState): GraphState {
+export function applyTemporaryConnection(portId: string, state: GraphState): GraphState {
   const port = findPortState(portId, state);
 
   if (port == null) {

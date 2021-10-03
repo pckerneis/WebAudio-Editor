@@ -2,11 +2,10 @@ import React, {createRef} from 'react';
 import './GraphComponent.css';
 import DragToMove from '../../ui-utils/DragToMove';
 import Node, {areNodesVisuallySimilar} from '../Node/Node';
-import {NodeDefinitionModel} from '../../model/NodeDefinition.model';
 import {NodeState} from '../../state/NodeState';
 import {Observable, Subscription, switchMap} from 'rxjs';
 import {GraphState} from '../../state/GraphState';
-import Coordinates, {areCoordinatesEqual} from '../../model/Coordinates';
+import Coordinates, {areCoordinatesEqual} from '../../../document/models/Coordinates';
 import {
   computeConnectionCurves,
   computeTemporaryConnectionCurve,
@@ -19,7 +18,8 @@ import initializeOrGetServices from '../../service/initialize-services';
 import {arePrimitiveArraysEqual} from '../../utils/arrays';
 import MiniMap, {computeMiniMapState} from '../MiniMap/MiniMap';
 import {getEmptyMiniMapState, MiniMapState} from '../../state/MiniMapState';
-import {areBoundsEqual} from '../../model/Bounds';
+import {areBoundsEqual} from '../../../document/models/Bounds';
+import {NodeDefinition} from '../../../document/node-definitions/NodeDefinition';
 
 const MAX_PORT_CLICK_DISTANCE = 8;
 
@@ -271,7 +271,7 @@ function getGraphAnchorStyle(graphState: GraphState): any {
 function buildNodes(graphState: GraphState): JSX.Element[] {
   return Object.entries(graphState.nodes)
     .map(([id, nodeState]: [string, NodeState]) => {
-      const definition = nodeDefinitionService.getNodeDefinition(nodeState.kind) as NodeDefinitionModel;
+      const definition = nodeDefinitionService.getNodeDefinition(nodeState.kind) as NodeDefinition;
       return (
         <Node key={id}
               nodeState={nodeState}

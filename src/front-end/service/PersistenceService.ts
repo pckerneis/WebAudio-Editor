@@ -1,7 +1,8 @@
 import GraphService from './GraphService';
 import ProjectService from './ProjectService';
 import SelectedItemSet from '../utils/SelectedItemSet';
-import {isValidPersistedProjectState, PersistedProjectState} from '../persistence/PersistedProjectState';
+import {ProjectDocument} from '../../document/ProjectDocument';
+import {isValidProjectDocument} from '../../document/validation/project-document-validation';
 
 const DOC_VERSION = '0';
 
@@ -15,13 +16,13 @@ export default class PersistenceService {
     return JSON.stringify(this.getState());
   }
 
-  private getState(): PersistedProjectState {
+  private getState(): ProjectDocument {
     const {temporaryConnectionPort, ...graphState} = this.graphService.snapshot;
     const projectName = this.projectService.snapshot.projectName;
 
     return {
       projectName,
-      graphState,
+      audioGraph: graphState,
       docVersion: DOC_VERSION,
       selection: this.graphSelection.items,
     }
@@ -31,11 +32,11 @@ export default class PersistenceService {
     try{
       const parsed = JSON.parse(jsonString);
 
-      if (isValidPersistedProjectState(parsed)) {
+      if (isValidProjectDocument(parsed)) {
         this.projectService.setProjectName(parsed.projectName);
         this.graphSelection.setSelection(parsed.selection);
         this.graphService.loadState({
-          ...parsed.graphState,
+          ...parsed.audioGraph,
           temporaryConnectionPort: null,
         });
       } else {

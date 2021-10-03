@@ -1,4 +1,4 @@
-import Coordinates from '../../model/Coordinates';
+import Coordinates from '../../../document/models/Coordinates';
 import {GraphState} from '../../state/GraphState';
 
 export function translateViewport(coordinates: Coordinates, state: GraphState): GraphState {

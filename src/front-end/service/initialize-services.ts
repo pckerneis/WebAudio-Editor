@@ -4,7 +4,7 @@ import {PortComponentRegistry} from './PortComponentRegistry';
 import CommandService from './CommandService';
 import SelectedItemSet from '../utils/SelectedItemSet';
 import SingletonWrapper from './SingletonWrapper';
-import {getNodeDefinitions} from '../model/StandardNodesDefinitions';
+import {getNodeDefinitions} from '../../document/node-definitions/StandardNodesDefinitions';
 import {loadDemoProject} from '../../project-setup';
 import GraphServiceCommandHandler from './command-handlers/GraphServiceCommandHandler';
 import getAllCommands from './commands/Commands';

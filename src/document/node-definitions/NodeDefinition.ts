@@ -1,6 +1,6 @@
-import {NodeKind} from './NodeKind.model';
+import {NodeKind} from '../models/NodeKind';
 
-export interface NodeDefinitionModel {
+export interface NodeDefinition {
   kind: NodeKind;
   params: ParamDefinition[];
   inputPortCount: number;

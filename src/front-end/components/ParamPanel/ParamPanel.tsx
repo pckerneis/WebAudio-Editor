@@ -1,15 +1,15 @@
 import React, {createRef} from 'react';
 import './ParamPanel.css'
 import PropTypes from 'prop-types';
-import {ParamDefinition, ParamType} from '../../model/NodeDefinition.model';
-import {NodeId, ParamPorts, ParamValues} from '../../state/NodeState';
 import GraphService from '../../service/GraphService';
 import {consumeEvent} from '../../ui-utils/events';
 import {PortComponentRegistry} from '../../service/PortComponentRegistry';
 import SelectedItemSet from '../../utils/SelectedItemSet';
+import {ParamDefinition, ParamType} from '../../../document/node-definitions/NodeDefinition';
+import {ParamPorts, ParamValues} from '../../../document/models/NodeModel';
 
 interface ParamPanelProps {
-  nodeId: NodeId;
+  nodeId: string;
   paramValues: ParamValues;
   paramPorts: ParamPorts;
   paramDefinitions: ParamDefinition[];

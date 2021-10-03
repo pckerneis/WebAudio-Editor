@@ -1,9 +1,9 @@
 import {Command, CommandHandler} from '../CommandService';
-import {isNodeKind, NodeKind} from '../../model/NodeKind.model';
 import GraphService from '../GraphService';
 import NodeDefinitionService from '../NodeDefinitionService';
 import {GraphState} from '../../state/GraphState';
 import SelectedItemSet from '../../utils/SelectedItemSet';
+import {isNodeKind, NodeKind} from '../../../document/models/NodeKind';
 
 const DELETE_SELECTION_COMMAND_ID = 'DeleteSelection';
 const CREATE_NODE_COMMAND_PREFIX = 'CreateNode/';

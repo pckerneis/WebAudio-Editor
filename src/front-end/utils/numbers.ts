@@ -1,4 +1,4 @@
-import Coordinates from '../model/Coordinates';
+import Coordinates from '../../document/models/Coordinates';
 
 export function constrainBetween(v: number, min: number, max: number): number {
   return Math.max(min, Math.min(v, max));

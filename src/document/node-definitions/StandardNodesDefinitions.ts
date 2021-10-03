@@ -1,11 +1,11 @@
-import {NodeKind} from './NodeKind.model';
-import {NodeDefinitionModel, ParamType} from './NodeDefinition.model';
+import {NodeDefinition, ParamType} from './NodeDefinition';
+import {NodeKind} from '../models/NodeKind';
 
 // From the specs : This value is approximately 1200 log2 FLT_MAX where FLT_MAX is the largest float value.
 const MAX_DETUNE = 153600;
 
 // TODO externalize data to JSON and add metadata such as library ID and version
-export function getNodeDefinitions(): NodeDefinitionModel[] {
+export function getNodeDefinitions(): NodeDefinition[] {
   return [
     {
       kind: NodeKind.osc,

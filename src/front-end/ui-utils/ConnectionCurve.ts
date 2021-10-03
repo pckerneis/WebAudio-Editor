@@ -1,8 +1,8 @@
-import Coordinates from '../model/Coordinates';
+import Coordinates from '../../document/models/Coordinates';
 import {cubicBezier, distToSegmentSquared, rectangleCenter, translate} from '../utils/geometry';
 import {PortComponentRegistry} from '../service/PortComponentRegistry';
 import {ConnectionState} from '../state/ConnectionState';
-import {PortKind} from '../state/PortState';
+import {PortKind} from '../../document/models/PortModel';
 import GraphService from '../service/GraphService';
 import {getDefaultConnectionColor, getSelectionOutlineColor} from './themes';
 

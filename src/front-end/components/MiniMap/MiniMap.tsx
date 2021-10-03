@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import './MiniMap.css';
 import {MiniMapNode, MiniMapState} from '../../state/MiniMapState';
 import {GraphState} from '../../state/GraphState';
-import Bounds, {expandBounds, getOuterBounds} from '../../model/Bounds';
+import Bounds, {expandBounds, getOuterBounds} from '../../../document/models/Bounds';
 import GraphService from '../../service/GraphService';
 import {getDefaultNodeColor, getSecondaryBackgroundColor} from '../../ui-utils/themes';
 
@@ -26,7 +26,7 @@ export default function MiniMap(props: MiniMapProps) {
     if (canvas != null) {
       canvas.style.width = '';
       canvas.style.height = '';
-      const size = Math.min(canvas.clientHeight, canvas.clientWidth, window.innerHeight / 2) ?? 0;
+      const size = Math.min(canvas.clientHeight, canvas.clientWidth, window.innerHeight * 0.4) ?? 0;
       canvas.width = size;
       canvas.height = size;
       canvas.style.width = `${size}px`;

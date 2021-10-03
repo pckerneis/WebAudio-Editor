@@ -5,19 +5,19 @@ import PropTypes from 'prop-types';
 import EditableLabel from '../EditableLabel/EditableLabel';
 import FoldButton from '../FoldButton/FoldButton';
 import ParamPanel from '../ParamPanel/ParamPanel';
-import {NodeId, NodeState} from '../../state/NodeState';
+import {NodeState} from '../../state/NodeState';
 import GraphService from '../../service/GraphService';
-import {NodeDefinitionModel} from '../../model/NodeDefinition.model';
 import {PortComponentRegistry, ReferencedPort} from '../../service/PortComponentRegistry';
 import SelectedItemSet from '../../utils/SelectedItemSet';
-import Coordinates from '../../model/Coordinates';
-import Bounds, {areBoundsEqual} from '../../model/Bounds';
+import Coordinates from '../../../document/models/Coordinates';
+import Bounds, {areBoundsEqual} from '../../../document/models/Bounds';
 import {buildReferencedPorts} from './Port';
+import {NodeDefinition} from '../../../document/node-definitions/NodeDefinition';
 
 interface NodeProps {
   nodeState: NodeState;
   service: GraphService;
-  definition: NodeDefinitionModel;
+  definition: NodeDefinition;
   portRegistry: PortComponentRegistry;
   selected: boolean;
   selectedItemSet: SelectedItemSet<string>;
@@ -49,7 +49,7 @@ function Node(props: NodeProps) {
   };
 
   const [startPosition, setStartPosition] = useState({} as Bounds);
-  const [positionByItem, setPositionByItem] = useState({} as { [id: NodeId]: Bounds });
+  const [positionByItem, setPositionByItem] = useState({} as { [id: string]: Bounds });
 
   const handlePointerDown = useCallback((evt: any) => {
     service.sendNodeToFront(nodeState.id);
@@ -76,7 +76,7 @@ function Node(props: NodeProps) {
     }
 
     const selectedNodes = selectedItemSet.items.map(id => service.snapshot.nodes[id]).filter(Boolean) as NodeState[];
-    const positionByItem = {} as { [id: NodeId]: Bounds };
+    const positionByItem = {} as { [id: string]: Bounds };
     selectedNodes.forEach(node => positionByItem[node.id] = node.display.bounds);
     setPositionByItem(positionByItem);
 
@@ -180,7 +180,7 @@ Node.propTypes = {
   zIndex: number,
 }
 
-type Nodes = {[id: NodeId]: NodeState};
+type Nodes = {[id: string]: NodeState};
 
 export function areNodesVisuallySimilar(previous: Nodes, next: Nodes): boolean {
   return Object.values(previous).every(first => {

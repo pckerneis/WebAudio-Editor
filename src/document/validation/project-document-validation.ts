@@ -1,21 +1,13 @@
-import {GraphState} from '../state/GraphState';
-import {NodeId, NodeState} from '../state/NodeState';
-import Coordinates, {isCoordinates} from '../model/Coordinates';
-import {ConnectionState} from '../state/ConnectionState';
-import {isNodeKind} from '../model/NodeKind.model';
-import Bounds from '../model/Bounds';
-import {isPortKind} from '../state/PortState';
+import {NodeModel} from '../models/NodeModel';
+import {AudioGraphModel, NodeModels} from '../models/AudioGraphModel';
+import Coordinates, {isCoordinates} from '../models/Coordinates';
+import {isPortKind} from '../models/PortModel';
+import Bounds from '../models/Bounds';
+import {ConnectionModel} from '../models/ConnectionModel';
+import {KNOWN_DOC_VERSIONS, ProjectDocument} from '../ProjectDocument';
+import {isNodeKind} from '../models/NodeKind';
 
-const KNOWN_VERSIONS = ['0'];
-
-export interface PersistedProjectState {
-  projectName: string;
-  docVersion: string;
-  graphState: Omit<GraphState, 'temporaryConnectionPort'>;
-  selection: string[];
-}
-
-export function isValidPersistedProjectState(candidate: any): candidate is PersistedProjectState {
+export function isValidProjectDocument(candidate: any): candidate is ProjectDocument {
   if (typeof candidate !== 'object') {
     return false;
   }
@@ -23,24 +15,24 @@ export function isValidPersistedProjectState(candidate: any): candidate is Persi
   const {
     projectName,
     docVersion,
-    graphState,
+    audioGraph,
     selection
   } = candidate;
 
   assertIsString(projectName, 'projectName');
   assertIsValidAppVersion(docVersion);
-  assertIsValidGraphState(graphState);
-  assertIsValidGraphSelection(selection, graphState);
+  assertIsValidGraphModel(audioGraph);
+  assertIsValidGraphSelection(selection, audioGraph);
   return true;
 }
 
 function assertIsValidAppVersion(candidate: any): void {
-  if (!KNOWN_VERSIONS.includes(candidate)) {
+  if (!KNOWN_DOC_VERSIONS.includes(candidate)) {
     throw new Error('Unhandled document version ' + candidate);
   }
 }
 
-function isValidNodeOrder(nodeOrder: any, nodes: NodeState[]): Boolean {
+function isValidNodeOrder(nodeOrder: any, nodes: NodeModel[]): Boolean {
   if (!isStringArray(nodeOrder)) {
     return false;
   }
@@ -48,7 +40,7 @@ function isValidNodeOrder(nodeOrder: any, nodes: NodeState[]): Boolean {
   return nodeOrder.every(candidate => nodes.map(n => n.id).includes(candidate));
 }
 
-function assertIsValidGraphState(candidate: any): candidate is GraphState {
+function assertIsValidGraphModel(candidate: any): candidate is AudioGraphModel {
   if (typeof candidate !== 'object') {
     return false;
   }
@@ -60,7 +52,7 @@ function assertIsValidGraphState(candidate: any): candidate is GraphState {
     viewportOffset
   } = candidate;
 
-  assertIsValidNodesCollection(nodes);
+  assertIsValidNodeModels(nodes);
   assertIsValidNodeOrder(nodeOrder, Object.values(nodes));
   assertIsValidConnectionArray(connections, Object.values(nodes));
 
@@ -75,7 +67,7 @@ function assertIsValidGraphState(candidate: any): candidate is GraphState {
   return true;
 }
 
-function assertIsValidNodesCollection(candidate: any): candidate is { [id: NodeId]: NodeState; } {
+function assertIsValidNodeModels(candidate: any): candidate is NodeModels {
   assertIsObject(candidate, 'nodes');
   Object.entries(candidate).forEach(([key, item]) => assertIsValidNode(item, key));
 
@@ -88,18 +80,18 @@ function assertIsValidNodesCollection(candidate: any): candidate is { [id: NodeI
   return true;
 }
 
-function assertIsValidNodeOrder(candidate: any, nodes: NodeState[]): void {
+function assertIsValidNodeOrder(candidate: any, nodes: NodeModel[]): void {
   if (!isValidNodeOrder(candidate, nodes)) {
     throw new Error('Invalid node order.');
   }
 }
 
-function assertIsValidConnectionArray(candidate: any, nodes: NodeState[]): void {
+function assertIsValidConnectionArray(candidate: any, nodes: NodeModel[]): void {
   assertIsArray(candidate, 'connections');
-  candidate.forEach((c: any) => assertIsValidConnectionState(c, nodes));
+  candidate.forEach((c: any) => assertIsValidConnection(c, nodes));
 }
 
-function assertIsValidConnectionState(candidate: any, nodes: NodeState[]): void {
+function assertIsValidConnection(candidate: any, nodes: NodeModel[]): void {
   if (typeof candidate !== 'object') {
     throw new Error('Expect to find a connection object in connections array.');
   }
@@ -121,7 +113,7 @@ function assertIsValidConnectionState(candidate: any, nodes: NodeState[]): void 
   }
 }
 
-function extractAllPortIds(nodes: NodeState[]): string[] {
+function extractAllPortIds(nodes: NodeModel[]): string[] {
   return nodes.map(n => [
     ...Object.values(n.paramPorts).map(port => port.id),
     ...n.inputPorts.map(port => port.id),
@@ -147,7 +139,7 @@ function isUniqueArray(candidate: any[]): boolean {
   return true;
 }
 
-function assertIsValidNode(candidate: any, candidateId: string): candidate is NodeState {
+function assertIsValidNode(candidate: any, candidateId: string): candidate is NodeModel {
   assertIsObject(candidate, candidateId);
 
   const {
@@ -184,10 +176,10 @@ function assertIsValidNode(candidate: any, candidateId: string): candidate is No
 
 function assertIsValidPortArray(candidate: any, name: string): void {
   assertIsArray(candidate, name);
-  candidate.forEach((item: any) => assertIsValidPortState(item, name));
+  candidate.forEach((item: any) => assertIsValidPort(item, name));
 }
 
-function assertIsValidPortState(candidate: any, name: string): void {
+function assertIsValidPort(candidate: any, name: string): void {
   assertIsObject(candidate, name);
 
   if (!isPortKind(candidate.kind)) {
@@ -195,7 +187,7 @@ function assertIsValidPortState(candidate: any, name: string): void {
   }
 }
 
-function assertIsValidParamPorts(candidate: any, node: NodeState): void {
+function assertIsValidParamPorts(candidate: any, node: NodeModel): void {
   assertIsObject(candidate, `[${node.id}].paramPorts`);
   assertIsValidPortArray(Object.values(candidate), `[${node.id}].paramPorts`);
 
@@ -204,7 +196,7 @@ function assertIsValidParamPorts(candidate: any, node: NodeState): void {
   }
 }
 
-function hasParam(name: string, node: NodeState): boolean {
+function hasParam(name: string, node: NodeModel): boolean {
   return Object.keys(node.paramValues).includes(name);
 }
 
@@ -216,16 +208,15 @@ function isBounds(candidate: any): candidate is Bounds {
     && typeof candidate.height === 'number';
 }
 
-function isValidGraphSelection(selection: string[], graphState: GraphState): boolean {
-  console.log(graphState);
-  const nodeIds = Object.keys(graphState.nodes);
-  const connectionIds = graphState.connections.map(c => c.id);
+function isValidGraphSelection(selection: string[], audioGraph: AudioGraphModel): boolean {
+  const nodeIds = Object.keys(audioGraph.nodes);
+  const connectionIds = audioGraph.connections.map(c => c.id);
   return selection.every(item => {
     return nodeIds.includes(item) || connectionIds.includes(item);
   });
 }
 
-function allIdsAreUnique(nodes: NodeState[], connections: ConnectionState[]): boolean {
+function allIdsAreUnique(nodes: NodeModel[], connections: ConnectionModel[]): boolean {
   const allIds = [
     nodes.map(n => n.id),
     connections.map(c => c.id),
@@ -266,8 +257,8 @@ function assertIsBoolean(candidate: any, name: string) {
   }
 }
 
-function assertIsValidGraphSelection(candidate: any, maybeGraphState: any): void {
-  if (!isStringArray(candidate) || !isValidGraphSelection(candidate, maybeGraphState)) {
+function assertIsValidGraphSelection(candidate: any, maybeGraph: any): void {
+  if (!isStringArray(candidate) || !isValidGraphSelection(candidate, maybeGraph)) {
     throw new Error('Invalid graph selection.');
   }
 }

@@ -1,5 +1,5 @@
-import Bounds from '../model/Bounds';
-import Coordinates from '../model/Coordinates';
+import Bounds from '../../document/models/Bounds';
+import Coordinates from '../../document/models/Coordinates';
 import {constrainBetween, squaredDist} from './numbers';
 
 export function rectangleCenter(rectangle: Bounds): Coordinates {

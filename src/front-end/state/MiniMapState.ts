@@ -1,5 +1,4 @@
-import Bounds, {emptyBounds} from '../model/Bounds';
-import {NodeId} from './NodeState';
+import Bounds, {emptyBounds} from '../../document/models/Bounds';
 
 export interface MiniMapState {
   nodes: MiniMapNode[];
@@ -7,7 +6,7 @@ export interface MiniMapState {
 }
 
 export interface MiniMapNode {
-  id: NodeId;
+  id: string;
   bounds: Bounds;
 }
 
