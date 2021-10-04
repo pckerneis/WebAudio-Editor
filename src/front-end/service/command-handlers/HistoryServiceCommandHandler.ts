@@ -20,12 +20,12 @@ export default class HistoryServiceCommandHandler implements CommandHandler {
 
   executeCommand(commandPath: string): boolean {
     if (commandPath === UNDO_COMMAND_ID) {
-      this.historyService.previous();
+      this.historyService.undo();
       return true;
     }
 
     if (commandPath === REDO_COMMAND_ID) {
-      this.historyService.next();
+      this.historyService.redo();
       return true;
     }
 

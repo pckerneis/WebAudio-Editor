@@ -30,21 +30,23 @@ export default class HistoryService {
     return this.state.currentIndex + 1 < this.state.transactions.length;
   }
 
-  get previousDescription(): string | null {
-    const previous = this.previousTransaction;
+  get undoDescription(): string | null {
+    const current = this.currentTransaction;
 
-    if (previous) {
-      return `Undo ${previous.description}`;
+    if (current) {
+      const when = current.date.toLocaleTimeString();
+      return `Undo ${current.description} (${when})`;
     } else {
       return null;
     }
   }
 
-  get nextDescription(): string | null {
+  get redoDescription(): string | null {
     const next = this.nextTransaction;
 
     if (next) {
-      return `Redo ${next.description}`;
+      const when = next.date.toLocaleTimeString();
+      return `Redo ${next.description} (${when})`;
     } else {
       return null;
     }
@@ -60,6 +62,7 @@ export default class HistoryService {
       description,
       graphState: this.graphService.snapshot,
       selection: this.graphSelection.items,
+      date: new Date(Date.now()),
     };
 
     const transactions = [
@@ -75,7 +78,7 @@ export default class HistoryService {
     this._store.next(newState);
   }
 
-  public previous(): void {
+  public undo(): void {
     if (this.hasPrevious) {
       const newIndex = this.state.currentIndex - 1;
       const restoredState = this.state.transactions[newIndex];
@@ -90,7 +93,7 @@ export default class HistoryService {
     }
   }
 
-  public next(): void {
+  public redo(): void {
     if (this.hasNext) {
       const newIndex = this.state.currentIndex + 1;
       const restoredState = this.state.transactions[newIndex];
@@ -108,13 +111,9 @@ export default class HistoryService {
     }
   }
 
-  private get previousTransaction(): Transaction | null {
-    if (!this.hasPrevious) {
-      return null;
-    }
-
+  private get currentTransaction(): Transaction | null {
     const {currentIndex, transactions} = this.state;
-    return transactions[currentIndex - 1];
+    return transactions[currentIndex];
   }
 
   private get nextTransaction(): Transaction | null {
@@ -144,6 +143,7 @@ interface Transaction {
   description: string;
   graphState: GraphState;
   selection: string[];
+  date: Date;
 }
 
 export enum TransactionNames {

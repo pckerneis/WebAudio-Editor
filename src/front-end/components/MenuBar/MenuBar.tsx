@@ -13,8 +13,8 @@ export default function MenuBar() {
   const [projectName] = WrapAsState(projectName$, '');
   WrapAsState(historyService.current$, null);
 
-  const handleUndo = () => historyService.previous();
-  const handleRedo = () => historyService.next();
+  const handleUndo = () => historyService.undo();
+  const handleRedo = () => historyService.redo();
   const handleChange = (evt: ChangeEvent<HTMLInputElement>) => {
     projectService.setProjectName(evt.target.value.trim());
   };
@@ -31,7 +31,7 @@ export default function MenuBar() {
         src={right}
         tabIndex={0}
         onPointerDown={handleUndo}
-        title={historyService.previousDescription ?? ''}
+        title={historyService.undoDescription ?? ''}
         alt="Undo"
       />
       <img
@@ -39,7 +39,7 @@ export default function MenuBar() {
         src={right}
         tabIndex={0}
         onPointerDown={handleRedo}
-        title={historyService.nextDescription ?? ''}
+        title={historyService.redoDescription ?? ''}
         alt="Redo"
       />
     </div>
