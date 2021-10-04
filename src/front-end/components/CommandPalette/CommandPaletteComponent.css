@@ -66,11 +66,11 @@
     color: var(--disabled-text-color);
 }
 
-.CommandRow:hover {
+.CommandRow:hover:not(.disabled) {
     background-color: var(--item-hilight);
 }
 
-.CommandRow:focus {
+.CommandRow:focus:not(.disabled) {
     background-color: var(--item-focus);
     outline: none;
     box-shadow: 0 0 2px 2px var(--selection-outline-color);
@@ -91,6 +91,6 @@
 .CommandRow .KeyCode {
     border: 1px grey solid;
     border-radius: 4px;
-    padding: 1px;
-    font-size: smaller;
+    padding: 0 2px;
+    font-size: x-small;
 }
