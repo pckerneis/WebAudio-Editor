@@ -6,6 +6,12 @@ import {ParamDefinition, ParamType} from '../../../document/node-definitions/Nod
 import {ParamPorts, ParamValues} from '../../../document/models/NodeModel';
 import initializeOrGetServices from '../../service/initialize-services';
 import {TransactionNames} from '../../service/HistoryService';
+import debounce from '../../ui-utils/debounce';
+
+const pushNodeParamChangeTransactionDebounced = debounce(
+  () => historyService.pushTransaction(TransactionNames.SET_NODE_PARAM),
+  500,
+);
 
 const {
   graphService,
@@ -46,7 +52,8 @@ function ParamPanel(props: ParamPanelProps) {
         const handleInputChange = (evt: any) => {
           const value = evt.target.value;
           graphService.setParamValue(nodeId, paramName, value);
-          historyService.pushTransaction(TransactionNames.SET_NODE_PARAM);
+
+          pushNodeParamChangeTransactionDebounced();
         };
 
         const isChoiceParam = definition.type === ParamType.choice;
