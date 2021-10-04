@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, {useRef, useState} from 'react';
 import {consumeEvent, isEnterKeyEvent} from '../../ui-utils/events';
+import './EditableLabel.css';
 
 export default function EditableLabel(props: any) {
   const {
@@ -39,11 +40,12 @@ export default function EditableLabel(props: any) {
       onPointerDown={consumeEvent}
       onPointerUp={consumeEvent}
       onChange={(event) => setTransientValue(event.target.value)}
+      onKeyDown={consumeEvent}
       onKeyUp={handleKeyUp}
       onBlur={sendValueAndClose}
       style={({...style, width: '100%'})}/>
   ) : (
-    <span style={({margin: '1px', textAlign: 'center'})}>{value}</span>
+    <span className="EditableLabelRead" style={({margin: '1px', textAlign: 'center'})}>{value}</span>
   );
 
   return (
