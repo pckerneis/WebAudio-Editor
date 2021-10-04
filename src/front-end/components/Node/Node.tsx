@@ -114,6 +114,15 @@ function Node(props: NodeProps) {
     historyService.pushTransaction(TransactionNames.SET_NODE_NAME);
   };
 
+  const handleResize = (coordinates: Coordinates) => {
+    graphService.setNodeWidth(nodeState.id, coordinates.x);
+  };
+
+  const dragHandlePosition: Coordinates = {
+    x: nodeState.display.bounds.width,
+    y: 0,
+  };
+
   return (
     <div className={nodeClassName}
          style={nodeStyle}
@@ -130,7 +139,7 @@ function Node(props: NodeProps) {
         onDragEnd={handleDragEnd}
         elementPosition={nodeState.display.bounds}
         buttons={[0]}
-        style={({display: 'flex'})}
+        style={{display: 'flex'}}
       >
         <div className="NodeContent"
              onPointerDown={handlePointerDown}>
@@ -167,6 +176,15 @@ function Node(props: NodeProps) {
       <div className="BottomPortsContainer">
         {bottomPorts.map(rp => rp.template)}
       </div>
+      <div className="NodeResizeBar">
+        <DragToMove
+          onDragMove={handleResize}
+          // onDragEnd={handleDragEnd}
+          elementPosition={dragHandlePosition}
+          buttons={[0]}
+          style={{width: '100%'}}
+        />
+      </div>
     </div>
   );
 }
@@ -199,10 +217,10 @@ export function areNodesVisuallySimilar(previous: Nodes, next: Nodes): boolean {
   });
 }
 
-function getNodeStyle(nodeState: NodeState, zIndex: number): { minHeight: number; transform: string; minWidth: number; zIndex: number } {
+function getNodeStyle(nodeState: NodeState, zIndex: number): any {
   return {
     transform: `translate(${nodeState.display.bounds.x}px, ${nodeState.display.bounds.y}px)`,
-    minWidth: nodeState.display.bounds.width,
+    width: nodeState.display.bounds.width,
     minHeight: nodeState.display.bounds.height,
     zIndex,
   };

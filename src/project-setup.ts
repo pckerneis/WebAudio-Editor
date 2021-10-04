@@ -1,5 +1,5 @@
 import {NodeKind} from './document/models/NodeKind';
-import GraphService from './front-end/service/GraphService';
+import GraphService, {DEFAULT_NODE_WIDTH} from './front-end/service/GraphService';
 import SelectedItemSet from './front-end/utils/SelectedItemSet';
 import HistoryService from './front-end/service/HistoryService';
 import NodeDefinitionService from './front-end/service/NodeDefinitionService';
@@ -10,15 +10,15 @@ export function loadDemoProject(graphService: GraphService,
                                 nodeDefinitionService: NodeDefinitionService): void {
   const osc = graphService.createAndAddNode('osc',
     nodeDefinitionService.getNodeDefinition(NodeKind.osc)!,
-    {x: 120, y: 20, width: 100, height: 20});
+    {x: 120, y: 20, width: DEFAULT_NODE_WIDTH, height: 20});
 
   const gain1 = graphService.createAndAddNode('gain1',
     nodeDefinitionService.getNodeDefinition(NodeKind.gain)!,
-    {x: 150, y: 300, width: 100, height: 20});
+    {x: 150, y: 300, width: DEFAULT_NODE_WIDTH, height: 20});
 
   const gain2 = graphService.createAndAddNode('gain2',
     nodeDefinitionService.getNodeDefinition(NodeKind.gain)!,
-    {x: 200, y: 150, width: 100, height: 20});
+    {x: 200, y: 150, width: DEFAULT_NODE_WIDTH, height: 20});
 
   graphService.addConnection(osc.id, 0, gain1.id, 0);
   graphService.addConnection(gain1.id, 0, gain2.id, 0);

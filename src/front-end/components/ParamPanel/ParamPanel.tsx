@@ -60,6 +60,7 @@ function ParamPanel(props: ParamPanelProps) {
         switch (definition.type) {
           case ParamType.choice:
             inputElement = <select
+              className="ParamValue"
               key={paramName + '_select'}
               value={currentValue}
               onChange={handleInputChange}
@@ -70,6 +71,7 @@ function ParamPanel(props: ParamPanelProps) {
             break;
           case ParamType.AudioParam:
             inputElement = <input
+              className="ParamValue"
               key={paramName + '_input'}
               type="number"
               value={currentValue}
@@ -81,6 +83,7 @@ function ParamPanel(props: ParamPanelProps) {
             break;
           case ParamType.boolean:
             inputElement = <input
+              className="ParamValue"
               key={paramName + '_input'}
               type="checkbox"
               value={currentValue}
@@ -90,6 +93,7 @@ function ParamPanel(props: ParamPanelProps) {
             break;
           case ParamType.number:
             inputElement = <input
+              className="ParamValue"
               key={paramName + '_input'}
               type="number"
               value={currentValue}
@@ -139,7 +143,9 @@ function ParamPanel(props: ParamPanelProps) {
               definition.name
             }
           </div>,
-          inputElement,
+          <div className="ParamValue" key={paramName + '_value'}>
+            {inputElement}
+          </div>,
         ]);
       }
     );

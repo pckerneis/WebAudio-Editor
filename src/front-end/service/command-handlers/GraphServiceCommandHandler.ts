@@ -1,5 +1,5 @@
 import {Command, CommandHandler} from '../CommandService';
-import GraphService from '../GraphService';
+import GraphService, {DEFAULT_NODE_WIDTH} from '../GraphService';
 import NodeDefinitionService from '../NodeDefinitionService';
 import {GraphState} from '../../state/GraphState';
 import SelectedItemSet from '../../utils/SelectedItemSet';
@@ -66,7 +66,7 @@ export default class GraphServiceCommandHandler implements CommandHandler {
     const bounds = {
       x: window.innerWidth / 2 - viewportOffset.x - 50,
       y: window.innerHeight / 2 - viewportOffset.y - 10,
-      width: 100,
+      width: DEFAULT_NODE_WIDTH,
       height: 20,
     };
     const name = findDefaultName(nodeKind, this.graphService.snapshot);

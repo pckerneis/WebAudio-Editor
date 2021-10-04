@@ -11,7 +11,7 @@ import {
   isNodeId,
   sendNodeToFront,
   setNodeName,
-  setNodePosition,
+  setNodePosition, setNodeWidth,
   setParamValue,
   toggleNodeFoldState
 } from './actions/NodeCommands';
@@ -26,6 +26,10 @@ import {
 } from './actions/ConnectionCommands';
 import {translateViewport} from './actions/ViewportCommands';
 import {NodeDefinition} from '../../document/node-definitions/NodeDefinition';
+
+export const DEFAULT_NODE_WIDTH = 150;
+export const MIN_NODE_WIDTH = 80;
+export const MAX_NODE_WIDTH = 400;
 
 export default class GraphService {
   public readonly state$: Observable<GraphState>;
@@ -109,6 +113,10 @@ export default class GraphService {
 
   loadState(graphState: GraphState): void {
     this._store.next(graphState);
+  }
+
+  setNodeWidth(nodeId: string, newWidth: number): void {
+    this._store.next(setNodeWidth(nodeId, newWidth, this.snapshot));
   }
 }
 

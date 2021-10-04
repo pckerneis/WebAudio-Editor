@@ -60,6 +60,16 @@
     pointer-events: none;
 }
 
+.NodeResizeBar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 6px;
+    cursor: ew-resize;
+    display: flex;
+}
+
 .NodeLabel {
     text-align: center;
     margin: 1px auto;

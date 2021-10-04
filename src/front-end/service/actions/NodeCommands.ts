@@ -6,6 +6,8 @@ import SequenceGenerator from '../../utils/SequenceGenerator';
 import {NodeDefinition, ParamType} from '../../../document/node-definitions/NodeDefinition';
 import {NodeDisplay, ParamPorts, ParamValues} from '../../../document/models/NodeModel';
 import {NodeState} from '../../state/NodeState';
+import {constrainBetween} from '../../utils/numbers';
+import {MAX_NODE_WIDTH, MIN_NODE_WIDTH} from '../GraphService';
 
 const nodeIdSequence = new SequenceGenerator();
 
@@ -167,5 +169,18 @@ export function setParamValue(nodeId: string, paramName: string, value: any, sta
       ...n.paramValues,
       [paramName]: value,
     },
+  }));
+}
+
+export function setNodeWidth(nodeId: string, newWidth: number, state: GraphState): GraphState {
+  return transformExistingNode(nodeId, state, n => ({
+    ...n,
+    display: {
+      ...n.display,
+      bounds: {
+        ...n.display.bounds,
+        width: constrainBetween(newWidth, MIN_NODE_WIDTH, MAX_NODE_WIDTH),
+      }
+    }
   }));
 }
