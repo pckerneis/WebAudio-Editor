@@ -201,6 +201,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
     const handleKeyUp = (e: any) => {
       if (e.code === 'Delete' || e.code === 'Backspace') {
         graphService.remove(graphSelection.items);
+        historyService.pushTransaction(TransactionNames.DELETE_SELECTION);
         consumeEvent(e);
       }
     };
