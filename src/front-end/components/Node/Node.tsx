@@ -14,8 +14,6 @@ import Bounds, {areBoundsEqual} from '../../../document/models/Bounds';
 import {buildReferencedPorts} from './Port';
 import {NodeDefinition} from '../../../document/node-definitions/NodeDefinition';
 import initializeOrGetServices from '../../service/initialize-services';
-import {filter, map, Observable, pluck} from 'rxjs';
-import WrapAsState from '../../ui-utils/WrapAsState';
 import {TransactionNames} from '../../service/HistoryService';
 
 const {historyService, graphService, graphSelection, portRegistry} = initializeOrGetServices();
@@ -43,13 +41,6 @@ function Node(props: NodeProps) {
     selected,
     zIndex,
   } = props;
-
-  const node$ = graphService.state$.pipe(
-    pluck('nodes'),
-    map((nodes) => nodes[nodeState.id]),
-    filter(Boolean),
-  ) as Observable<NodeState>;
-  WrapAsState(node$, null);
 
   const nodeStyle = getNodeStyle(nodeState, zIndex);
   const [startPosition, setStartPosition] = useState({} as Bounds);
