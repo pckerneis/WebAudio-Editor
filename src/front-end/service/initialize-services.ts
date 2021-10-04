@@ -12,6 +12,7 @@ import PersistenceService from './PersistenceService';
 import ProjectService from './ProjectService';
 import MessageService from './MessageService';
 import HistoryService from './HistoryService';
+import HistoryServiceCommandHandler from './command-handlers/HistoryServiceCommandHandler';
 
 export default function initializeOrGetServices(): Services {
   const firstInitialization = ! SingletonWrapper.hasInstance(GraphService);
@@ -34,8 +35,9 @@ export default function initializeOrGetServices(): Services {
       historyService,
       nodeDefinitionService);
 
-    commandService.registerCommandHandler(
+    commandService.registerCommandHandlers(
       new GraphServiceCommandHandler(graphService, nodeDefinitionService, graphSelection, historyService),
+      new HistoryServiceCommandHandler(historyService),
     );
   }
 

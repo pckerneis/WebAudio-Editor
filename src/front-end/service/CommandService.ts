@@ -23,8 +23,8 @@ export default class CommandService {
     }
   }
 
-  registerCommandHandler(handler: CommandHandler) {
-    this._handlers.push(handler);
+  registerCommandHandlers(...handlers: CommandHandler[]) {
+    this._handlers.push(...handlers);
   }
 }
 
