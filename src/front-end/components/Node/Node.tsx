@@ -16,6 +16,7 @@ import {NodeDefinition} from '../../../document/node-definitions/NodeDefinition'
 import initializeOrGetServices from '../../service/initialize-services';
 import {filter, map, Observable, pluck} from 'rxjs';
 import WrapAsState from '../../ui-utils/WrapAsState';
+import {TransactionNames} from '../../service/HistoryService';
 
 const {historyService, graphService, graphSelection, portRegistry} = initializeOrGetServices();
 
@@ -113,8 +114,13 @@ function Node(props: NodeProps) {
 
   const handleDragEnd = ({dragDistanceSquared}: { dragDistanceSquared: number }) => {
     if (dragDistanceSquared > 1) {
-      historyService.pushTransaction('move selection');
+      historyService.pushTransaction(TransactionNames.MOVE_SELECTION);
     }
+  };
+
+  const handleNameChange = (name: string) => {
+    graphService.setNodeName(nodeState.id, name);
+    historyService.pushTransaction(TransactionNames.SET_NODE_NAME);
   };
 
   return (
@@ -149,7 +155,7 @@ function Node(props: NodeProps) {
             <EditableLabel
               className="NodeLabel"
               value={nodeState.name}
-              onChange={(name) => graphService.setNodeName(nodeState.id, name)}
+              onChange={handleNameChange}
             />
           </div>
           {

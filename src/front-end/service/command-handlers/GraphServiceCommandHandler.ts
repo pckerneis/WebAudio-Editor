@@ -4,6 +4,7 @@ import NodeDefinitionService from '../NodeDefinitionService';
 import {GraphState} from '../../state/GraphState';
 import SelectedItemSet from '../../utils/SelectedItemSet';
 import {isNodeKind, NodeKind} from '../../../document/models/NodeKind';
+import HistoryService, {TransactionNames} from '../HistoryService';
 
 const DELETE_SELECTION_COMMAND_ID = 'DeleteSelection';
 const CREATE_NODE_COMMAND_PREFIX = 'CreateNode/';
@@ -11,7 +12,8 @@ const CREATE_NODE_COMMAND_PREFIX = 'CreateNode/';
 export default class GraphServiceCommandHandler implements CommandHandler {
   constructor(public readonly graphService: GraphService,
               public readonly nodeDefinitionService: NodeDefinitionService,
-              public readonly graphSelection: SelectedItemSet<string>) {
+              public readonly graphSelection: SelectedItemSet<string>,
+              public readonly historyService: HistoryService) {
   }
 
   public canExecute(commandPath: string): boolean {
@@ -36,6 +38,7 @@ export default class GraphServiceCommandHandler implements CommandHandler {
     if (isCreateNodeCommand(commandPath)) {
       const nodeKind = extractNodeKindFromCreateNodeCommand(commandPath);
       this.createAndAddNode(nodeKind as NodeKind);
+      this.historyService.pushTransaction(TransactionNames.CREATE_NODE);
       return true;
     }
 
@@ -44,7 +47,12 @@ export default class GraphServiceCommandHandler implements CommandHandler {
 
   private executeDeleteSelectionCommand(commandPath: string): boolean {
     if (commandPath === DELETE_SELECTION_COMMAND_ID) {
-      this.graphService.remove(this.graphSelection.items);
+      const selection = this.graphSelection.items;
+
+      if (selection.length > 0) {
+        this.graphService.remove(this.graphSelection.items);
+        this.historyService.pushTransaction(TransactionNames.DELETE_SELECTION);
+      }
     }
 
     return false;

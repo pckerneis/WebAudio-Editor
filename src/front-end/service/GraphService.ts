@@ -44,18 +44,14 @@ export default class GraphService {
     this._store.next(translateViewport(coordinates, this.snapshot));
   }
 
-  createNode(name: string, definition: NodeDefinition, bounds: Bounds): NodeState {
-    return createNode(definition, bounds, name);
-  }
-
-  addNode(node: NodeState): void {
-    this._store.next(addNode(node.id, node, this.snapshot));
-  }
-
   createAndAddNode(name: string, definition: NodeDefinition, bounds: Bounds): NodeState {
-    const n = this.createNode(name, definition, bounds);
+    const n = createNode(definition, bounds, name);
     this.addNode(n);
     return n;
+  }
+
+  private addNode(node: NodeState): void {
+    this._store.next(addNode(node.id, node, this.snapshot));
   }
 
   setNodePosition(id: string, coordinates: Coordinates): void {

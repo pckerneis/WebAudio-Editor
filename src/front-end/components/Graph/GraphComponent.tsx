@@ -20,6 +20,7 @@ import MiniMap, {computeMiniMapState} from '../MiniMap/MiniMap';
 import {getEmptyMiniMapState, MiniMapState} from '../../state/MiniMapState';
 import {areBoundsEqual} from '../../../document/models/Bounds';
 import {NodeDefinition} from '../../../document/node-definitions/NodeDefinition';
+import {TransactionNames} from '../../service/HistoryService';
 
 const MAX_PORT_CLICK_DISTANCE = 8;
 
@@ -27,7 +28,8 @@ const {
   graphService,
   nodeDefinitionService,
   portRegistry,
-  graphSelection
+  graphSelection,
+  historyService,
 } = initializeOrGetServices();
 
 interface GraphComponentState {
@@ -179,6 +181,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
 
         if (suitablePort) {
           graphService.applyTemporaryConnection(suitablePort.id);
+          historyService.pushTransaction(TransactionNames.CREATE_CONNECTION);
         } else {
           graphService.removeTemporaryConnection();
         }

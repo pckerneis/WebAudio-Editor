@@ -145,3 +145,15 @@ interface Transaction {
   graphState: GraphState;
   selection: string[];
 }
+
+export enum TransactionNames {
+  MOVE_SELECTION = 'move selection',
+
+  CREATE_NODE = 'create node',
+  CREATE_CONNECTION = 'create connection',
+
+  DELETE_SELECTION = 'delete selection',
+
+  SET_NODE_NAME = 'set node name',
+  SET_NODE_PARAM = 'set node param',
+}

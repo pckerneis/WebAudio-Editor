@@ -5,8 +5,14 @@ import {consumeEvent} from '../../ui-utils/events';
 import {ParamDefinition, ParamType} from '../../../document/node-definitions/NodeDefinition';
 import {ParamPorts, ParamValues} from '../../../document/models/NodeModel';
 import initializeOrGetServices from '../../service/initialize-services';
+import {TransactionNames} from '../../service/HistoryService';
 
-const {graphService, portRegistry, graphSelection} = initializeOrGetServices();
+const {
+  graphService,
+  portRegistry,
+  graphSelection,
+  historyService,
+} = initializeOrGetServices();
 
 interface ParamPanelProps {
   nodeId: string;
@@ -40,6 +46,7 @@ function ParamPanel(props: ParamPanelProps) {
         const handleInputChange = (evt: any) => {
           const value = evt.target.value;
           graphService.setParamValue(nodeId, paramName, value);
+          historyService.pushTransaction(TransactionNames.SET_NODE_PARAM);
         };
 
         const isChoiceParam = definition.type === ParamType.choice;

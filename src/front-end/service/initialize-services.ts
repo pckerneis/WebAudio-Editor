@@ -35,7 +35,7 @@ export default function initializeOrGetServices(): Services {
       nodeDefinitionService);
 
     commandService.registerCommandHandler(
-      new GraphServiceCommandHandler(graphService, nodeDefinitionService, graphSelection),
+      new GraphServiceCommandHandler(graphService, nodeDefinitionService, graphSelection, historyService),
     );
   }
 
