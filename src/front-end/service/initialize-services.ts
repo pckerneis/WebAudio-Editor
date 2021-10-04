@@ -28,7 +28,11 @@ export default function initializeOrGetServices(): Services {
   const historyService = SingletonWrapper.get(HistoryService, graphService, graphSelection);
 
   if (firstInitialization) {
-    loadDemoProject(graphService, graphSelection, nodeDefinitionService);
+    loadDemoProject(
+      graphService,
+      graphSelection,
+      historyService,
+      nodeDefinitionService);
 
     commandService.registerCommandHandler(
       new GraphServiceCommandHandler(graphService, nodeDefinitionService, graphSelection),

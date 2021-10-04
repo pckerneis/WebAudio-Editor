@@ -1,7 +1,9 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
+import {squaredDist} from '../utils/numbers';
+import Coordinates from '../../document/models/Coordinates';
 
-export default function DragToMove(props: any) {
+export default function DragToMove(props: DragToMoveProps) {
   const {
     elementPosition,
     onDragMove,
@@ -27,12 +29,20 @@ export default function DragToMove(props: any) {
     }
   };
 
-  const handlePointerUp = useCallback(() => {
+  const handlePointerUp = useCallback((e: any) => {
     if (isDragging) {
       setIsDragging(false);
-      if (onDragEnd) onDragEnd();
+
+      const dragDistanceSquared = squaredDist(dragStartPosition, {
+        x: e.screenX,
+        y: e.screenY,
+      });
+
+      if (onDragEnd) onDragEnd({
+        dragDistanceSquared,
+      });
     }
-  }, [isDragging, setIsDragging, onDragEnd]);
+  }, [isDragging, setIsDragging, onDragEnd, dragStartPosition]);
 
   const handlePointerMove = useCallback((e: any) => {
     if (isDragging) {
@@ -77,4 +87,19 @@ DragToMove.propTypes = {
   children: element,
   style: shape({}),
   className: string,
+}
+
+interface DragToMoveProps {
+  elementPosition: Coordinates;
+  onDragStart?: () => void;
+  onDragMove: (newPosition: Coordinates) => void;
+  onDragEnd?: (info: DragEndInfo) => void;
+  children?: any;
+  style?: any;
+  className?: string;
+  buttons: number[];
+}
+
+interface DragEndInfo {
+  dragDistanceSquared: number;
 }

@@ -87,8 +87,9 @@ export default function MiniMap(props: MiniMapProps) {
   }, [setDragging, moveViewPortToPointer]);
 
   return (
-    <div className="MiniMap drop-shadow">
+    <div className="MiniMap">
       <canvas
+        className="drop-shadow"
         ref={canvasRef}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}

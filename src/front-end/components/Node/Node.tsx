@@ -14,6 +14,8 @@ import Bounds, {areBoundsEqual} from '../../../document/models/Bounds';
 import {buildReferencedPorts} from './Port';
 import {NodeDefinition} from '../../../document/node-definitions/NodeDefinition';
 import initializeOrGetServices from '../../service/initialize-services';
+import {filter, map, Observable, pluck} from 'rxjs';
+import WrapAsState from '../../ui-utils/WrapAsState';
 
 const {historyService, graphService, graphSelection, portRegistry} = initializeOrGetServices();
 
@@ -41,13 +43,14 @@ function Node(props: NodeProps) {
     zIndex,
   } = props;
 
-  const nodeStyle = {
-    transform: `translate(${nodeState.display.bounds.x}px, ${nodeState.display.bounds.y}px)`,
-    minWidth: nodeState.display.bounds.width,
-    minHeight: nodeState.display.bounds.height,
-    zIndex,
-  };
+  const node$ = graphService.state$.pipe(
+    pluck('nodes'),
+    map((nodes) => nodes[nodeState.id]),
+    filter(Boolean),
+  ) as Observable<NodeState>;
+  WrapAsState(node$, null);
 
+  const nodeStyle = getNodeStyle(nodeState, zIndex);
   const [startPosition, setStartPosition] = useState({} as Bounds);
   const [positionByItem, setPositionByItem] = useState({} as { [id: string]: Bounds });
 
@@ -108,9 +111,10 @@ function Node(props: NodeProps) {
 
   const nodeClassName = selected ? 'Node node-shadow selected' : 'Node node-shadow';
 
-  const handleDragEnd = () => {
-    historyService.pushState('move selection');
-    console.log('drag end')
+  const handleDragEnd = ({dragDistanceSquared}: { dragDistanceSquared: number }) => {
+    if (dragDistanceSquared > 1) {
+      historyService.pushTransaction('move selection');
+    }
   };
 
   return (
@@ -196,6 +200,15 @@ export function areNodesVisuallySimilar(previous: Nodes, next: Nodes): boolean {
 
     return areBoundsEqual(first.display.bounds, second.display.bounds);
   });
+}
+
+function getNodeStyle(nodeState: NodeState, zIndex: number): { minHeight: number; transform: string; minWidth: number; zIndex: number } {
+  return {
+    transform: `translate(${nodeState.display.bounds.x}px, ${nodeState.display.bounds.y}px)`,
+    minWidth: nodeState.display.bounds.width,
+    minHeight: nodeState.display.bounds.height,
+    zIndex,
+  };
 }
 
 export default React.memo(Node);

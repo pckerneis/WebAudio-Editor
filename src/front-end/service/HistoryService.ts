@@ -1,7 +1,7 @@
 import {GraphState} from '../state/GraphState';
 import GraphService from './GraphService';
 import SelectedItemSet from '../utils/SelectedItemSet';
-import {BehaviorSubject} from 'rxjs';
+import {BehaviorSubject, map} from 'rxjs';
 import SequenceGenerator from '../utils/SequenceGenerator';
 
 export default class HistoryService {
@@ -10,7 +10,9 @@ export default class HistoryService {
 
   private _store = new BehaviorSubject<History>(emptyHistory());
 
-  public readonly state$ = this._store.asObservable();
+  public readonly current$ = this._store.pipe(
+    map(s => s.transactions[s.currentIndex]),
+  );
 
   constructor(public readonly graphService: GraphService,
               public readonly graphSelection: SelectedItemSet<string>) {
@@ -20,68 +22,124 @@ export default class HistoryService {
     return this._store.value;
   }
 
-  public get canUndo(): boolean {
-    return this.state.undoStack.length > 0;
+  public get hasPrevious(): boolean {
+    return this.state.currentIndex > 0;
   }
 
-  public get canRedo(): boolean {
-    return this.state.redoStack.length > 0;
+  public get hasNext(): boolean {
+    return this.state.currentIndex + 1 < this.state.transactions.length;
   }
 
-  public pushState(description: string): void {
-    const newItem: HistoryState = {
+  get previousDescription(): string | null {
+    const previous = this.previousTransaction;
+
+    if (previous) {
+      return `Undo ${previous.description}`;
+    } else {
+      return null;
+    }
+  }
+
+  get nextDescription(): string | null {
+    const next = this.nextTransaction;
+
+    if (next) {
+      return `Redo ${next.description}`;
+    } else {
+      return null;
+    }
+  }
+
+  public clearHistory(): void {
+    this._store.next(emptyHistory());
+  }
+
+  public pushTransaction(description: string): void {
+    const newTransaction: Transaction = {
       id: this.sequenceGenerator.nextString(),
       description,
       graphState: this.graphService.snapshot,
       selection: this.graphSelection.items,
     };
 
-    const newState = {
-      undoStack: [...this.state.undoStack, newItem],
-      redoStack: [],
+    const transactions = [
+      ...this.state.transactions.slice(0, this.state.currentIndex + 1),
+      newTransaction,
+    ];
+
+    const newState: History = {
+      transactions,
+      currentIndex: this.state.currentIndex + 1,
     };
 
     this._store.next(newState);
   }
 
-  public undo(): void {
-    if (this.canUndo) {
-      const undoStack = [...this.state.undoStack];
-      const restoredState = undoStack.pop() as HistoryState;
+  public previous(): void {
+    if (this.hasPrevious) {
+      const newIndex = this.state.currentIndex - 1;
+      const restoredState = this.state.transactions[newIndex];
+
+      this.graphService.loadState(restoredState.graphState);
+      this.graphSelection.setSelection(restoredState.selection);
 
       this._store.next({
-        undoStack,
-        redoStack: [...this.state.redoStack, restoredState],
+        ...this.state,
+        currentIndex: newIndex,
       });
     }
   }
 
-  public redo(): void {
-    if (this.canRedo) {
-      const redoStack = [...this.state.redoStack];
-      const restoredState = redoStack.pop() as HistoryState;
+  public next(): void {
+    if (this.hasNext) {
+      const newIndex = this.state.currentIndex + 1;
+      const restoredState = this.state.transactions[newIndex];
+
+      this.graphService.loadState(restoredState.graphState);
+      this.graphSelection.setSelection(restoredState.selection);
+
+      this.graphService.loadState(restoredState.graphState);
+      this.graphSelection.setSelection(restoredState.selection);
 
       this._store.next({
-        undoStack: [...this.state.undoStack, restoredState],
-        redoStack,
+        ...this.state,
+        currentIndex: newIndex,
       });
     }
+  }
+
+  private get previousTransaction(): Transaction | null {
+    if (!this.hasPrevious) {
+      return null;
+    }
+
+    const {currentIndex, transactions} = this.state;
+    return transactions[currentIndex - 1];
+  }
+
+  private get nextTransaction(): Transaction | null {
+    if (!this.hasNext) {
+      return null;
+    }
+
+    const {currentIndex, transactions} = this.state;
+    return transactions[currentIndex + 1];
   }
 }
 
 export interface History {
-  undoStack: HistoryState[];
-  redoStack: HistoryState[];
+  transactions: Transaction[];
+  currentIndex: number;
 }
 
 export function emptyHistory(): History {
   return {
-    undoStack: [],
-    redoStack: [],
+    transactions: [],
+    currentIndex: -1,
   };
 }
 
-interface HistoryState {
+interface Transaction {
   id: string;
   description: string;
   graphState: GraphState;
