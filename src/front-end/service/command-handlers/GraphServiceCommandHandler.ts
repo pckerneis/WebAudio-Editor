@@ -59,7 +59,6 @@ export default class GraphServiceCommandHandler implements CommandHandler {
   }
 
   private createAndAddNode(nodeKind: NodeKind): void {
-    const nodeDefinition = this.nodeDefinitionService.getNodeDefinition(nodeKind);
     const viewportOffset = this.graphService.snapshot.viewportOffset;
 
     // TODO use graph bounds instead of window
@@ -69,8 +68,14 @@ export default class GraphServiceCommandHandler implements CommandHandler {
       width: DEFAULT_NODE_WIDTH,
       height: 20,
     };
-    const name = findDefaultName(nodeKind, this.graphService.snapshot);
-    this.graphService.createAndAddNode(name, nodeDefinition, bounds);
+
+    if (nodeKind === NodeKind.destination) {
+      this.graphService.addAudioDestination(bounds);
+    } else {
+      const nodeDefinition = this.nodeDefinitionService.getNodeDefinition(nodeKind);
+      const name = findDefaultName(nodeKind, this.graphService.snapshot);
+      this.graphService.createAndAddNode(name, nodeDefinition!, bounds);
+    }
   }
 }
 
@@ -93,9 +98,9 @@ const desiredNames: DesiredNames = {
   [NodeKind.mediaElementSource]: 'mediaElementAudioSource',
   [NodeKind.mediaStreamDestination]: 'mediaStreamAudioDestination',
   [NodeKind.mediaStreamSource]: 'mediaStreamAudioSource',
-  // [NodeKind.mediaStreamTrackAudioSource]: 'mediaStreamTrackAudioSource',
   [NodeKind.osc]: 'osc',
   [NodeKind.panner]: 'panner',
+  [NodeKind.destination]: 'destination',
 };
 
 

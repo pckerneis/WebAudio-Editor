@@ -1,4 +1,4 @@
-import React, {useCallback} from 'react';
+import React, {useCallback, useState} from 'react';
 import './PreviewFrame.css'
 import initializeOrGetServices from '../../service/helpers/initialize-services';
 import WrapAsState from '../../ui-utils/WrapAsState';
@@ -14,22 +14,38 @@ const {
 
 export default function PreviewFrame(): JSX.Element {
   const [layout] = WrapAsState(layoutService.state$, emptyLayout());
+  const [audioGraph, setAudioGraph] = useState<any>(null);
 
   const handleBackDropClicked = () => {
+    stop();
     layoutService.closePreviewFrame();
   };
 
-  const handleStart = useCallback(() => {
+  const start = useCallback(() => {
     const projectDocument = persistenceService.getState();
     const buildResult = new WebAudioGraphBuilder().build(projectDocument);
 
     if (buildResult.error) {
       messageService.post(buildResult.error.message, 'error');
     } else {
-      console.log(buildResult.audioGraph);
+      setAudioGraph(buildResult.audioGraph);
     }
-  }, []);
+  }, [setAudioGraph]);
 
+  const stop = useCallback(() => {
+    audioGraph?.context?.close();
+    setAudioGraph(null);
+  }, [audioGraph]);
+
+  const handleButtonPress = useCallback(() => {
+    if (audioGraph == null) {
+      start();
+    } else {
+      stop();
+    }
+  }, [audioGraph, stop, start]);
+
+  const buttonText = audioGraph ? 'Stop' : 'Start';
 
   const element = (
     <div
@@ -41,9 +57,9 @@ export default function PreviewFrame(): JSX.Element {
         onClick={consumeEvent}
       >
         <button
-          onClick={handleStart}
+          onClick={handleButtonPress}
         >
-          Start
+          {buttonText}
         </button>
       </div>
     </div>);

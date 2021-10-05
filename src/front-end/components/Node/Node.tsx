@@ -21,7 +21,7 @@ const {historyService, graphService, graphSelection, portRegistry} = initializeO
 interface NodeProps {
   nodeState: NodeState;
   service: GraphService;
-  definition: NodeDefinition;
+  definition: NodeDefinition | null;
   portRegistry: PortComponentRegistry;
   selected: boolean;
   selectedItemSet: SelectedItemSet<string>;
@@ -85,7 +85,7 @@ function Node(props: NodeProps) {
     portRegistry.registerPorts(...bottomPorts);
   });
 
-  const hasParams = Object.keys(definition.params).length > 0;
+  const hasParams = definition && Object.keys(definition.params).length > 0;
 
   const hiddenParamPorts = nodeState.display.folded ?
     Object.values(nodeState.paramPorts).map((p) => {
@@ -179,7 +179,6 @@ function Node(props: NodeProps) {
       <div className="NodeResizeBar">
         <DragToMove
           onDragMove={handleResize}
-          // onDragEnd={handleDragEnd}
           elementPosition={dragHandlePosition}
           buttons={[0]}
           style={{width: '100%'}}
@@ -193,7 +192,7 @@ const {shape, bool, number} = PropTypes;
 
 Node.propTypes = {
   nodeState: shape({}).isRequired,
-  definition: shape({}).isRequired,
+  definition: shape({}),
   style: shape({}),
   selected: bool,
   zIndex: number,

@@ -23,6 +23,12 @@ interface Connection {
   target: string;
 }
 
+enum ConnectionMatchKind {
+  nodeInput = 'nodeInput',
+  nodeOutput = 'nodeOutput',
+  nodeAudioParam = 'nodeAudioParam',
+}
+
 export class WebAudioGraphBuilder {
   validate(document: ProjectDocument): void {
     isValidProjectDocument(document);
@@ -48,7 +54,24 @@ export class WebAudioGraphBuilder {
     const nodes: AudioNodes = {};
 
     Object.entries(document.audioGraph.nodes).forEach(([id, model]) => {
-      nodes[id] = buildNode(model, context);
+      const node = buildNode(model, context);
+      nodes[id] = node;
+      Object.entries(model.paramValues).forEach(entry => {
+        const paramName = entry[0] as keyof AudioNode;
+        const value = entry[1];
+        const candidate: any = node[paramName];
+
+        if (candidate instanceof AudioParam) {
+          candidate.setValueAtTime(value, 0);
+        } else {
+          const propertyDescriptor = Object.getOwnPropertyDescriptor(node, paramName);
+          if (propertyDescriptor && propertyDescriptor.writable) {
+            (node[paramName] as any) = value;
+          } else {
+            console.debug(`Could not set value "${value}" on property "${paramName}" for node with ID "${id}".`);
+          }
+        }
+      });
     });
 
     document.audioGraph.connections.forEach(connection => {
@@ -114,12 +137,6 @@ export class WebAudioGraphBuilder {
   }
 }
 
-enum ConnectionMatchKind {
-  nodeInput = 'nodeInput',
-  nodeOutput = 'nodeOutput',
-  nodeAudioParam = 'nodeAudioParam',
-}
-
 interface NodeInputMatch {
   kind: ConnectionMatchKind.nodeInput;
   nodeId: string;
@@ -145,7 +162,12 @@ type ConnectionMatch = NodeInputMatch
 type AudioNodeBuilders = { [kind in NodeKind]: (ctx: AudioContext, ...args: any[]) => AudioNode };
 
 const nodeBuilders: AudioNodeBuilders = {
-  [NodeKind.osc]: (ctx: AudioContext) => ctx.createOscillator(),
+  [NodeKind.osc]: (ctx: AudioContext) => {
+    const osc = ctx.createOscillator();
+    // TODO add 'started' param
+    osc.start();
+    return osc;
+  },
   [NodeKind.gain]: (ctx: AudioContext) => ctx.createGain(),
   [NodeKind.delay]: (ctx: AudioContext, ...args: any[]) => ctx.createDelay(args[0]),
   [NodeKind.analyser]: (ctx: AudioContext) => ctx.createAnalyser(),
@@ -161,6 +183,7 @@ const nodeBuilders: AudioNodeBuilders = {
   [NodeKind.mediaStreamDestination]: (ctx: AudioContext) => ctx.createMediaStreamDestination(),
   [NodeKind.mediaStreamSource]: (ctx: AudioContext, ...args: any[]) => ctx.createMediaStreamSource(args[0]),
   [NodeKind.panner]: (ctx: AudioContext) => ctx.createPanner(),
+  [NodeKind.destination]: (ctx: AudioContext) => ctx.destination,
 }
 
 function buildNode(nodeModel: NodeModel, ctx: AudioContext): AudioNode {

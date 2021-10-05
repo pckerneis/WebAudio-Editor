@@ -19,7 +19,6 @@ import {arePrimitiveArraysEqual} from '../../utils/arrays';
 import MiniMap, {computeMiniMapState} from '../MiniMap/MiniMap';
 import {getEmptyMiniMapState, MiniMapState} from '../../state/MiniMapState';
 import {areBoundsEqual} from '../../../document/models/Bounds';
-import {NodeDefinition} from '../../../document/node-definitions/NodeDefinition';
 import {TransactionNames} from '../../service/HistoryService';
 
 const MAX_PORT_CLICK_DISTANCE = 8;
@@ -53,7 +52,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
       canvasRef: createRef(),
       selection: graphSelection.items,
       connectionCurves: [],
-      mouseCoordinates: {x: 0, y:  0},
+      mouseCoordinates: {x: 0, y: 0},
       subscriptions: [
         graphService.state$.pipe(
           switchMap(s => this.updateGraphState$(s)),
@@ -97,19 +96,19 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
 
   shouldComponentUpdate(nextProps: Readonly<{}>, nextState: Readonly<GraphComponentState>, nextContext: any): boolean {
     const hasNodesChanges = () => Object.keys(nextState.graphState.nodes).length !== Object.keys(this.state.graphState.nodes).length
-    || ! arePrimitiveArraysEqual(Object.keys(nextState.graphState.nodes), Object.keys(this.state.graphState.nodes))
-    || ! areNodesVisuallySimilar(nextState.graphState.nodes, this.state.graphState.nodes);
+      || !arePrimitiveArraysEqual(Object.keys(nextState.graphState.nodes), Object.keys(this.state.graphState.nodes))
+      || !areNodesVisuallySimilar(nextState.graphState.nodes, this.state.graphState.nodes);
 
-    const hasNodeOrderChanged = () => ! arePrimitiveArraysEqual(nextState.graphState.nodeOrder, this.state.graphState.nodeOrder);
+    const hasNodeOrderChanged = () => !arePrimitiveArraysEqual(nextState.graphState.nodeOrder, this.state.graphState.nodeOrder);
 
     const temporaryConnectionMoved = () => {
       const hasTemporaryConnection = nextState.graphState.temporaryConnectionPort != null;
       return hasTemporaryConnection
-        && ! areCoordinatesEqual(nextState.mouseCoordinates, this.state.mouseCoordinates);
+        && !areCoordinatesEqual(nextState.mouseCoordinates, this.state.mouseCoordinates);
     };
 
     const viewportBoundsChanged = () => {
-      return ! areBoundsEqual(nextState.miniMapState.viewportBounds, this.state.miniMapState.viewportBounds);
+      return !areBoundsEqual(nextState.miniMapState.viewportBounds, this.state.miniMapState.viewportBounds);
     }
 
     return nextState.graphState.viewportOffset !== this.state.graphState.viewportOffset
@@ -275,7 +274,7 @@ function getGraphAnchorStyle(graphState: GraphState): any {
 function buildNodes(graphState: GraphState): JSX.Element[] {
   return Object.entries(graphState.nodes)
     .map(([id, nodeState]: [string, NodeState]) => {
-      const definition = nodeDefinitionService.getNodeDefinition(nodeState.kind) as NodeDefinition;
+      const definition = nodeDefinitionService.getNodeDefinition(nodeState.kind);
       return (
         <Node key={id}
               nodeState={nodeState}

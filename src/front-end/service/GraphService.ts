@@ -4,7 +4,7 @@ import {NodeState} from '../state/NodeState';
 import Bounds from '../../document/models/Bounds';
 import {PortModel} from '../../document/models/PortModel';
 import {
-  addNode,
+  addNode, createAudioDestination,
   createNode,
   findPortState,
   isNodeId,
@@ -43,6 +43,12 @@ export default class GraphService extends StoreBasedService<GraphState> {
 
   createAndAddNode(name: string, definition: NodeDefinition, bounds: Bounds): NodeState {
     const n = createNode(definition, bounds, name, this.snapshot);
+    this.addNode(n);
+    return n;
+  }
+
+  addAudioDestination(bounds: Bounds): NodeState {
+    const n = createAudioDestination(bounds, this.snapshot);
     this.addNode(n);
     return n;
   }

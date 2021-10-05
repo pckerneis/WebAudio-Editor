@@ -8,6 +8,7 @@ import {NodeState} from '../../state/NodeState';
 import {constrainBetween} from '../../utils/numbers';
 import {MAX_NODE_WIDTH, MIN_NODE_WIDTH} from '../GraphService';
 import {nextId} from '../../utils/IdentifierGenerator';
+import {NodeKind} from '../../../document/models/NodeKind';
 
 function nextNodeId(knownIds: string[]): string {
   return nextId('Node-', knownIds);
@@ -65,6 +66,26 @@ export function createNode(definition: NodeDefinition,
     name,
     paramValues,
     paramPorts,
+  };
+}
+
+export function createAudioDestination(bounds: Bounds, graphState: GraphState): NodeState {
+  const id = nextNodeId(extractAllNodeIds(graphState));
+  return {
+    id,
+    name: 'destination',
+    kind: NodeKind.destination,
+    paramValues: {},
+    display: {
+      bounds,
+      folded: false,
+    },
+    inputPorts: [{
+      id: id + '-input',
+      kind: PortKind.input,
+    }],
+    outputPorts: [],
+    paramPorts: {},
   };
 }
 

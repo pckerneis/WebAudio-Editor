@@ -158,7 +158,12 @@ function ParamPanel(props: ParamPanelProps) {
     );
 
   return (
-    <div className="ParamPanel" onKeyDown={consumeEvent}>
+    <div
+      className="ParamPanel"
+      onKeyDown={consumeEvent}
+      onKeyPress={consumeEvent}
+      onKeyUp={consumeEvent}
+    >
       {paramElements}
     </div>
   );

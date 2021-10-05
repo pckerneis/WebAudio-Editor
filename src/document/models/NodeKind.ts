@@ -15,6 +15,7 @@ export enum NodeKind {
   mediaStreamDestination = 'mediaStreamDestination',
   mediaStreamSource = 'mediaStreamSource',
   panner = 'panner',
+  destination = 'destination',
 }
 
 export function isNodeKind(candidate: any): candidate is NodeKind {
