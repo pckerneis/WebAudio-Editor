@@ -1,33 +1,28 @@
 import {GraphState} from '../state/GraphState';
 import GraphService from './GraphService';
 import SelectedItemSet from '../utils/SelectedItemSet';
-import {BehaviorSubject, map} from 'rxjs';
+import {map} from 'rxjs';
 import SequenceGenerator from '../utils/SequenceGenerator';
+import StoreBasedService from './helpers/StoreBasedService';
 
-export default class HistoryService {
-
+export default class HistoryService extends StoreBasedService<HistoryState> {
   private readonly sequenceGenerator = new SequenceGenerator();
 
-  private _store = new BehaviorSubject<History>(emptyHistory());
-
-  public readonly current$ = this._store.pipe(
+  public readonly current$ = this.state$.pipe(
     map(s => s.transactions[s.currentIndex]),
   );
 
   constructor(public readonly graphService: GraphService,
               public readonly graphSelection: SelectedItemSet<string>) {
-  }
-
-  public get state(): History {
-    return this._store.value;
+    super(emptyHistory());
   }
 
   public get hasPrevious(): boolean {
-    return this.state.currentIndex > 0;
+    return this.snapshot.currentIndex > 0;
   }
 
   public get hasNext(): boolean {
-    return this.state.currentIndex + 1 < this.state.transactions.length;
+    return this.snapshot.currentIndex + 1 < this.snapshot.transactions.length;
   }
 
   get undoDescription(): string | null {
@@ -53,7 +48,7 @@ export default class HistoryService {
   }
 
   public clearHistory(): void {
-    this._store.next(emptyHistory());
+    this.commit(emptyHistory());
   }
 
   public pushTransaction(description: string): void {
@@ -66,37 +61,34 @@ export default class HistoryService {
     };
 
     const transactions = [
-      ...this.state.transactions.slice(0, this.state.currentIndex + 1),
+      ...this.snapshot.transactions.slice(0, this.snapshot.currentIndex + 1),
       newTransaction,
     ];
 
-    const newState: History = {
+    const newState: HistoryState = {
       transactions,
-      currentIndex: this.state.currentIndex + 1,
+      currentIndex: this.snapshot.currentIndex + 1,
     };
 
-    this._store.next(newState);
+    this.commit(newState);
   }
 
   public undo(): void {
     if (this.hasPrevious) {
-      const newIndex = this.state.currentIndex - 1;
-      const restoredState = this.state.transactions[newIndex];
+      const newIndex = this.snapshot.currentIndex - 1;
+      const restoredState = this.snapshot.transactions[newIndex];
 
       this.graphService.loadState(restoredState.graphState);
       this.graphSelection.setSelection(restoredState.selection);
 
-      this._store.next({
-        ...this.state,
-        currentIndex: newIndex,
-      });
+      this.commit(s => ({...s, currentIndex: newIndex}));
     }
   }
 
   public redo(): void {
     if (this.hasNext) {
-      const newIndex = this.state.currentIndex + 1;
-      const restoredState = this.state.transactions[newIndex];
+      const newIndex = this.snapshot.currentIndex + 1;
+      const restoredState = this.snapshot.transactions[newIndex];
 
       this.graphService.loadState(restoredState.graphState);
       this.graphSelection.setSelection(restoredState.selection);
@@ -104,15 +96,12 @@ export default class HistoryService {
       this.graphService.loadState(restoredState.graphState);
       this.graphSelection.setSelection(restoredState.selection);
 
-      this._store.next({
-        ...this.state,
-        currentIndex: newIndex,
-      });
+      this.commit(s => ({...s, currentIndex: newIndex}));
     }
   }
 
   private get currentTransaction(): Transaction | null {
-    const {currentIndex, transactions} = this.state;
+    const {currentIndex, transactions} = this.snapshot;
     return transactions[currentIndex];
   }
 
@@ -121,17 +110,17 @@ export default class HistoryService {
       return null;
     }
 
-    const {currentIndex, transactions} = this.state;
+    const {currentIndex, transactions} = this.snapshot;
     return transactions[currentIndex + 1];
   }
 }
 
-export interface History {
+export interface HistoryState {
   transactions: Transaction[];
   currentIndex: number;
 }
 
-export function emptyHistory(): History {
+export function emptyHistory(): HistoryState {
   return {
     transactions: [],
     currentIndex: -1,

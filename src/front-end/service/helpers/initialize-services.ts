@@ -1,19 +1,19 @@
-import GraphService from './GraphService';
-import NodeDefinitionService from './NodeDefinitionService';
-import {PortComponentRegistry} from './PortComponentRegistry';
-import CommandService from './CommandService';
-import SelectedItemSet from '../utils/SelectedItemSet';
+import GraphService from '../GraphService';
+import NodeDefinitionService from '../NodeDefinitionService';
+import {PortComponentRegistry} from '../PortComponentRegistry';
+import CommandService from '../CommandService';
+import SelectedItemSet from '../../utils/SelectedItemSet';
 import SingletonWrapper from './SingletonWrapper';
-import {getNodeDefinitions} from '../../document/node-definitions/StandardNodesDefinitions';
-import {loadDemoProject} from '../../project-setup';
-import GraphServiceCommandHandler from './command-handlers/GraphServiceCommandHandler';
-import getAllCommands from './commands/Commands';
-import PersistenceService from './PersistenceService';
-import ProjectService from './ProjectService';
-import MessageService from './MessageService';
-import HistoryService from './HistoryService';
-import HistoryServiceCommandHandler from './command-handlers/HistoryServiceCommandHandler';
-import LayoutService from './LayoutService';
+import {getNodeDefinitions} from '../../../document/node-definitions/StandardNodesDefinitions';
+import {loadDemoProject} from '../../../project-setup';
+import GraphServiceCommandHandler from '../command-handlers/GraphServiceCommandHandler';
+import getAllCommands from '../commands/Commands';
+import PersistenceService from '../PersistenceService';
+import ProjectService from '../ProjectService';
+import MessageService from '../MessageService';
+import HistoryService from '../HistoryService';
+import HistoryServiceCommandHandler from '../command-handlers/HistoryServiceCommandHandler';
+import LayoutService from '../LayoutService';
 
 export default function initializeOrGetServices(): Services {
   const firstInitialization = ! SingletonWrapper.hasInstance(GraphService);

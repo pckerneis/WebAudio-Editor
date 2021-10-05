@@ -1,4 +1,4 @@
-import StoreBasedService from './StoreBasedService';
+import StoreBasedService from './helpers/StoreBasedService';
 
 export default class LayoutService extends StoreBasedService<Layout> {
   constructor() {

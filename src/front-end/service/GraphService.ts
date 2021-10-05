@@ -1,4 +1,3 @@
-import {BehaviorSubject, Observable} from 'rxjs';
 import {getInitialGraphModel, GraphState} from '../state/GraphState';
 import Coordinates from '../../document/models/Coordinates';
 import {NodeState} from '../state/NodeState';
@@ -11,7 +10,8 @@ import {
   isNodeId,
   sendNodeToFront,
   setNodeName,
-  setNodePosition, setNodeWidth,
+  setNodePosition,
+  setNodeWidth,
   setParamValue,
   toggleNodeFoldState
 } from './actions/NodeCommands';
@@ -26,26 +26,19 @@ import {
 } from './actions/ConnectionCommands';
 import {translateViewport} from './actions/ViewportCommands';
 import {NodeDefinition} from '../../document/node-definitions/NodeDefinition';
+import StoreBasedService from './helpers/StoreBasedService';
 
 export const DEFAULT_NODE_WIDTH = 150;
 export const MIN_NODE_WIDTH = 80;
 export const MAX_NODE_WIDTH = 400;
 
-export default class GraphService {
-  public readonly state$: Observable<GraphState>;
-
-  private _store = new BehaviorSubject<GraphState>(getInitialGraphModel());
-
-  get snapshot(): GraphState {
-    return this._store.value;
-  };
-
+export default class GraphService extends StoreBasedService<GraphState> {
   constructor() {
-    this.state$ = this._store.asObservable();
+    super(getInitialGraphModel());
   }
 
   setViewportTranslate(coordinates: Coordinates): void {
-    this._store.next(translateViewport(coordinates, this.snapshot));
+    this.commit(s => translateViewport(coordinates, s));
   }
 
   createAndAddNode(name: string, definition: NodeDefinition, bounds: Bounds): NodeState {
@@ -55,40 +48,40 @@ export default class GraphService {
   }
 
   private addNode(node: NodeState): void {
-    this._store.next(addNode(node.id, node, this.snapshot));
+    this.commit(s => addNode(node.id, node, s));
   }
 
   setNodePosition(id: string, coordinates: Coordinates): void {
-    this._store.next(setNodePosition(id, coordinates, this.snapshot));
+    this.commit(s => setNodePosition(id, coordinates, s));
   }
 
   sendNodeToFront(id: string): void {
-    this._store.next(sendNodeToFront(id, this.snapshot));
+    this.commit(s => sendNodeToFront(id, s));
   }
 
   setNodeName(id: string, name: string): void {
-    this._store.next(setNodeName(id, name, this.snapshot));
+    this.commit(s => setNodeName(id, name, s));
   }
 
   toggleNodeFoldState(id: string): void {
-    this._store.next(toggleNodeFoldState(id, this.snapshot));
+    this.commit(s => toggleNodeFoldState(id, s));
   }
 
   addConnection(sourceNodeId: string, sourcePortIndex: number,
                 targetNodeId: string, targetPortIndex: number): void {
-    this._store.next(addConnection(sourceNodeId, sourcePortIndex, targetNodeId, targetPortIndex, this.snapshot));
+    this.commit(s => addConnection(sourceNodeId, sourcePortIndex, targetNodeId, targetPortIndex, s));
   }
 
   createTemporaryConnection(portId: string): any {
-    this._store.next(createTemporaryConnection(portId, this.snapshot));
+    this.commit(s => createTemporaryConnection(portId, s));
   }
 
   applyTemporaryConnection(portId: string): any {
-    this._store.next(applyTemporaryConnection(portId, this.snapshot));
+    this.commit(s => applyTemporaryConnection(portId, s));
   }
 
   removeTemporaryConnection(): void {
-    this._store.next(removeTemporaryConnection(this.snapshot));
+    this.commit(s => removeTemporaryConnection(s));
   }
 
   findPortState(id: string): PortModel | null {
@@ -100,11 +93,11 @@ export default class GraphService {
   }
 
   setParamValue(nodeId: string, paramName: string, value: any): void {
-    this._store.next(setParamValue(nodeId, paramName, value, this.snapshot));
+    this.commit(s => setParamValue(nodeId, paramName, value, s));
   }
 
   remove(items: string[]): void {
-    this._store.next(remove(items, this.snapshot));
+    this.commit(s => remove(items, s));
   }
 
   hasTemporaryConnection(): boolean {
@@ -112,11 +105,11 @@ export default class GraphService {
   }
 
   loadState(graphState: GraphState): void {
-    this._store.next(graphState);
+    this.commit(() => graphState);
   }
 
   setNodeWidth(nodeId: string, newWidth: number): void {
-    this._store.next(setNodeWidth(nodeId, newWidth, this.snapshot));
+    this.commit(s => setNodeWidth(nodeId, newWidth, s));
   }
 }
 

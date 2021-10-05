@@ -13,8 +13,13 @@ export default abstract class StoreBasedService<S> {
     return this._store.value;
   }
 
-  protected commit(mapper: StateMapper<S>): void {
-    return this._store.next(mapper(this.snapshot));
+  protected commit(stateOrMapper: S | StateMapper<S>): void {
+    if (typeof stateOrMapper === 'function') {
+      const mapper = stateOrMapper as StateMapper<S>;
+      return this._store.next(mapper(this.snapshot));
+    } else {
+      return this._store.next(stateOrMapper);
+    }
   }
 }
 

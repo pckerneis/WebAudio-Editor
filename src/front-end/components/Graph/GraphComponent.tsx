@@ -14,7 +14,7 @@ import {
   hitsConnectionCurve
 } from '../../ui-utils/ConnectionCurve';
 import {consumeEvent} from '../../ui-utils/events';
-import initializeOrGetServices from '../../service/initialize-services';
+import initializeOrGetServices from '../../service/helpers/initialize-services';
 import {arePrimitiveArraysEqual} from '../../utils/arrays';
 import MiniMap, {computeMiniMapState} from '../MiniMap/MiniMap';
 import {getEmptyMiniMapState, MiniMapState} from '../../state/MiniMapState';

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import {consumeEvent} from '../../ui-utils/events';
 import {ParamDefinition, ParamType} from '../../../document/node-definitions/NodeDefinition';
 import {ParamPorts, ParamValues} from '../../../document/models/NodeModel';
-import initializeOrGetServices from '../../service/initialize-services';
+import initializeOrGetServices from '../../service/helpers/initialize-services';
 import {TransactionNames} from '../../service/HistoryService';
 import debounce from '../../ui-utils/debounce';
 

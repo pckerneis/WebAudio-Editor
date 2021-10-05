@@ -1,7 +1,7 @@
 import React, {useCallback} from 'react';
 import './MessageQueue.css';
 import {consumeEvent} from '../../ui-utils/events';
-import initializeOrGetServices from '../../service/initialize-services';
+import initializeOrGetServices from '../../service/helpers/initialize-services';
 import {Message} from '../../service/MessageService';
 import WrapAsState from '../../ui-utils/WrapAsState';
 

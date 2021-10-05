@@ -1,7 +1,7 @@
 import './MenuBar.css';
 import React, {ChangeEvent} from 'react';
 import ProjectBurgerMenu from './ProjectMenu/ProjectBurgerMenu';
-import initializeOrGetServices from '../../service/initialize-services';
+import initializeOrGetServices from '../../service/helpers/initialize-services';
 import right from './right.svg';
 import {pluck} from 'rxjs';
 import WrapAsState from '../../ui-utils/WrapAsState';

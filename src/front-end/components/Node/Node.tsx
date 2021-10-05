@@ -13,7 +13,7 @@ import Coordinates from '../../../document/models/Coordinates';
 import Bounds, {areBoundsEqual} from '../../../document/models/Bounds';
 import {buildReferencedPorts} from './Port';
 import {NodeDefinition} from '../../../document/node-definitions/NodeDefinition';
-import initializeOrGetServices from '../../service/initialize-services';
+import initializeOrGetServices from '../../service/helpers/initialize-services';
 import {TransactionNames} from '../../service/HistoryService';
 
 const {historyService, graphService, graphSelection, portRegistry} = initializeOrGetServices();

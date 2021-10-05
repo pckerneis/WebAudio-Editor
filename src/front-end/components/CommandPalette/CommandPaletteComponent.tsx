@@ -2,7 +2,7 @@ import './CommandPaletteComponent.css';
 import React, {useCallback, useEffect, useState} from 'react';
 import {consumeEvent, isEnterKeyEvent, isEscapeKeyEvent} from '../../ui-utils/events';
 import {RegisteredCommand} from '../../service/CommandService';
-import initializeOrGetServices from '../../service/initialize-services';
+import initializeOrGetServices from '../../service/helpers/initialize-services';
 
 const {
   commandService

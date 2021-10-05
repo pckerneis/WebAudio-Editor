@@ -1,23 +1,12 @@
-import {BehaviorSubject, Observable} from 'rxjs';
 import {getInitialProjectState, ProjectState} from '../state/ProjectState';
+import StoreBasedService from './helpers/StoreBasedService';
 
-export default class ProjectService {
-  public readonly state$: Observable<ProjectState>;
-
-  private _store = new BehaviorSubject<ProjectState>(getInitialProjectState());
-
+export default class ProjectService extends StoreBasedService<ProjectState> {
   constructor() {
-    this.state$ = this._store.asObservable();
-  }
-
-  get snapshot(): ProjectState {
-    return this._store.value;
+    super(getInitialProjectState());
   }
 
   setProjectName(projectName: string): void {
-    this._store.next({
-      ...this.snapshot,
-      projectName,
-    });
+    this.commit(s => ({...s, projectName}));
   }
 }

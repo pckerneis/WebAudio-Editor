@@ -3,7 +3,7 @@ import React, {useCallback, useRef, useState} from 'react';
 import {consumeEvent, isEnterKeyEvent} from '../../../ui-utils/events';
 import './ProjectBurgerMenu.css'
 import WrapAsState from '../../../ui-utils/WrapAsState';
-import initializeOrGetServices from '../../../service/initialize-services';
+import initializeOrGetServices from '../../../service/helpers/initialize-services';
 import {pluck} from 'rxjs';
 
 const {projectService, persistenceService, layoutService} = initializeOrGetServices();

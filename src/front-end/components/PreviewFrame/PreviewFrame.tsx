@@ -2,7 +2,7 @@ import React, {createRef, useEffect} from 'react';
 import './PreviewFrame.css'
 import {Preview} from './Preview';
 import ReactDOMServer from 'react-dom/server'
-import initializeOrGetServices from '../../service/initialize-services';
+import initializeOrGetServices from '../../service/helpers/initialize-services';
 import WrapAsState from '../../ui-utils/WrapAsState';
 import {emptyLayout} from '../../service/LayoutService';
 
