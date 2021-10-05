@@ -49,8 +49,15 @@ function ParamPanel(props: ParamPanelProps) {
         const paramName = definition.name;
         const currentValue = paramValues[paramName];
 
-        const handleInputChange = (evt: any) => {
+        const handleInputValueChange = (evt: any) => {
           const value = evt.target.value;
+          graphService.setParamValue(nodeId, paramName, value);
+
+          pushNodeParamChangeTransactionDebounced();
+        };
+
+        const handleCheckedChange = (evt: any) => {
+          const value = evt.target.checked;
           graphService.setParamValue(nodeId, paramName, value);
 
           pushNodeParamChangeTransactionDebounced();
@@ -70,7 +77,7 @@ function ParamPanel(props: ParamPanelProps) {
               className="ParamValue"
               key={paramName + '_select'}
               value={currentValue}
-              onChange={handleInputChange}
+              onChange={handleInputValueChange}
               onPointerDown={handleInputPointerDown}
             >
               {options}
@@ -84,7 +91,7 @@ function ParamPanel(props: ParamPanelProps) {
               value={currentValue}
               min={definition.min}
               max={definition.max}
-              onChange={handleInputChange}
+              onChange={handleInputValueChange}
               onPointerDown={handleInputPointerDown}
             />;
             break;
@@ -93,8 +100,8 @@ function ParamPanel(props: ParamPanelProps) {
               className="ParamValue"
               key={paramName + '_input'}
               type="checkbox"
-              value={currentValue}
-              onChange={handleInputChange}
+              checked={currentValue}
+              onChange={handleCheckedChange}
               onPointerDown={handleInputPointerDown}
             />;
             break;
@@ -106,7 +113,7 @@ function ParamPanel(props: ParamPanelProps) {
               value={currentValue}
               min={definition?.min}
               max={definition?.max}
-              onChange={handleInputChange}
+              onChange={handleInputValueChange}
               onPointerDown={handleInputPointerDown}
             />;
             break;

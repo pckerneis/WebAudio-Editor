@@ -4,6 +4,12 @@ import WebAudioGraphBuilderOptions from './WebAudioGraphBuilderOptions';
 import {NodeModel} from '../document/models/NodeModel';
 import {NodeKind} from '../document/models/NodeKind';
 import {ConnectionModel} from '../document/models/ConnectionModel';
+import {
+  AudioParamValueSetter,
+  AudioScheduledSourceNodeValueSetter, OscillatorNodeValueSetter,
+  OwnPropertyValueSetter,
+  ParamValueSetter
+} from './ParamValueSetter';
 
 interface BuildResult {
   error?: any;
@@ -30,6 +36,14 @@ enum ConnectionMatchKind {
 }
 
 export class WebAudioGraphBuilder {
+
+  private readonly paramValueSetters: ParamValueSetter[] = [
+    new AudioParamValueSetter(),
+    new OwnPropertyValueSetter(),
+    new AudioScheduledSourceNodeValueSetter(),
+    new OscillatorNodeValueSetter(),
+  ];
+
   validate(document: ProjectDocument): void {
     isValidProjectDocument(document);
   }
@@ -54,23 +68,12 @@ export class WebAudioGraphBuilder {
     const nodes: AudioNodes = {};
 
     Object.entries(document.audioGraph.nodes).forEach(([id, model]) => {
-      const node = buildNode(model, context);
-      nodes[id] = node;
+      const audioNode = buildNode(model, context);
+      nodes[id] = audioNode;
       Object.entries(model.paramValues).forEach(entry => {
         const paramName = entry[0] as keyof AudioNode;
         const value = entry[1];
-        const candidate: any = node[paramName];
-
-        if (candidate instanceof AudioParam) {
-          candidate.setValueAtTime(value, 0);
-        } else {
-          const propertyDescriptor = Object.getOwnPropertyDescriptor(node, paramName);
-          if (propertyDescriptor && propertyDescriptor.writable) {
-            (node[paramName] as any) = value;
-          } else {
-            console.debug(`Could not set value "${value}" on property "${paramName}" for node with ID "${id}".`);
-          }
-        }
+        this.setNodeParamValue(id, audioNode, paramName, value);
       });
     });
 
@@ -83,6 +86,19 @@ export class WebAudioGraphBuilder {
     return {
       connections, context, nodes,
     };
+  }
+
+  private setNodeParamValue(id: string,
+                            audioNode: AudioNode,
+                            paramName: keyof AudioNode,
+                            value: any) {
+    for (const setter of this.paramValueSetters) {
+      if (setter.handleValueChange(audioNode, paramName, value)) {
+        return;
+      }
+    }
+
+    console.warn(`Could not set value "${value}" on property "${paramName}" for node with ID "${id}".`);
   }
 
   private applyConnection(connection: ConnectionModel, nodes: AudioNodes, document: ProjectDocument): void {
@@ -162,12 +178,7 @@ type ConnectionMatch = NodeInputMatch
 type AudioNodeBuilders = { [kind in NodeKind]: (ctx: AudioContext, ...args: any[]) => AudioNode };
 
 const nodeBuilders: AudioNodeBuilders = {
-  [NodeKind.osc]: (ctx: AudioContext) => {
-    const osc = ctx.createOscillator();
-    // TODO add 'started' param
-    osc.start();
-    return osc;
-  },
+  [NodeKind.osc]: (ctx: AudioContext) => ctx.createOscillator(),
   [NodeKind.gain]: (ctx: AudioContext) => ctx.createGain(),
   [NodeKind.delay]: (ctx: AudioContext, ...args: any[]) => ctx.createDelay(args[0]),
   [NodeKind.analyser]: (ctx: AudioContext) => ctx.createAnalyser(),

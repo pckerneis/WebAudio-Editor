@@ -31,6 +31,11 @@ export function getNodeDefinitions(): NodeDefinition[] {
           min: -MAX_DETUNE,
           max: MAX_DETUNE,
           acceptsInput: true,
+        },
+        {
+          name: 'started',
+          type: ParamType.boolean,
+          defaultValue: false,
         }
       ],
     },
