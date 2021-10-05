@@ -2,4 +2,14 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    cursor: default;
+}
+
+.EditableLabelRead.placeholder {
+    font-style: italic;
+    color: var(--disabled-text-color);
+}
+
+input.EditableLabel {
+    background-color: transparent;
 }

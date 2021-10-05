@@ -2,9 +2,10 @@ import burger from './burger.svg';
 import React, {useCallback, useRef, useState} from 'react';
 import {consumeEvent, isEnterKeyEvent} from '../../../ui-utils/events';
 import './ProjectBurgerMenu.css'
-import WrapAsState from '../../../ui-utils/WrapAsState';
+import useObservableState from '../../../ui-utils/UseObservableState';
 import initializeOrGetServices from '../../../service/helpers/initialize-services';
 import {pluck} from 'rxjs';
+import OpenProjectWindow from '../OpenProjectWindow/OpenProjectWindow';
 
 const DEFAULT_FILE_NAME = 'untitled-audio-graph';
 
@@ -12,7 +13,7 @@ const {projectService, persistenceService, layoutService} = initializeOrGetServi
 
 export default function ProjectBurgerMenu() {
   const projectName$ = projectService.state$.pipe(pluck('projectName'));
-  const [projectName] = WrapAsState(projectName$, '');
+  const [projectName] = useObservableState(projectName$, '');
   const [isMenuVisible, setMenuVisible] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -61,13 +62,11 @@ export default function ProjectBurgerMenu() {
     }
   }, [setMenuVisible, downloadAsJson]);
 
-  const openPreview = () => {
-    layoutService.openPreviewFrame();
-  };
-
   const createNewProject = () => {
     persistenceService.createNewProject();
   };
+
+  const openProject = () => layoutService.showOpenProject();
 
   return (
     <div style={{width: 38}}>
@@ -89,17 +88,17 @@ export default function ProjectBurgerMenu() {
             Create new project
           </li>
           <li tabIndex={0}
+              onPointerDown={openProject}
+          >
+            Open project
+          </li>
+          <li tabIndex={0}
               onPointerDown={loadFromJson}
               onKeyDown={loadFromJsonKeyHandler}>Load from JSON
           </li>
           <li tabIndex={0}
               onPointerDown={downloadAsJson}
               onKeyDown={downloadAsJsonKeyHandler}>Download as JSON
-          </li>
-          <li tabIndex={0}
-              onPointerDown={openPreview}
-          >
-            Preview rendered graph
           </li>
         </ul>
       </div>
@@ -110,6 +109,7 @@ export default function ProjectBurgerMenu() {
         style={{display: 'none'}}
         onChange={handleFileChange}
       />
+      <OpenProjectWindow/>
     </div>);
 }
 

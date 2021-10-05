@@ -3,12 +3,12 @@ import './MessageQueue.css';
 import {consumeEvent} from '../../ui-utils/events';
 import initializeOrGetServices from '../../service/helpers/initialize-services';
 import {Message} from '../../service/MessageService';
-import WrapAsState from '../../ui-utils/WrapAsState';
+import useObservableState from '../../ui-utils/UseObservableState';
 
 const {messageService} = initializeOrGetServices();
 
 export default function MessageQueue() {
-  const [messages] = WrapAsState(messageService.messages$, []);
+  const [messages] = useObservableState(messageService.messages$, []);
 
   const handleCloseClick = useCallback((msg: Message, evt: any) => {
     messageService.close(msg.id);

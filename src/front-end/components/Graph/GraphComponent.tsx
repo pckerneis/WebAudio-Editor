@@ -29,6 +29,7 @@ const {
   portRegistry,
   graphSelection,
   historyService,
+  localeStorageService,
 } = initializeOrGetServices();
 
 interface GraphComponentState {
@@ -181,6 +182,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
         if (suitablePort) {
           graphService.applyTemporaryConnection(suitablePort.id);
           historyService.pushTransaction(TransactionNames.CREATE_CONNECTION);
+          localeStorageService.pushSnapshot();
         } else {
           graphService.removeTemporaryConnection();
         }
@@ -201,6 +203,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
       if (e.code === 'Delete' || e.code === 'Backspace') {
         graphService.remove(graphSelection.items);
         historyService.pushTransaction(TransactionNames.DELETE_SELECTION);
+        localeStorageService.pushSnapshot();
         consumeEvent(e);
       }
     };

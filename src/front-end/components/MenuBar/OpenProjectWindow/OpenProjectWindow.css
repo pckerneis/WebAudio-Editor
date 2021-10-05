@@ -1,0 +1,50 @@
+.OpenProjectWindow {
+    width: 300px;
+    height: 400px;
+    margin: auto;
+    background: var(--primary-background-color);
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    color: var(--primary-text-color);
+    user-select: none;
+}
+
+.OpenProjectWindow > span {
+    margin:  2px auto 6px;
+    font-weight: bold;
+}
+
+.OpenProjectWindow .ProjectList {
+    background: var(--secondary-background-color);
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.OpenProjectWindowHeader {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 8px;
+    align-items: flex-end;
+    font-size: smaller;
+}
+
+.OpenProjectWindowRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 8px;
+    align-items: flex-end;
+}
+
+.OpenProjectWindowRow:hover {
+    background-color: var(--item-focus);
+}
+
+.OpenProjectWindowRow:active {
+    background-color: var(--item-focus);
+}
+
+.OpenProjectWindowRow span:not(:first-child) {
+    font-size: smaller;
+}
+

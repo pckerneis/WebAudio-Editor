@@ -1,14 +1,14 @@
-import PropTypes from 'prop-types';
 import React, {useRef, useState} from 'react';
 import {consumeEvent, isEnterKeyEvent} from '../../ui-utils/events';
 import './EditableLabel.css';
 
-export default function EditableLabel(props: any) {
+export default function EditableLabel(props: EditableLabelProps) {
   const {
     onChange,
     value,
-    style,
+    inputStyle,
     className,
+    placeHolder,
   } = props;
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -34,6 +34,7 @@ export default function EditableLabel(props: any) {
 
   const content = editable ? (
     <input
+      className="EditableLabel"
       ref={inputRef}
       value={transientValue}
       autoFocus
@@ -43,9 +44,13 @@ export default function EditableLabel(props: any) {
       onKeyDown={consumeEvent}
       onKeyUp={handleKeyUp}
       onBlur={sendValueAndClose}
-      style={({...style, width: '100%'})}/>
+      placeholder={placeHolder}
+      style={({...inputStyle, width: '100%'})}/>
   ) : (
-    <span className="EditableLabelRead" style={({margin: '1px', textAlign: 'center'})}>{value}</span>
+    <span className={`EditableLabelRead${value ? '' : ' placeholder'}`}
+          style={({margin: '1px', textAlign: 'center'})}>
+      {value || placeHolder}
+    </span>
   );
 
   return (
@@ -57,11 +62,10 @@ export default function EditableLabel(props: any) {
   );
 }
 
-const {func, string, shape} = PropTypes;
-
-EditableLabel.propTypes = {
-  onChange: func.isRequired,
-  value: string.isRequired,
-  style: shape({}),
-  className: string,
-};
+interface EditableLabelProps {
+  onChange: Function,
+  value: string,
+  inputStyle?: React.CSSProperties;
+  className?: string,
+  placeHolder?: string,
+}

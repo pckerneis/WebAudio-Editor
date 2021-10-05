@@ -5,7 +5,6 @@ import CommandService from '../CommandService';
 import SelectedItemSet from '../../utils/SelectedItemSet';
 import SingletonWrapper from './SingletonWrapper';
 import {getNodeDefinitions} from '../../../document/node-definitions/StandardNodesDefinitions';
-import {loadDemoProject} from '../../../project-setup';
 import GraphServiceCommandHandler from '../command-handlers/GraphServiceCommandHandler';
 import getAllCommands from '../commands/Commands';
 import PersistenceService from '../PersistenceService';
@@ -15,6 +14,7 @@ import HistoryService from '../HistoryService';
 import HistoryServiceCommandHandler from '../command-handlers/HistoryServiceCommandHandler';
 import LayoutService from '../LayoutService';
 import PlayService from '../PlayService';
+import LocaleStorageService from '../LocaleStorageService';
 
 export default function initializeOrGetServices(): Services {
   const firstInitialization = ! SingletonWrapper.hasInstance(GraphService);
@@ -31,16 +31,11 @@ export default function initializeOrGetServices(): Services {
   const persistenceService = SingletonWrapper.get(PersistenceService, graphService, projectService, graphSelection, messageService, historyService);
   const layoutService = SingletonWrapper.get(LayoutService);
   const playService = SingletonWrapper.get(PlayService, persistenceService, messageService);
+  const localeStorageService = SingletonWrapper.get(LocaleStorageService, graphService, graphSelection, projectService);
 
   if (firstInitialization) {
-    loadDemoProject(
-      graphService,
-      graphSelection,
-      historyService,
-      nodeDefinitionService);
-
     commandService.registerCommandHandlers(
-      new GraphServiceCommandHandler(graphService, nodeDefinitionService, graphSelection, historyService),
+      new GraphServiceCommandHandler(graphService, nodeDefinitionService, graphSelection, historyService, localeStorageService),
       new HistoryServiceCommandHandler(historyService),
     );
   }
@@ -57,6 +52,7 @@ export default function initializeOrGetServices(): Services {
     historyService,
     layoutService,
     playService,
+    localeStorageService,
   }
 }
 
@@ -72,4 +68,5 @@ export interface Services {
   historyService: HistoryService;
   layoutService: LayoutService;
   playService: PlayService;
+  localeStorageService: LocaleStorageService;
 }

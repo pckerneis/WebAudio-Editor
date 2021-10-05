@@ -3,16 +3,17 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {consumeEvent, isEnterKeyEvent, isEscapeKeyEvent} from '../../ui-utils/events';
 import {RegisteredCommand} from '../../service/CommandService';
 import initializeOrGetServices from '../../service/helpers/initialize-services';
+import {ModalWindow} from '../ModalWindow/ModalWindow';
+import useObservableState from '../../ui-utils/UseObservableState';
 
 const {
-  commandService
+  commandService,
+  layoutService,
 } = initializeOrGetServices();
 
 export default function CommandPaletteComponent(): JSX.Element {
-  const [
-    isCommandPaletteVisible,
-    setCommandPaletteVisible
-  ] = useState(false);
+  const [isCommandPaletteVisible] = useObservableState(layoutService.isCommandPaletteVisible$, false);
+  const [hasModalWindow] = useObservableState(layoutService.hasModalWindow$, false);
 
   const commands = commandService.registeredCommands;
 
@@ -39,19 +40,17 @@ export default function CommandPaletteComponent(): JSX.Element {
 
   const resetAndClose = () => {
     setFoundCommands(commands.map(cmd => cmd.path));
-    setCommandPaletteVisible(false);
+    layoutService.closeCommandPalette();
   };
 
   useEffect(() => {
     const handleKeyDown = (evt: any) => {
-      if (!isCommandPaletteVisible) {
-        if (evt.code === 'Space') {
-          if (foundCommands.length > 0) {
-            setCommandPaletteVisible(true);
-            consumeEvent(evt);
-          }
-        }
+      if (!hasModalWindow && evt.code === 'Space' && foundCommands.length > 0) {
+        layoutService.showCommandPalette();
+        consumeEvent(evt);
+      }
 
+      if (! isCommandPaletteVisible) {
         return;
       }
 
@@ -116,11 +115,6 @@ export default function CommandPaletteComponent(): JSX.Element {
 
   const hasFilter = filter.length > 0;
 
-  const handleBackdropClick = (evt: any) => {
-    resetAndClose();
-    consumeEvent(evt);
-  };
-
   const handleCommandRowClick = (evt: any, cmd: RegisteredCommand) => {
     if (!cmd.disabled) {
       commandService.executeCommand(cmd.path);
@@ -130,9 +124,9 @@ export default function CommandPaletteComponent(): JSX.Element {
   };
 
   return (
-    isCommandPaletteVisible &&
-    <div className="CommandPaletteBackdrop"
-         onClick={handleBackdropClick}
+    <ModalWindow
+      visible={isCommandPaletteVisible}
+      close={resetAndClose}
     >
       <div className="CommandPalette drop-shadow" onClick={consumeEvent}>
         <input
@@ -152,7 +146,7 @@ export default function CommandPaletteComponent(): JSX.Element {
           </div>
         }
       </div>
-    </div>
+    </ModalWindow>
   ) as JSX.Element;
 }
 

@@ -8,17 +8,18 @@ import initializeOrGetServices from '../../service/helpers/initialize-services';
 import {TransactionNames} from '../../service/HistoryService';
 import debounce from '../../ui-utils/debounce';
 
-const pushNodeParamChangeTransactionDebounced = debounce(
-  () => historyService.pushTransaction(TransactionNames.SET_NODE_PARAM),
-  500,
-);
-
 const {
   graphService,
   portRegistry,
   graphSelection,
   historyService,
+  localeStorageService,
 } = initializeOrGetServices();
+
+const pushNodeParamChangeTransactionDebounced = debounce(() => {
+    historyService.pushTransaction(TransactionNames.SET_NODE_PARAM);
+    localeStorageService.pushSnapshot();
+  }, 500);
 
 interface ParamPanelProps {
   nodeId: string;

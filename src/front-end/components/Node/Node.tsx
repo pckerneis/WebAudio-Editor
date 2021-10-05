@@ -16,7 +16,13 @@ import {NodeDefinition} from '../../../document/node-definitions/NodeDefinition'
 import initializeOrGetServices from '../../service/helpers/initialize-services';
 import {TransactionNames} from '../../service/HistoryService';
 
-const {historyService, graphService, graphSelection, portRegistry} = initializeOrGetServices();
+const {
+  historyService,
+  graphService,
+  graphSelection,
+  portRegistry,
+  localeStorageService,
+} = initializeOrGetServices();
 
 interface NodeProps {
   nodeState: NodeState;
@@ -116,12 +122,14 @@ function Node(props: NodeProps) {
   const handleDragEnd = ({dragDistanceSquared}: { dragDistanceSquared: number }) => {
     if (dragDistanceSquared > 1) {
       historyService.pushTransaction(TransactionNames.MOVE_SELECTION);
+      localeStorageService.pushSnapshot();
     }
   };
 
   const handleNameChange = (name: string) => {
     graphService.setNodeName(nodeState.id, name);
     historyService.pushTransaction(TransactionNames.SET_NODE_NAME);
+    localeStorageService.pushSnapshot();
   };
 
   const handleResize = (coordinates: Coordinates) => {
