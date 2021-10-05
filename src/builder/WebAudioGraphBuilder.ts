@@ -29,7 +29,7 @@ export class WebAudioGraphBuilder {
   }
 
   build(document: ProjectDocument,
-        options: Partial<WebAudioGraphBuilderOptions>): BuildResult {
+        options?: Partial<WebAudioGraphBuilderOptions>): BuildResult {
     try {
       return {
         audioGraph: this.doBuild(document, options),
@@ -43,12 +43,12 @@ export class WebAudioGraphBuilder {
   }
 
   private doBuild(document: ProjectDocument,
-                  options: Partial<WebAudioGraphBuilderOptions>): AudioGraph {
-    const context = options.audioContext ?? new AudioContext(options?.audioContextOptions);
+                  options?: Partial<WebAudioGraphBuilderOptions>): AudioGraph {
+    const context = options?.audioContext ?? new AudioContext(options?.audioContextOptions);
     const nodes: AudioNodes = {};
 
     Object.entries(document.audioGraph.nodes).forEach(([id, model]) => {
-      nodes[id] = this.buildNode(model, context);
+      nodes[id] = buildNode(model, context);
     });
 
     document.audioGraph.connections.forEach(connection => {
@@ -60,10 +60,6 @@ export class WebAudioGraphBuilder {
     return {
       connections, context, nodes,
     };
-  }
-
-  private buildNode(nodeModel: NodeModel, ctx: AudioContext): AudioNode {
-    return nodeBuilders[nodeModel.kind](ctx);
   }
 
   private applyConnection(connection: ConnectionModel, nodes: AudioNodes, document: ProjectDocument): void {
@@ -83,7 +79,7 @@ export class WebAudioGraphBuilder {
       const nodeId = node.id;
       const inputIndex = node.inputPorts.map(p => p.id).indexOf(portId);
 
-      if (inputIndex > 0) {
+      if (inputIndex >= 0) {
         return {
           kind: ConnectionMatchKind.nodeInput,
           nodeId,
@@ -91,10 +87,9 @@ export class WebAudioGraphBuilder {
         } as ConnectionMatch;
       }
 
-
       const outputIndex = node.outputPorts.map(p => p.id).indexOf(portId);
 
-      if (outputIndex > 0) {
+      if (outputIndex >= 0) {
         return {
           kind: ConnectionMatchKind.nodeOutput,
           nodeId,
@@ -166,6 +161,10 @@ const nodeBuilders: AudioNodeBuilders = {
   [NodeKind.mediaStreamDestination]: (ctx: AudioContext) => ctx.createMediaStreamDestination(),
   [NodeKind.mediaStreamSource]: (ctx: AudioContext, ...args: any[]) => ctx.createMediaStreamSource(args[0]),
   [NodeKind.panner]: (ctx: AudioContext) => ctx.createPanner(),
+}
+
+function buildNode(nodeModel: NodeModel, ctx: AudioContext): AudioNode {
+  return nodeBuilders[nodeModel.kind](ctx);
 }
 
 function connectIfLegal(firstMatch: ConnectionMatch, secondMatch: ConnectionMatch, nodes: AudioNodes): boolean {
