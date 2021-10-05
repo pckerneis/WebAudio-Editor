@@ -18,11 +18,11 @@ export default class PersistenceService {
               public readonly historyService: HistoryService) {
   }
 
-  getStateAsJsonString(): string {
+  public getStateAsJsonString(): string {
     return JSON.stringify(this.getState());
   }
 
-  private getState(): ProjectDocument {
+  public getState(): ProjectDocument {
     const {temporaryConnectionPort, ...graphState} = this.graphService.snapshot;
     const projectName = this.projectService.snapshot.projectName;
 
@@ -34,7 +34,7 @@ export default class PersistenceService {
     }
   }
 
-  loadFromJsonString(jsonString: string): void {
+  public loadFromJsonString(jsonString: string): void {
     try{
       const parsed = JSON.parse(jsonString);
 
@@ -57,7 +57,7 @@ export default class PersistenceService {
     }
   }
 
-  createNewProject(): void {
+  public createNewProject(): void {
     this.projectService.setProjectName(DEFAULT_PROJECT_NAME);
     this.graphSelection.setSelection([]);
     this.graphService.loadState(getInitialGraphModel());

@@ -24,8 +24,8 @@ export function App() {
       <GraphComponent/>
       <MenuBar/>
       <CommandPaletteComponent/>
-      <MessageQueue/>
       <PreviewFrame/>
+      <MessageQueue/>
     </div>
   );
 }
