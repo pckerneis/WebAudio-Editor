@@ -6,3 +6,4 @@ export default class SequenceGenerator {
     return '' + this._count;
   }
 }
+

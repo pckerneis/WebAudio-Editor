@@ -26,8 +26,8 @@ export default function initializeOrGetServices(): Services {
   const commandService = SingletonWrapper.get(CommandService, getAllCommands());
   const projectService = SingletonWrapper.get(ProjectService);
   const messageService = SingletonWrapper.get(MessageService);
-  const persistenceService = SingletonWrapper.get(PersistenceService, graphService, projectService, graphSelection, messageService);
   const historyService = SingletonWrapper.get(HistoryService, graphService, graphSelection);
+  const persistenceService = SingletonWrapper.get(PersistenceService, graphService, projectService, graphSelection, messageService, historyService);
   const layoutService = SingletonWrapper.get(LayoutService);
 
   if (firstInitialization) {

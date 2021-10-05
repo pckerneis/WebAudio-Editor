@@ -3,12 +3,10 @@ import {PortKind} from '../../../document/models/PortModel';
 import {ConnectionState} from '../../state/ConnectionState';
 import {NodeState} from '../../state/NodeState';
 import {assertNodeExists, findPortState} from './NodeCommands';
-import SequenceGenerator from '../../utils/SequenceGenerator';
+import {nextId} from '../../utils/IdentifierGenerator';
 
-const sequence = new SequenceGenerator();
-
-function nextConnectionId(): string {
-  return `Connection-${sequence.nextString()}`;
+function nextConnectionId(knownIds: string[]): string {
+  return nextId('Connection-', knownIds);
 }
 
 export function isConnectionId(candidate: any): candidate is string {
@@ -35,8 +33,9 @@ export function addConnection(sourceNodeId: string, sourcePortIndex: number,
 
 export function doAddConnection(source: string, target: string, state: GraphState): GraphState {
   if (canConnect(source, target, state)) {
+    const knownIds = state.connections.map(c => c.id);
     const newConnection: ConnectionState = {
-      id: nextConnectionId(),
+      id: nextConnectionId(knownIds),
       source,
       target
     };

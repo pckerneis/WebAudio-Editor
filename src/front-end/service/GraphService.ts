@@ -42,7 +42,7 @@ export default class GraphService extends StoreBasedService<GraphState> {
   }
 
   createAndAddNode(name: string, definition: NodeDefinition, bounds: Bounds): NodeState {
-    const n = createNode(definition, bounds, name);
+    const n = createNode(definition, bounds, name, this.snapshot);
     this.addNode(n);
     return n;
   }

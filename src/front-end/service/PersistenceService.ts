@@ -4,6 +4,9 @@ import SelectedItemSet from '../utils/SelectedItemSet';
 import {ProjectDocument} from '../../document/ProjectDocument';
 import {isValidProjectDocument} from '../../document/validation/project-document-validation';
 import MessageService from './MessageService';
+import HistoryService from './HistoryService';
+import {DEFAULT_PROJECT_NAME} from '../state/ProjectState';
+import {getInitialGraphModel} from '../state/GraphState';
 
 const DOC_VERSION = '0';
 
@@ -11,7 +14,8 @@ export default class PersistenceService {
   constructor(public readonly graphService: GraphService,
               public readonly projectService: ProjectService,
               public readonly graphSelection: SelectedItemSet<string>,
-              public readonly messageService: MessageService) {
+              public readonly messageService: MessageService,
+              public readonly historyService: HistoryService) {
   }
 
   getStateAsJsonString(): string {
@@ -51,5 +55,12 @@ export default class PersistenceService {
         console.error(e);
       }
     }
+  }
+
+  createNewProject(): void {
+    this.projectService.setProjectName(DEFAULT_PROJECT_NAME);
+    this.graphSelection.setSelection([]);
+    this.graphService.loadState(getInitialGraphModel());
+    this.historyService.clearHistory();
   }
 }

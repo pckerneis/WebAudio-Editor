@@ -62,6 +62,10 @@ export default function ProjectBurgerMenu() {
     layoutService.openPreviewFrame();
   };
 
+  const createNewProject = () => {
+    persistenceService.createNewProject();
+  };
+
   return (
     <div style={{width: 38}}>
       <img
@@ -76,6 +80,11 @@ export default function ProjectBurgerMenu() {
            onPointerDown={handleBackDropPointerDown}
       >
         <ul className="drop-shadow">
+          <li tabIndex={0}
+              onPointerDown={createNewProject}
+          >
+            Create new project
+          </li>
           <li tabIndex={0}
               onPointerDown={loadFromJson}
               onKeyDown={loadFromJsonKeyHandler}>Load from JSON

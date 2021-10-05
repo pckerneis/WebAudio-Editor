@@ -2,17 +2,15 @@ import Bounds from '../../../document/models/Bounds';
 import {PortKind, PortModel} from '../../../document/models/PortModel';
 import {GraphState} from '../../state/GraphState';
 import Coordinates from '../../../document/models/Coordinates';
-import SequenceGenerator from '../../utils/SequenceGenerator';
 import {NodeDefinition, ParamType} from '../../../document/node-definitions/NodeDefinition';
 import {NodeDisplay, ParamPorts, ParamValues} from '../../../document/models/NodeModel';
 import {NodeState} from '../../state/NodeState';
 import {constrainBetween} from '../../utils/numbers';
 import {MAX_NODE_WIDTH, MIN_NODE_WIDTH} from '../GraphService';
+import {nextId} from '../../utils/IdentifierGenerator';
 
-const nodeIdSequence = new SequenceGenerator();
-
-function nextNodeId(): string {
-  return `Node-${nodeIdSequence.nextString()}`;
+function nextNodeId(knownIds: string[]): string {
+  return nextId('Node-', knownIds);
 }
 
 export function isNodeId(candidate: any): candidate is string {
@@ -21,31 +19,26 @@ export function isNodeId(candidate: any): candidate is string {
     && candidate.split('-')[0] === 'Node';
 }
 
-const portIdSequence = new SequenceGenerator();
-
-function nextPortId(): string {
-  return `Port-${portIdSequence.nextString()}`;
-}
-
 export function assertNodeExists(nodeId: string, state: GraphState): void {
   if (!Object.keys(state.nodes).includes(nodeId)) {
     throw new Error('There is no node with ID ' + nodeId);
   }
 }
 
-export function createNode(definition: NodeDefinition, bounds: Bounds, name: string): NodeState {
-  const id = nextNodeId();
+export function createNode(definition: NodeDefinition,
+                           bounds: Bounds, name: string,
+                           graphState: GraphState): NodeState {
+  const id = nextNodeId(extractAllNodeIds(graphState));
 
-  const inputPorts = new Array(definition.inputPortCount).fill('').map(() => ({
-    id: nextPortId(),
+  const inputPorts = new Array(definition.inputPortCount).fill('').map((_, i) => ({
+    id: `${id}-Input-${i}`,
     kind: PortKind.input,
   }));
 
-  const outputPorts = new Array(definition.outputPortCount).fill('').map(() => ({
-    id: nextPortId(),
+  const outputPorts = new Array(definition.outputPortCount).fill('').map((_, i) => ({
+    id: `${id}-Output-${i}`,
     kind: PortKind.output,
   }));
-
 
   const display: NodeDisplay = {
     bounds,
@@ -59,7 +52,7 @@ export function createNode(definition: NodeDefinition, bounds: Bounds, name: str
   definition.params
     .filter(p => p.type === ParamType.AudioParam && p.acceptsInput)
     .forEach((p) => paramPorts[p.name] = {
-      id: nextPortId(),
+      id: `${id}-${p.name}`,
       kind: PortKind.audioParam,
     });
 
@@ -73,6 +66,10 @@ export function createNode(definition: NodeDefinition, bounds: Bounds, name: str
     paramValues,
     paramPorts,
   };
+}
+
+function extractAllNodeIds(graphState: GraphState): string[] {
+  return Object.keys(graphState.nodes);
 }
 
 export function addNode(id: string, nodeState: NodeState, state: GraphState): GraphState {
@@ -101,8 +98,8 @@ export function setNodePosition(id: string, coordinates: Coordinates, state: Gra
 }
 
 export function transformExistingNode(id: string,
-                               state: GraphState,
-                               mapper: (n: NodeState) => NodeState): GraphState {
+                                      state: GraphState,
+                                      mapper: (n: NodeState) => NodeState): GraphState {
   assertNodeExists(id, state);
 
   return {

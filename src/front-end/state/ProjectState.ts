@@ -1,9 +1,11 @@
+export const DEFAULT_PROJECT_NAME = 'Untitled audio graph';
+
 export interface ProjectState {
   projectName: string;
 }
 
 export function getInitialProjectState(): ProjectState {
   return {
-    projectName: 'Untitled audio graph',
+    projectName: DEFAULT_PROJECT_NAME,
   }
 }
