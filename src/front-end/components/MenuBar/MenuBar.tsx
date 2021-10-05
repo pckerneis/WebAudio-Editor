@@ -6,6 +6,8 @@ import right from './right.svg';
 import {pluck} from 'rxjs';
 import WrapAsState from '../../ui-utils/WrapAsState';
 
+const PROJECT_NAME_PLACEHOLDER = 'Untitled audio graph';
+
 const {projectService, historyService} = initializeOrGetServices();
 
 export default function MenuBar() {
@@ -25,6 +27,7 @@ export default function MenuBar() {
       <input className="ProjectNameInput"
              value={projectName}
              onChange={handleChange}
+             placeholder={PROJECT_NAME_PLACEHOLDER}
       />
       <img
         className={'UndoIcon' + (historyService.hasPrevious ? '' : ' disabled')}

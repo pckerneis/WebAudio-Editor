@@ -1,4 +1,4 @@
-export const DEFAULT_PROJECT_NAME = 'Untitled audio graph';
+export const DEFAULT_PROJECT_NAME = '';
 
 export interface ProjectState {
   projectName: string;

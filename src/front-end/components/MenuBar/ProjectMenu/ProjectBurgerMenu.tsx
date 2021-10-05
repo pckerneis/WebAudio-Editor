@@ -6,6 +6,8 @@ import WrapAsState from '../../../ui-utils/WrapAsState';
 import initializeOrGetServices from '../../../service/helpers/initialize-services';
 import {pluck} from 'rxjs';
 
+const DEFAULT_FILE_NAME = 'untitled-audio-graph';
+
 const {projectService, persistenceService, layoutService} = initializeOrGetServices();
 
 export default function ProjectBurgerMenu() {
@@ -24,7 +26,8 @@ export default function ProjectBurgerMenu() {
   }, [fileInputRef]);
 
   const downloadAsJson = useCallback(() => {
-    downloadJsonFile(projectName, persistenceService.getStateAsJsonString());
+    const fileName = projectName || DEFAULT_FILE_NAME;
+    downloadJsonFile(fileName, persistenceService.getStateAsJsonString());
   }, [projectName]);
 
   const handleFileChange = useCallback((evt: React.ChangeEvent<HTMLInputElement>) => {

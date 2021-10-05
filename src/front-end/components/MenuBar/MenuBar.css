@@ -2,7 +2,7 @@
     position: fixed;
     max-width: 500px;
     min-width: 320px;
-    width: 50%;
+    width: max-content;
     height: 40px;
     background: var(--primary-background-color);
     top: 20px;
@@ -44,4 +44,9 @@
 .RedoIcon {
     filter: var(--icon-filter);
     opacity: 0.5;
+}
+
+.MenuBar input::placeholder {
+    font-style: italic;
+    color: var(--disabled-text-color);
 }
