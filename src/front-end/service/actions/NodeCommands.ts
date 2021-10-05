@@ -202,3 +202,16 @@ export function setNodeWidth(nodeId: string, newWidth: number, state: GraphState
     }
   }));
 }
+
+export function setNodeHeight(nodeId: string, newHeight: number, state: GraphState): GraphState {
+  return transformExistingNode(nodeId, state, n => ({
+    ...n,
+    display: {
+      ...n.display,
+      bounds: {
+        ...n.display.bounds,
+        height: newHeight,
+      }
+    }
+  }));
+}

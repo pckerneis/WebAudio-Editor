@@ -9,6 +9,7 @@ import {
   findPortState,
   isNodeId,
   sendNodeToFront,
+  setNodeHeight,
   setNodeName,
   setNodePosition,
   setNodeWidth,
@@ -116,6 +117,10 @@ export default class GraphService extends StoreBasedService<GraphState> {
 
   setNodeWidth(nodeId: string, newWidth: number): void {
     this.commit(s => setNodeWidth(nodeId, newWidth, s));
+  }
+
+  setNodeHeight(nodeId: string, newHeight: number): void {
+    this.commit(s => setNodeHeight(nodeId, newHeight, s));
   }
 }
 

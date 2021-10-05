@@ -42,6 +42,7 @@ function Node(props: NodeProps) {
     zIndex,
   } = props;
 
+  const nodeRef = createRef<HTMLDivElement>();
   const nodeStyle = getNodeStyle(nodeState, zIndex);
   const [startPosition, setStartPosition] = useState({} as Bounds);
   const [positionByItem, setPositionByItem] = useState({} as { [id: string]: Bounds });
@@ -83,7 +84,16 @@ function Node(props: NodeProps) {
   useLayoutEffect(() => {
     portRegistry.registerPorts(...topPorts);
     portRegistry.registerPorts(...bottomPorts);
-  });
+
+    const nodeElement = nodeRef.current;
+
+    if (nodeElement) {
+      const newHeight = nodeElement.getBoundingClientRect().height;
+      if (newHeight !== nodeState.display.bounds.height) {
+        graphService.setNodeHeight(nodeState.id, newHeight);
+      }
+    }
+  }, [nodeRef, nodeState.id, bottomPorts, topPorts, nodeState.display.bounds.height]);
 
   const hasParams = definition && Object.keys(definition.params).length > 0;
 
@@ -125,6 +135,7 @@ function Node(props: NodeProps) {
 
   return (
     <div className={nodeClassName}
+         ref={nodeRef}
          style={nodeStyle}
          onPointerDown={handlePointerDown}
     >
@@ -220,7 +231,6 @@ function getNodeStyle(nodeState: NodeState, zIndex: number): any {
   return {
     transform: `translate(${nodeState.display.bounds.x}px, ${nodeState.display.bounds.y}px)`,
     width: nodeState.display.bounds.width,
-    minHeight: nodeState.display.bounds.height,
     zIndex,
   };
 }
