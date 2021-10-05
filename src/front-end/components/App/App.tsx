@@ -3,6 +3,7 @@ import CommandPaletteComponent from '../CommandPalette/CommandPaletteComponent';
 import React, {useCallback, useState} from 'react';
 import MenuBar from '../MenuBar/MenuBar';
 import MessageQueue from '../MessageQueue/MessageQueue';
+import PreviewFrame from '../PreviewFrame/PreviewFrame';
 
 export function App() {
   const [isCommandPaletteVisible, setCommandPaletteVisible] = useState(false);
@@ -24,6 +25,7 @@ export function App() {
       <MenuBar/>
       <CommandPaletteComponent/>
       <MessageQueue/>
+      <PreviewFrame/>
     </div>
   );
 }

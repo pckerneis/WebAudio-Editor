@@ -13,6 +13,7 @@ import ProjectService from './ProjectService';
 import MessageService from './MessageService';
 import HistoryService from './HistoryService';
 import HistoryServiceCommandHandler from './command-handlers/HistoryServiceCommandHandler';
+import LayoutService from './LayoutService';
 
 export default function initializeOrGetServices(): Services {
   const firstInitialization = ! SingletonWrapper.hasInstance(GraphService);
@@ -27,6 +28,7 @@ export default function initializeOrGetServices(): Services {
   const messageService = SingletonWrapper.get(MessageService);
   const persistenceService = SingletonWrapper.get(PersistenceService, graphService, projectService, graphSelection, messageService);
   const historyService = SingletonWrapper.get(HistoryService, graphService, graphSelection);
+  const layoutService = SingletonWrapper.get(LayoutService);
 
   if (firstInitialization) {
     loadDemoProject(
@@ -51,6 +53,7 @@ export default function initializeOrGetServices(): Services {
     persistenceService,
     messageService,
     historyService,
+    layoutService,
   }
 }
 
@@ -64,4 +67,5 @@ export interface Services {
   persistenceService: PersistenceService;
   messageService: MessageService;
   historyService: HistoryService;
+  layoutService: LayoutService;
 }

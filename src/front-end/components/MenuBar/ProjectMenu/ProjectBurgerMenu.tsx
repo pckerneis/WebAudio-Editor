@@ -6,7 +6,7 @@ import WrapAsState from '../../../ui-utils/WrapAsState';
 import initializeOrGetServices from '../../../service/initialize-services';
 import {pluck} from 'rxjs';
 
-const {projectService, persistenceService} = initializeOrGetServices();
+const {projectService, persistenceService, layoutService} = initializeOrGetServices();
 
 export default function ProjectBurgerMenu() {
   const projectName$ = projectService.state$.pipe(pluck('projectName'));
@@ -58,6 +58,10 @@ export default function ProjectBurgerMenu() {
     }
   }, [setMenuVisible, downloadAsJson]);
 
+  const openPreview = () => {
+    layoutService.openPreviewFrame();
+  };
+
   return (
     <div style={{width: 38}}>
       <img
@@ -79,6 +83,11 @@ export default function ProjectBurgerMenu() {
           <li tabIndex={0}
               onPointerDown={downloadAsJson}
               onKeyDown={downloadAsJsonKeyHandler}>Download as JSON
+          </li>
+          <li tabIndex={0}
+              onPointerDown={openPreview}
+          >
+            Preview rendered graph
           </li>
         </ul>
       </div>
