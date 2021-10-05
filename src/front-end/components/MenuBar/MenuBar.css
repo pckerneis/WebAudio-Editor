@@ -11,6 +11,11 @@
     display: flex;
 }
 
+.MenuBarSeparator {
+    width: 1px;
+    border-right: var(--secondary-background-color) 1px solid;
+}
+
 .ProjectNameInput {
     font-size: 18px;
     color: var(--primary-text-color);
@@ -21,19 +26,16 @@
     flex-grow: 1;
 }
 
-.UndoIcon,
-.RedoIcon {
+.IconButton {
     filter: var(--icon-filter);
     opacity: 0.5;
 }
 
-.UndoIcon:hover:not(.disabled),
-.RedoIcon:hover:not(.disabled) {
+.IconButton:hover:not(.disabled) {
     opacity: 0.8;
 }
 
-.UndoIcon.disabled,
-.RedoIcon.disabled {
+.IconButton.disabled {
     opacity: 0.25;
 }
 

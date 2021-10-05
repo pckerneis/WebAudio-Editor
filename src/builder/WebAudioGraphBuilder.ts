@@ -13,12 +13,12 @@ import {
 
 interface BuildResult {
   error?: any;
-  audioGraph: AudioGraph | null;
+  audioGraph: BuiltAudioGraph | null;
 }
 
 type AudioNodes = { [id: string]: AudioNode; };
 
-interface AudioGraph {
+export interface BuiltAudioGraph {
   context: AudioContext;
   nodes: AudioNodes;
   connections: Connection[];
@@ -63,7 +63,7 @@ export class WebAudioGraphBuilder {
   }
 
   private doBuild(document: ProjectDocument,
-                  options?: Partial<WebAudioGraphBuilderOptions>): AudioGraph {
+                  options?: Partial<WebAudioGraphBuilderOptions>): BuiltAudioGraph {
     const context = options?.audioContext ?? new AudioContext(options?.audioContextOptions);
     const nodes: AudioNodes = {};
 
