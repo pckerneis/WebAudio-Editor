@@ -16,6 +16,7 @@ export default function EditableLabel(props: EditableLabelProps) {
   const [transientValue, setTransientValue] = useState(value);
 
   const handleDoubleClick = () => {
+    setTransientValue(value);
     setEditable(true);
     setTimeout(() => inputRef.current?.select());
   };
