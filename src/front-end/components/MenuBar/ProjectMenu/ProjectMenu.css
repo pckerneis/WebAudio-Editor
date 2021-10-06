@@ -14,29 +14,37 @@
     left: 0;
     right: 0;
     bottom: 0;
+    font-size: 0.9em;
 }
 
 .ProjectMenuBackDrop ul {
     position: fixed;
     background: var(--primary-background-color);
-    top: 44px;
+    top: 46px;
     left: 22px;
     padding: 6px 0;
 }
 
-.ProjectMenuBackDrop ul li {
+.ProjectMenuBackDrop ul li:not(.ListSeparator) {
     list-style: none;
     padding: 4px 18px;
     color: var(--primary-text-color);
     user-select: none;
 }
 
-.ProjectMenuBackDrop ul li:hover {
+.ProjectMenuBackDrop ul li:not(.ListSeparator):hover {
     background: var(--item-hilight);
 }
 
-.ProjectMenuBackDrop ul li:focus {
+.ProjectMenuBackDrop ul li:not(.ListSeparator):focus {
     background: var(--item-focus);
     outline: none;
     box-shadow: 0 0 2px 2px var(--selection-outline-color);
+}
+
+.ProjectMenuBackDrop ul li.ListSeparator {
+    height: 0;
+    border-bottom: 1px solid var(--disabled-text-color);
+    margin: 2px 6px;
+    opacity: 60%;
 }

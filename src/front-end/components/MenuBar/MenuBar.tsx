@@ -1,6 +1,6 @@
 import './MenuBar.css';
 import React from 'react';
-import ProjectBurgerMenu from './ProjectMenu/ProjectBurgerMenu';
+import ProjectMenu from './ProjectMenu/ProjectMenu';
 import initializeOrGetServices from '../../service/helpers/initialize-services';
 import right from './right.svg';
 import floppy from './floppy.svg';
@@ -49,19 +49,18 @@ export default function MenuBar() {
   );
 
   const handleSave = () => {
-    localeStorageService.pushSnapshot();
+    localeStorageService.saveProject();
     historyService.setSavePoint();
   };
 
   return (
     <div className="MenuBar drop-shadow">
-      <ProjectBurgerMenu/>
+      <ProjectMenu/>
       <EditableLabel
         className="ProjectNameInput"
         value={projectName}
         onChange={handleChange}
         placeHolder={PROJECT_NAME_PLACEHOLDER}
-        inputStyle={{fontSize: 18}}
       />
       <img
         className={'IconButton SaveIcon' + (historyService.hasPrevious ? '' : ' disabled')}

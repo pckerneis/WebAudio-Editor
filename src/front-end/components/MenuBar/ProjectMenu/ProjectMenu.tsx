@@ -1,7 +1,7 @@
 import burger from './burger.svg';
 import React, {useCallback, useRef, useState} from 'react';
 import {consumeEvent, isEnterKeyEvent} from '../../../ui-utils/events';
-import './ProjectBurgerMenu.css'
+import './ProjectMenu.css'
 import useObservableState from '../../../ui-utils/UseObservableState';
 import initializeOrGetServices from '../../../service/helpers/initialize-services';
 import {pluck} from 'rxjs';
@@ -16,10 +16,11 @@ const {
   layoutService,
   graphSelection,
   graphService,
-  historyService
+  historyService,
+  localeStorageService,
 } = initializeOrGetServices();
 
-export default function ProjectBurgerMenu() {
+export default function ProjectMenu() {
   const projectName$ = projectService.state$.pipe(pluck('projectName'));
   const [projectName] = useObservableState(projectName$, '');
   const [isMenuVisible, setMenuVisible] = useState(false);
@@ -78,6 +79,8 @@ export default function ProjectBurgerMenu() {
   };
 
   const openProject = () => layoutService.showOpenProject();
+  const saveProject = () => localeStorageService.saveProject();
+  const saveCopy = () => localeStorageService.saveAsCopy();
 
   return (
     <div style={{width: 38}}>
@@ -102,6 +105,20 @@ export default function ProjectBurgerMenu() {
               onPointerDown={openProject}
           >
             Open project
+          </li>
+          <li className="ListSeparator">
+          </li>
+          <li tabIndex={0}
+              onPointerDown={saveProject}
+          >
+            Save
+          </li>
+          <li tabIndex={0}
+              onPointerDown={saveCopy}
+          >
+            Save as copy
+          </li>
+          <li className="ListSeparator">
           </li>
           <li tabIndex={0}
               onPointerDown={loadFromJson}

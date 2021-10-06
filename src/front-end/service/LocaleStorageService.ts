@@ -5,6 +5,7 @@ import SelectedItemSet from '../utils/SelectedItemSet';
 import LayoutService from './LayoutService';
 import Coordinates from '../../document/models/Coordinates';
 import HistoryService from './HistoryService';
+import {newProjectId} from '../state/ProjectState';
 
 export default class LocaleStorageService {
 
@@ -58,7 +59,18 @@ export default class LocaleStorageService {
     return lines;
   }
 
-  public pushSnapshot(): void {
+  public saveProject(): void {
+    this.pushSnapshot();
+  }
+
+  public saveAsCopy(): void {
+    const projectId = newProjectId();
+    const projectName = this.projectService.snapshot.projectName + ' - Copy';
+    this.projectService.restoreProject(projectId, projectName);
+    this.pushSnapshot();
+  }
+
+  private pushSnapshot(): void {
     const projectId = this.projectService.snapshot.projectId as any;
 
     if (typeof projectId !== 'string' || projectId.length === 0) {

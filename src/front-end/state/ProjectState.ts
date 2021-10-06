@@ -1,3 +1,5 @@
+import { v4 as uuid } from 'uuid';
+
 export const DEFAULT_PROJECT_NAME = '';
 
 export interface ProjectState {
@@ -12,4 +14,9 @@ export function getEmptyProjectState(): ProjectState {
     projectId: null,
     projectName: '',
   }
+}
+
+
+export function newProjectId(): string {
+  return uuid();
 }

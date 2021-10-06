@@ -27,6 +27,11 @@
     min-width: 200px;
 }
 
+.ProjectNameInput input {
+    color: var(--primary-text-color);
+    font-size: 18px;
+}
+
 .IconButton {
     filter: var(--icon-filter);
     opacity: 0.5;

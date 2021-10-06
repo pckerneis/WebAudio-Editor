@@ -1,6 +1,5 @@
-import {DEFAULT_PROJECT_NAME, getEmptyProjectState, ProjectState} from '../state/ProjectState';
+import {DEFAULT_PROJECT_NAME, getEmptyProjectState, newProjectId, ProjectState} from '../state/ProjectState';
 import StoreBasedService from './helpers/StoreBasedService';
-import { v4 as uuid } from 'uuid';
 
 export default class ProjectService extends StoreBasedService<ProjectState> {
   constructor() {
@@ -24,7 +23,7 @@ export default class ProjectService extends StoreBasedService<ProjectState> {
 
   initialiseEmptyProject(projectName?: string): void {
     this.commit({
-      projectId: uuid(),
+      projectId: newProjectId(),
       creation: new Date(Date.now()),
       projectName: projectName || DEFAULT_PROJECT_NAME,
     });
