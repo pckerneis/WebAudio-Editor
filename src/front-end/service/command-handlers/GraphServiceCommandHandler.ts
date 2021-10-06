@@ -103,6 +103,8 @@ const desiredNames: DesiredNames = {
   [NodeKind.mediaStreamSource]: 'mediaStreamAudioSource',
   [NodeKind.osc]: 'osc',
   [NodeKind.panner]: 'panner',
+  [NodeKind.stereoPanner]: 'stereoPanner',
+  [NodeKind.waveShaper]: 'waveShaper',
   [NodeKind.destination]: 'destination',
 };
 

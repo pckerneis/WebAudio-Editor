@@ -37,15 +37,23 @@ export interface BooleanParamDefinition {
   defaultValue: boolean;
 }
 
+export interface Float32ArrayParamDefinition {
+  type: ParamType.Float32Array;
+  name: string;
+  defaultValue: Float32Array | null;
+}
+
 export type ParamDefinition =
   ChoiceParamDefinition
   | AudioParamDefinition
   | NumberParamDefinition
-  | BooleanParamDefinition;
+  | BooleanParamDefinition
+  | Float32ArrayParamDefinition;
 
 export enum ParamType {
   choice = 'choice',
   AudioParam = 'AudioParam',
   number = 'number',
   boolean = 'boolean',
+  Float32Array = 'Float32Array',
 }

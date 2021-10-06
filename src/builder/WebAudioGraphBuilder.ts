@@ -194,6 +194,8 @@ const nodeBuilders: AudioNodeBuilders = {
   [NodeKind.mediaStreamDestination]: (ctx: AudioContext) => ctx.createMediaStreamDestination(),
   [NodeKind.mediaStreamSource]: (ctx: AudioContext, ...args: any[]) => ctx.createMediaStreamSource(args[0]),
   [NodeKind.panner]: (ctx: AudioContext) => ctx.createPanner(),
+  [NodeKind.stereoPanner]: (ctx: AudioContext) => ctx.createStereoPanner(),
+  [NodeKind.waveShaper]: (ctx: AudioContext) => ctx.createWaveShaper(),
   [NodeKind.destination]: (ctx: AudioContext) => ctx.destination,
 }
 

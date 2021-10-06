@@ -348,7 +348,42 @@ export function getNodeDefinitions(): NodeDefinition[] {
           min: 0,
           max: 1,
         },
+      ],
+    },
 
+
+    {
+      kind: NodeKind.stereoPanner,
+      inputPortCount: 1,
+      outputPortCount: 1,
+      params: [
+        {
+          name: 'pan',
+          type: ParamType.AudioParam,
+          defaultValue: 0,
+          min: -1,
+          max: 1,
+          acceptsInput: true,
+        },
+      ],
+    },
+
+    {
+      kind: NodeKind.waveShaper,
+      inputPortCount: 1,
+      outputPortCount: 1,
+      params: [
+        {
+          name: 'curve',
+          type: ParamType.Float32Array,
+          defaultValue: null,
+        },
+        {
+          name: 'oversample',
+          type: ParamType.choice,
+          possibleValues: ['none', '2x', '4x'],
+          defaultValue: 'none',
+        },
       ],
     },
   ];

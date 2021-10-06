@@ -15,6 +15,8 @@ export enum NodeKind {
   mediaStreamDestination = 'mediaStreamDestination',
   mediaStreamSource = 'mediaStreamSource',
   panner = 'panner',
+  stereoPanner = 'stereoPanner',
+  waveShaper = 'waveShaper',
   destination = 'destination',
 }
 
