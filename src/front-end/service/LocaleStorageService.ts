@@ -2,12 +2,17 @@ import ProjectService from './ProjectService';
 import {GraphState} from '../state/GraphState';
 import GraphService from './GraphService';
 import SelectedItemSet from '../utils/SelectedItemSet';
+import LayoutService from './LayoutService';
+import Coordinates from '../../document/models/Coordinates';
+import HistoryService from './HistoryService';
 
 export default class LocaleStorageService {
 
   constructor(public readonly graphService: GraphService,
               public readonly graphSelection: SelectedItemSet<string>,
-              public readonly projectService: ProjectService) {
+              public readonly projectService: ProjectService,
+              public readonly layoutService: LayoutService,
+              public readonly historyService: HistoryService) {
   }
 
   private static persistenceKey = 'WebAudio-Editor_projectData_0';
@@ -20,6 +25,11 @@ export default class LocaleStorageService {
     }
 
     return JSON.parse(stored);
+  }
+
+  public findLatestProject(): ProjectInfo {
+    const knownProjects = this.getKnownProjectInfos();
+    return knownProjects[0];
   }
 
   public getKnownProjectInfos(): ProjectInfo[] {
@@ -71,6 +81,7 @@ export default class LocaleStorageService {
       date: new Date(Date.now()).toISOString(),
       graphState: this.graphService.snapshot,
       selection: this.graphSelection.items,
+      viewportOffset: this.layoutService.snapshot.viewportOffset,
     };
   }
 
@@ -115,6 +126,8 @@ export default class LocaleStorageService {
       this.graphService.loadState(latest.graphState);
       this.graphSelection.setSelection(latest.selection);
       this.projectService.setProjectName(projectName);
+      this.layoutService.setViewportTranslate(latest.viewportOffset);
+      this.historyService.setSavePoint();
     }
   }
 }
@@ -128,6 +141,7 @@ interface Snapshot {
   selection: string[];
   date: string;
   name?: string | null;
+  viewportOffset: Coordinates;
 }
 
 export interface ProjectInfo {

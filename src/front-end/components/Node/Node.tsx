@@ -21,7 +21,6 @@ const {
   graphService,
   graphSelection,
   portRegistry,
-  localeStorageService,
 } = initializeOrGetServices();
 
 interface NodeProps {
@@ -122,14 +121,12 @@ function Node(props: NodeProps) {
   const handleDragEnd = ({dragDistanceSquared}: { dragDistanceSquared: number }) => {
     if (dragDistanceSquared > 1) {
       historyService.pushTransaction(TransactionNames.MOVE_SELECTION);
-      localeStorageService.pushSnapshot();
     }
   };
 
   const handleNameChange = (name: string) => {
     graphService.setNodeName(nodeState.id, name);
     historyService.pushTransaction(TransactionNames.SET_NODE_NAME);
-    localeStorageService.pushSnapshot();
   };
 
   const handleResize = (coordinates: Coordinates) => {

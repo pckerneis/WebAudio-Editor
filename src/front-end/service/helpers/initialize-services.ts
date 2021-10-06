@@ -7,7 +7,7 @@ import SingletonWrapper from './SingletonWrapper';
 import {getNodeDefinitions} from '../../../document/node-definitions/StandardNodesDefinitions';
 import GraphServiceCommandHandler from '../command-handlers/GraphServiceCommandHandler';
 import getAllCommands from '../commands/Commands';
-import PersistenceService from '../PersistenceService';
+import JsonAdapterService from '../JsonAdapterService';
 import ProjectService from '../ProjectService';
 import MessageService from '../MessageService';
 import HistoryService from '../HistoryService';
@@ -27,17 +27,22 @@ export default function initializeOrGetServices(): Services {
   const commandService = SingletonWrapper.get(CommandService, getAllCommands());
   const projectService = SingletonWrapper.get(ProjectService);
   const messageService = SingletonWrapper.get(MessageService);
-  const historyService = SingletonWrapper.get(HistoryService, graphService, graphSelection);
-  const persistenceService = SingletonWrapper.get(PersistenceService, graphService, projectService, graphSelection, messageService, historyService);
   const layoutService = SingletonWrapper.get(LayoutService);
-  const playService = SingletonWrapper.get(PlayService, persistenceService, messageService);
-  const localeStorageService = SingletonWrapper.get(LocaleStorageService, graphService, graphSelection, projectService);
+  const historyService = SingletonWrapper.get(HistoryService, graphService, graphSelection, layoutService);
+  const jsonAdapterService = SingletonWrapper.get(JsonAdapterService, graphService, projectService, graphSelection, messageService, historyService);
+  const playService = SingletonWrapper.get(PlayService, jsonAdapterService, messageService);
+  const localeStorageService = SingletonWrapper.get(LocaleStorageService, graphService, graphSelection, projectService, layoutService, historyService);
 
   if (firstInitialization) {
     commandService.registerCommandHandlers(
       new GraphServiceCommandHandler(graphService, nodeDefinitionService, graphSelection, historyService, localeStorageService, layoutService),
       new HistoryServiceCommandHandler(historyService),
     );
+
+    const latestProject = localeStorageService.findLatestProject();
+    if (latestProject != null) {
+      localeStorageService.loadProject(latestProject);
+    }
   }
 
   return {
@@ -47,7 +52,7 @@ export default function initializeOrGetServices(): Services {
     nodeDefinitionService,
     commandService,
     projectService,
-    persistenceService,
+    jsonAdapterService,
     messageService,
     historyService,
     layoutService,
@@ -63,7 +68,7 @@ export interface Services {
   commandService: CommandService;
   graphSelection: SelectedItemSet<string>;
   projectService: ProjectService;
-  persistenceService: PersistenceService;
+  jsonAdapterService: JsonAdapterService;
   messageService: MessageService;
   historyService: HistoryService;
   layoutService: LayoutService;

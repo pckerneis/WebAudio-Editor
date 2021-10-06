@@ -3,6 +3,7 @@ import React from 'react';
 import ProjectBurgerMenu from './ProjectMenu/ProjectBurgerMenu';
 import initializeOrGetServices from '../../service/helpers/initialize-services';
 import right from './right.svg';
+import floppy from './floppy.svg';
 import play from './play.svg';
 import stop from './stop.svg';
 import {pluck} from 'rxjs';
@@ -55,6 +56,11 @@ export default function MenuBar() {
     />
   );
 
+  const handleSave = () => {
+    localeStorageService.pushSnapshot();
+    historyService.setSavePoint();
+  };
+
   return (
     <div className="MenuBar drop-shadow">
       <ProjectBurgerMenu/>
@@ -64,6 +70,14 @@ export default function MenuBar() {
         onChange={handleChange}
         placeHolder={PROJECT_NAME_PLACEHOLDER}
         inputStyle={{fontSize: 18}}
+      />
+      <img
+        className={'IconButton SaveIcon' + (historyService.hasPrevious ? '' : ' disabled')}
+        src={floppy}
+        tabIndex={0}
+        onPointerDown={handleSave}
+        title="Save"
+        alt="Save"
       />
       <div className="MenuBarSeparator">
       </div>

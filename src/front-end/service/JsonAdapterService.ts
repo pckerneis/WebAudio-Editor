@@ -5,12 +5,10 @@ import {ProjectDocument} from '../../document/ProjectDocument';
 import {isValidProjectDocument} from '../../document/validation/project-document-validation';
 import MessageService from './MessageService';
 import HistoryService from './HistoryService';
-import {DEFAULT_PROJECT_NAME} from '../state/ProjectState';
-import {getInitialGraphModel} from '../state/GraphState';
 
 const DOC_VERSION = '0';
 
-export default class PersistenceService {
+export default class JsonAdapterService {
   constructor(public readonly graphService: GraphService,
               public readonly projectService: ProjectService,
               public readonly graphSelection: SelectedItemSet<string>,
@@ -35,7 +33,7 @@ export default class PersistenceService {
   }
 
   public loadFromJsonString(jsonString: string): void {
-    try{
+    try {
       const parsed = JSON.parse(jsonString);
 
       if (isValidProjectDocument(parsed)) {
@@ -48,19 +46,12 @@ export default class PersistenceService {
       } else {
         this.messageService.post('Invalid project document.', 'error');
       }
-    } catch(e: any) {
+    } catch (e: any) {
       if (e?.message) {
         this.messageService.post('Could not load project:\n' + e?.message, 'error');
       } else {
         console.error(e);
       }
     }
-  }
-
-  public createNewProject(): void {
-    this.projectService.setProjectName(DEFAULT_PROJECT_NAME);
-    this.graphSelection.setSelection([]);
-    this.graphService.loadState(getInitialGraphModel());
-    this.historyService.clearHistory();
   }
 }

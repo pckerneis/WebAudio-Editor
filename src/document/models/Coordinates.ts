@@ -17,5 +17,9 @@ export function isCoordinates(candidate: any): candidate is Coordinates {
 }
 
 export function areCoordinatesEqual(first: Coordinates, second: Coordinates): boolean {
+  if (first == null || second == null) {
+    return false;
+  }
+
   return first.x === second.x && first.y === second.y;
 }

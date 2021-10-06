@@ -24,6 +24,7 @@
     margin: auto 8px;
     padding: 4px 8px;
     flex-grow: 1;
+    min-width: 200px;
 }
 
 .IconButton {

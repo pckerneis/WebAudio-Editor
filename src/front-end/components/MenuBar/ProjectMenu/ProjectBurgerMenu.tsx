@@ -6,10 +6,19 @@ import useObservableState from '../../../ui-utils/UseObservableState';
 import initializeOrGetServices from '../../../service/helpers/initialize-services';
 import {pluck} from 'rxjs';
 import OpenProjectWindow from '../OpenProjectWindow/OpenProjectWindow';
+import {DEFAULT_PROJECT_NAME} from '../../../state/ProjectState';
+import {getInitialGraphModel} from '../../../state/GraphState';
 
 const DEFAULT_FILE_NAME = 'untitled-audio-graph';
 
-const {projectService, persistenceService, layoutService} = initializeOrGetServices();
+const {
+  projectService,
+  jsonAdapterService,
+  layoutService,
+  graphSelection,
+  graphService,
+  historyService
+} = initializeOrGetServices();
 
 export default function ProjectBurgerMenu() {
   const projectName$ = projectService.state$.pipe(pluck('projectName'));
@@ -28,7 +37,7 @@ export default function ProjectBurgerMenu() {
 
   const downloadAsJson = useCallback(() => {
     const fileName = projectName || DEFAULT_FILE_NAME;
-    downloadJsonFile(fileName, persistenceService.getStateAsJsonString());
+    downloadJsonFile(fileName, jsonAdapterService.getStateAsJsonString());
   }, [projectName]);
 
   const handleFileChange = useCallback((evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,7 +48,7 @@ export default function ProjectBurgerMenu() {
 
       reader.onload = (evt) => {
         if (typeof evt.target?.result === 'string') {
-          persistenceService.loadFromJsonString(evt.target?.result);
+          jsonAdapterService.loadFromJsonString(evt.target?.result);
         }
       };
 
@@ -63,7 +72,10 @@ export default function ProjectBurgerMenu() {
   }, [setMenuVisible, downloadAsJson]);
 
   const createNewProject = () => {
-    persistenceService.createNewProject();
+    projectService.setProjectName(DEFAULT_PROJECT_NAME);
+    graphSelection.setSelection([]);
+    graphService.loadState(getInitialGraphModel());
+    historyService.setSavePoint();
   };
 
   const openProject = () => layoutService.showOpenProject();

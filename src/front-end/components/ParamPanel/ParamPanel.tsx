@@ -13,12 +13,10 @@ const {
   portRegistry,
   graphSelection,
   historyService,
-  localeStorageService,
 } = initializeOrGetServices();
 
 const pushNodeParamChangeTransactionDebounced = debounce(() => {
     historyService.pushTransaction(TransactionNames.SET_NODE_PARAM);
-    localeStorageService.pushSnapshot();
   }, 500);
 
 interface ParamPanelProps {

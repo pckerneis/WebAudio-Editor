@@ -30,7 +30,6 @@ const {
   portRegistry,
   graphSelection,
   historyService,
-  localeStorageService,
   layoutService,
 } = initializeOrGetServices();
 
@@ -122,7 +121,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
       return !areBoundsEqual(nextState.miniMapState.viewportBounds, this.state.miniMapState.viewportBounds);
     }
 
-    return ! areCoordinatesEqual(nextState.viewportOffset, this.state.viewportOffset)
+    return !areCoordinatesEqual(nextState.viewportOffset, this.state.viewportOffset)
       || nextState.selection !== this.state.selection
       || nextState.connectionCurves !== this.state.connectionCurves
       || hasNodesChanges()
@@ -191,7 +190,6 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
         if (suitablePort) {
           graphService.applyTemporaryConnection(suitablePort.id);
           historyService.pushTransaction(TransactionNames.CREATE_CONNECTION);
-          localeStorageService.pushSnapshot();
         } else {
           graphService.removeTemporaryConnection();
         }
@@ -212,7 +210,6 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
       if (e.code === 'Delete' || e.code === 'Backspace') {
         graphService.remove(graphSelection.items);
         historyService.pushTransaction(TransactionNames.DELETE_SELECTION);
-        localeStorageService.pushSnapshot();
         consumeEvent(e);
       }
     };
@@ -260,7 +257,10 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
 
   private updateSelection$ = (selection: string[]) => this.update$(s => ({...s, selection}));
 
-  private updateViewportOffset$ = (layout: Layout) => this.update$(s => ({...s, viewportOffset: layout.viewportOffset}));
+  private updateViewportOffset$ = (layout: Layout) => this.update$(s => ({
+    ...s,
+    viewportOffset: layout.viewportOffset
+  }));
 
   private updateMiniMapState$ = () => {
     return this.update$(s => ({

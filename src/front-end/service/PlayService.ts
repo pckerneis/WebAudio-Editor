@@ -1,7 +1,7 @@
 import StoreBasedService from './helpers/StoreBasedService';
 import {pluck} from 'rxjs';
 import {BuiltAudioGraph, WebAudioGraphBuilder} from '../../builder/WebAudioGraphBuilder';
-import PersistenceService from './PersistenceService';
+import JsonAdapterService from './JsonAdapterService';
 import MessageService from './MessageService';
 
 export default class PlayService extends StoreBasedService<PlayState> {
@@ -11,13 +11,13 @@ export default class PlayService extends StoreBasedService<PlayState> {
     pluck('playing'),
   );
 
-  constructor(public readonly persistenceService: PersistenceService,
+  constructor(public readonly jsonAdapterService: JsonAdapterService,
               public readonly messageService: MessageService) {
     super(defaultPlayState());
   }
 
   start(): void {
-    const projectDocument = this.persistenceService.getState();
+    const projectDocument = this.jsonAdapterService.getState();
     const buildResult = new WebAudioGraphBuilder().build(projectDocument);
 
     if (buildResult.error) {

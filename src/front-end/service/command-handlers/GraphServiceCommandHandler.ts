@@ -44,7 +44,6 @@ export default class GraphServiceCommandHandler implements CommandHandler {
       const nodeKind = extractNodeKindFromCreateNodeCommand(commandPath);
       this.createAndAddNode(nodeKind as NodeKind, this.layoutService.snapshot.viewportOffset);
       this.historyService.pushTransaction(TransactionNames.CREATE_NODE);
-      this.localeStorageService.pushSnapshot();
       return true;
     }
 
@@ -58,7 +57,6 @@ export default class GraphServiceCommandHandler implements CommandHandler {
       if (selection.length > 0) {
         this.graphService.remove(this.graphSelection.items);
         this.historyService.pushTransaction(TransactionNames.DELETE_SELECTION);
-        this.localeStorageService.pushSnapshot();
       }
     }
 

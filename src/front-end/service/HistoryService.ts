@@ -4,6 +4,8 @@ import SelectedItemSet from '../utils/SelectedItemSet';
 import {map} from 'rxjs';
 import SequenceGenerator from '../utils/SequenceGenerator';
 import StoreBasedService from './helpers/StoreBasedService';
+import Coordinates from '../../document/models/Coordinates';
+import LayoutService from './LayoutService';
 
 export default class HistoryService extends StoreBasedService<HistoryState> {
   private readonly sequenceGenerator = new SequenceGenerator();
@@ -13,7 +15,8 @@ export default class HistoryService extends StoreBasedService<HistoryState> {
   );
 
   constructor(public readonly graphService: GraphService,
-              public readonly graphSelection: SelectedItemSet<string>) {
+              public readonly graphSelection: SelectedItemSet<string>,
+              public readonly layoutService: LayoutService) {
     super(emptyHistory());
   }
 
@@ -26,6 +29,10 @@ export default class HistoryService extends StoreBasedService<HistoryState> {
   }
 
   get undoDescription(): string | null {
+    if (this.snapshot.currentIndex === 0) {
+      return null;
+    }
+
     const current = this.currentTransaction;
 
     if (current) {
@@ -51,6 +58,11 @@ export default class HistoryService extends StoreBasedService<HistoryState> {
     this.commit(emptyHistory());
   }
 
+  public setSavePoint(): void {
+    this.commit(emptyHistory());
+    this.pushTransaction('initial state');
+  }
+
   public pushTransaction(description: string): void {
     const newTransaction: Transaction = {
       id: this.sequenceGenerator.nextString(),
@@ -58,6 +70,7 @@ export default class HistoryService extends StoreBasedService<HistoryState> {
       graphState: this.graphService.snapshot,
       selection: this.graphSelection.items,
       date: new Date(Date.now()),
+      viewportOffset: this.layoutService.snapshot.viewportOffset,
     };
 
     const transactions = [
@@ -133,6 +146,7 @@ interface Transaction {
   graphState: GraphState;
   selection: string[];
   date: Date;
+  viewportOffset: Coordinates;
 }
 
 export enum TransactionNames {
