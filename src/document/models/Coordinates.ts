@@ -3,6 +3,13 @@ export default interface Coordinates {
   y: number;
 }
 
+export function emptyCoordinates(): Coordinates {
+  return {
+    x: 0,
+    y: 0,
+  }
+}
+
 export function isCoordinates(candidate: any): candidate is Coordinates {
   return typeof candidate === 'object'
     && typeof candidate.x === 'number'

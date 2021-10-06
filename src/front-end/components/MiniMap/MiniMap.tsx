@@ -3,12 +3,16 @@ import './MiniMap.css';
 import {MiniMapNode, MiniMapState} from '../../state/MiniMapState';
 import {GraphState} from '../../state/GraphState';
 import Bounds, {expandBounds, getOuterBounds} from '../../../document/models/Bounds';
-import GraphService from '../../service/GraphService';
 import {getDefaultNodeColor, getSecondaryBackgroundColor} from '../../ui-utils/themes';
+import initializeOrGetServices from '../../service/helpers/initialize-services';
+import Coordinates from '../../../document/models/Coordinates';
+
+const {
+  layoutService,
+} = initializeOrGetServices();
 
 export default function MiniMap(props: MiniMapProps) {
   const {
-    graphService,
     miniMapState,
   } = props;
 
@@ -68,8 +72,8 @@ export default function MiniMap(props: MiniMapProps) {
       y: -realPosition.y + viewportBounds.height / 2,
     }
 
-    graphService.setViewportTranslate(newViewportOffset);
-  }, [graphService, nodes, viewportBounds.height, viewportBounds.width]);
+    layoutService.setViewportTranslate(newViewportOffset);
+  }, [nodes, viewportBounds.height, viewportBounds.width]);
 
   const handlePointerMove = useCallback((evt) => {
     if (!dragging) {
@@ -176,10 +180,9 @@ function render(canvas: HTMLCanvasElement,
 
 interface MiniMapProps {
   miniMapState: MiniMapState;
-  graphService: GraphService;
 }
 
-export function computeMiniMapState(graphState: GraphState): MiniMapState {
+export function computeMiniMapState(graphState: GraphState, viewportOffset: Coordinates): MiniMapState {
   return {
     nodes: Object.values(graphState.nodes).map(n => ({
       bounds: n.display.bounds,
@@ -187,8 +190,8 @@ export function computeMiniMapState(graphState: GraphState): MiniMapState {
     })),
     // TODO: use viewport bounds instead of window
     viewportBounds: {
-      x: graphState.viewportOffset.x,
-      y: graphState.viewportOffset.y,
+      x: viewportOffset.x,
+      y: viewportOffset.y,
       width: window.innerWidth,
       height: window.innerHeight,
     }

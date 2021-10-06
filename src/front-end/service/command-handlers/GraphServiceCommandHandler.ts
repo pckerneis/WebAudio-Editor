@@ -6,6 +6,8 @@ import SelectedItemSet from '../../utils/SelectedItemSet';
 import {isNodeKind, NodeKind} from '../../../document/models/NodeKind';
 import HistoryService, {TransactionNames} from '../HistoryService';
 import LocaleStorageService from '../LocaleStorageService';
+import Coordinates from '../../../document/models/Coordinates';
+import LayoutService from '../LayoutService';
 
 const DELETE_SELECTION_COMMAND_ID = 'DeleteSelection';
 const CREATE_NODE_COMMAND_PREFIX = 'CreateNode/';
@@ -15,7 +17,8 @@ export default class GraphServiceCommandHandler implements CommandHandler {
               public readonly nodeDefinitionService: NodeDefinitionService,
               public readonly graphSelection: SelectedItemSet<string>,
               public readonly historyService: HistoryService,
-              public readonly localeStorageService: LocaleStorageService) {
+              public readonly localeStorageService: LocaleStorageService,
+              public readonly layoutService: LayoutService) {
   }
 
   public canExecute(commandPath: string): boolean {
@@ -39,7 +42,7 @@ export default class GraphServiceCommandHandler implements CommandHandler {
   private executeCreateNodeCommand(commandPath: string): boolean {
     if (isCreateNodeCommand(commandPath)) {
       const nodeKind = extractNodeKindFromCreateNodeCommand(commandPath);
-      this.createAndAddNode(nodeKind as NodeKind);
+      this.createAndAddNode(nodeKind as NodeKind, this.layoutService.snapshot.viewportOffset);
       this.historyService.pushTransaction(TransactionNames.CREATE_NODE);
       this.localeStorageService.pushSnapshot();
       return true;
@@ -62,9 +65,7 @@ export default class GraphServiceCommandHandler implements CommandHandler {
     return false;
   }
 
-  private createAndAddNode(nodeKind: NodeKind): void {
-    const viewportOffset = this.graphService.snapshot.viewportOffset;
-
+  private createAndAddNode(nodeKind: NodeKind, viewportOffset: Coordinates): void {
     // TODO use graph bounds instead of window
     const bounds = {
       x: window.innerWidth / 2 - viewportOffset.x - 50,

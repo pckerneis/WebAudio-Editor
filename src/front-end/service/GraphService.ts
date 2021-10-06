@@ -4,7 +4,8 @@ import {NodeState} from '../state/NodeState';
 import Bounds from '../../document/models/Bounds';
 import {PortModel} from '../../document/models/PortModel';
 import {
-  addNode, createAudioDestination,
+  addNode,
+  createAudioDestination,
   createNode,
   findPortState,
   isNodeId,
@@ -25,7 +26,6 @@ import {
   isConnectionId,
   removeTemporaryConnection
 } from './actions/ConnectionCommands';
-import {translateViewport} from './actions/ViewportCommands';
 import {NodeDefinition} from '../../document/node-definitions/NodeDefinition';
 import StoreBasedService from './helpers/StoreBasedService';
 
@@ -36,10 +36,6 @@ export const MAX_NODE_WIDTH = 400;
 export default class GraphService extends StoreBasedService<GraphState> {
   constructor() {
     super(getInitialGraphModel());
-  }
-
-  setViewportTranslate(coordinates: Coordinates): void {
-    this.commit(s => translateViewport(coordinates, s));
   }
 
   createAndAddNode(name: string, definition: NodeDefinition, bounds: Bounds): NodeState {

@@ -1,4 +1,3 @@
-import Coordinates from './Coordinates';
 import {NodeModel} from './NodeModel';
 import {ConnectionModel} from './ConnectionModel';
 
@@ -8,5 +7,4 @@ export interface AudioGraphModel {
   nodes: NodeModels;
   nodeOrder: string[];
   connections: ConnectionModel[];
-  viewportOffset: Coordinates;
 }

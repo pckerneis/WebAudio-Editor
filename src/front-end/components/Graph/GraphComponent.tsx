@@ -5,7 +5,7 @@ import Node, {areNodesVisuallySimilar} from '../Node/Node';
 import {NodeState} from '../../state/NodeState';
 import {Observable, Subscription, switchMap} from 'rxjs';
 import {GraphState} from '../../state/GraphState';
-import Coordinates, {areCoordinatesEqual} from '../../../document/models/Coordinates';
+import Coordinates, {areCoordinatesEqual, emptyCoordinates} from '../../../document/models/Coordinates';
 import {
   computeConnectionCurves,
   computeTemporaryConnectionCurve,
@@ -20,6 +20,7 @@ import MiniMap, {computeMiniMapState} from '../MiniMap/MiniMap';
 import {getEmptyMiniMapState, MiniMapState} from '../../state/MiniMapState';
 import {areBoundsEqual} from '../../../document/models/Bounds';
 import {TransactionNames} from '../../service/HistoryService';
+import {Layout} from '../../service/LayoutService';
 
 const MAX_PORT_CLICK_DISTANCE = 8;
 
@@ -30,6 +31,7 @@ const {
   graphSelection,
   historyService,
   localeStorageService,
+  layoutService,
 } = initializeOrGetServices();
 
 interface GraphComponentState {
@@ -40,6 +42,7 @@ interface GraphComponentState {
   mouseCoordinates: Coordinates;
   subscriptions: Subscription[];
   miniMapState: MiniMapState;
+  viewportOffset: Coordinates;
 }
 
 class GraphComponent extends React.Component<{}, GraphComponentState> {
@@ -53,7 +56,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
       canvasRef: createRef(),
       selection: graphSelection.items,
       connectionCurves: [],
-      mouseCoordinates: {x: 0, y: 0},
+      mouseCoordinates: emptyCoordinates(),
       subscriptions: [
         graphService.state$.pipe(
           switchMap(s => this.updateGraphState$(s)),
@@ -64,8 +67,15 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
         graphSelection.selection$.pipe(
           switchMap(this.updateSelection$),
         ).subscribe(),
+
+        layoutService.state$.pipe(
+          switchMap(s => this.updateViewportOffset$(s)),
+          switchMap(() => this.updateMiniMapState$()),
+          switchMap(() => this.computeConnectionCurves$()),
+        ).subscribe(),
       ],
       miniMapState: getEmptyMiniMapState(),
+      viewportOffset: layoutService.snapshot.viewportOffset,
     };
   }
 
@@ -112,7 +122,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
       return !areBoundsEqual(nextState.miniMapState.viewportBounds, this.state.miniMapState.viewportBounds);
     }
 
-    return nextState.graphState.viewportOffset !== this.state.graphState.viewportOffset
+    return ! areCoordinatesEqual(nextState.viewportOffset, this.state.viewportOffset)
       || nextState.selection !== this.state.selection
       || nextState.connectionCurves !== this.state.connectionCurves
       || hasNodesChanges()
@@ -145,9 +155,8 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
   }
 
   render() {
-    const {graphState} = this.state;
-    const graphAnchorStyle = getGraphAnchorStyle(graphState);
-    const nodes = buildNodes(graphState);
+    const graphAnchorStyle = getGraphAnchorStyle(this.state.viewportOffset);
+    const nodes = buildNodes(this.state.graphState);
 
     const handlePointerDown = (evt: any) => {
       let somethingHit = false;
@@ -221,8 +230,8 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
         </div>
         <div className="GraphContainer" onPointerDown={handlePointerDown}>
           <DragToMove
-            onDragMove={e => graphService.setViewportTranslate(e)}
-            elementPosition={graphService.snapshot.viewportOffset}
+            onDragMove={e => layoutService.setViewportTranslate(e)}
+            elementPosition={this.state.viewportOffset}
             buttons={[1]}
             style={({minHeight: '100vh'})}
           >
@@ -233,7 +242,6 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
         </div>
         <MiniMap
           miniMapState={this.state.miniMapState}
-          graphService={graphService}
         />
       </div>
     );
@@ -252,10 +260,12 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
 
   private updateSelection$ = (selection: string[]) => this.update$(s => ({...s, selection}));
 
+  private updateViewportOffset$ = (layout: Layout) => this.update$(s => ({...s, viewportOffset: layout.viewportOffset}));
+
   private updateMiniMapState$ = () => {
     return this.update$(s => ({
       ...s,
-      miniMapState: computeMiniMapState(graphService.snapshot),
+      miniMapState: computeMiniMapState(graphService.snapshot, layoutService.snapshot.viewportOffset),
     }));
   }
 
@@ -269,8 +279,8 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
   }
 }
 
-function getGraphAnchorStyle(graphState: GraphState): any {
-  const {x, y} = graphState.viewportOffset;
+function getGraphAnchorStyle(viewportOffset: Coordinates): any {
+  const {x, y} = viewportOffset;
   return {transform: `translate(${x}px, ${y}px)`};
 }
 

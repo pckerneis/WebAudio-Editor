@@ -1,6 +1,8 @@
 import StoreBasedService from './helpers/StoreBasedService';
 import {combineLatest, map, Observable, pluck} from 'rxjs';
 import {anyTruthy} from '../utils/arrays';
+import Coordinates, {emptyCoordinates} from '../../document/models/Coordinates';
+import {translateViewport} from './actions/ViewportCommands';
 
 export default class LayoutService extends StoreBasedService<Layout> {
   public readonly isCommandPaletteVisible$: Observable<boolean>;
@@ -17,6 +19,10 @@ export default class LayoutService extends StoreBasedService<Layout> {
       this.isCommandPaletteVisible$,
       this.isOpenProjectVisible$,
     ]).pipe(map(anyTruthy));
+  }
+
+  setViewportTranslate(coordinates: Coordinates): void {
+    this.commit(s => translateViewport(coordinates, s));
   }
 
   showCommandPalette(): void {
@@ -37,12 +43,14 @@ export default class LayoutService extends StoreBasedService<Layout> {
 }
 
 export interface Layout {
+  viewportOffset: Coordinates;
   isCommandPaletteVisible: boolean;
   isOpenProjectVisible: boolean;
 }
 
 export function emptyLayout(): Layout {
   return {
+    viewportOffset: emptyCoordinates(),
     isOpenProjectVisible: false,
     isCommandPaletteVisible: false,
   };
