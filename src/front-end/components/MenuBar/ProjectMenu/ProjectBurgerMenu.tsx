@@ -6,7 +6,6 @@ import useObservableState from '../../../ui-utils/UseObservableState';
 import initializeOrGetServices from '../../../service/helpers/initialize-services';
 import {pluck} from 'rxjs';
 import OpenProjectWindow from '../OpenProjectWindow/OpenProjectWindow';
-import {DEFAULT_PROJECT_NAME} from '../../../state/ProjectState';
 import {getInitialGraphModel} from '../../../state/GraphState';
 
 const DEFAULT_FILE_NAME = 'untitled-audio-graph';
@@ -72,7 +71,7 @@ export default function ProjectBurgerMenu() {
   }, [setMenuVisible, downloadAsJson]);
 
   const createNewProject = () => {
-    projectService.setProjectName(DEFAULT_PROJECT_NAME);
+    projectService.initialiseEmptyProject();
     graphSelection.setSelection([]);
     graphService.loadState(getInitialGraphModel());
     historyService.setSavePoint();

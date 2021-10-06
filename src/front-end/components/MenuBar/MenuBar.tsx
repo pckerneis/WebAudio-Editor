@@ -18,7 +18,6 @@ const {
   historyService,
   playService,
   localeStorageService,
-  messageService
 } = initializeOrGetServices();
 
 export default function MenuBar() {
@@ -29,15 +28,8 @@ export default function MenuBar() {
 
   const handleUndo = () => historyService.undo();
   const handleRedo = () => historyService.redo();
-  const handleChange = (value: string) => {
-    try {
-      localeStorageService.renameProject(value);
-    } catch (e: any) {
-      if (e.message) {
-        messageService.post(e.message, 'error');
-      }
-    }
-  };
+  const handleChange = (value: string) => projectService.renameProject(value);
+
   const handlePlay = (evt: any) => {
     if (playing) {
       playService.stop();

@@ -1,11 +1,15 @@
 export const DEFAULT_PROJECT_NAME = '';
 
 export interface ProjectState {
+  projectId: string | null;
   projectName: string;
+  creation?: Date;
+  lastModification?: Date;
 }
 
-export function getInitialProjectState(): ProjectState {
+export function getEmptyProjectState(): ProjectState {
   return {
-    projectName: DEFAULT_PROJECT_NAME,
+    projectId: null,
+    projectName: '',
   }
 }

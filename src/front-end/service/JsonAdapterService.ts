@@ -37,7 +37,7 @@ export default class JsonAdapterService {
       const parsed = JSON.parse(jsonString);
 
       if (isValidProjectDocument(parsed)) {
-        this.projectService.setProjectName(parsed.projectName);
+        this.projectService.initialiseEmptyProject(parsed.projectName);
         this.graphSelection.setSelection(parsed.selection);
         this.graphService.loadState({
           ...parsed.audioGraph,

@@ -24,7 +24,7 @@ export default function OpenProjectWindow() {
     const time = info.lastModification.toLocaleTimeString();
     return (
       <div className="OpenProjectWindowRow"
-           key={info.projectName}
+           key={info.projectId}
            onClick={() => handleProjectRowClicked(info)}
       >
         <span>{info.projectName}</span>

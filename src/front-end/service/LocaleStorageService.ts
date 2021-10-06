@@ -35,8 +35,8 @@ export default class LocaleStorageService {
   public getKnownProjectInfos(): ProjectInfo[] {
     const record = this.getRecord();
     const lines = Object.entries(record)
-      .filter(([projectName, snapshots]) => Boolean(projectName) && Boolean(snapshots))
-      .map(([projectName, snapshots]) => {
+      .filter(([projectId, snapshots]) => Boolean(projectId) && Boolean(snapshots))
+      .map(([projectId, snapshots]) => {
       const latestSnapshot = [...snapshots].pop();
 
       if (! latestSnapshot) {
@@ -44,7 +44,8 @@ export default class LocaleStorageService {
       }
 
       return {
-        projectName,
+        projectId,
+        projectName: latestSnapshot.projectName,
         lastModification: new Date(Date.parse(latestSnapshot.date)),
       };
     }).filter(Boolean) as ProjectInfo[];
@@ -58,19 +59,19 @@ export default class LocaleStorageService {
   }
 
   public pushSnapshot(): void {
-    const projectName = this.projectService.snapshot.projectName as any;
+    const projectId = this.projectService.snapshot.projectId as any;
 
-    if (typeof projectName !== 'string' || projectName.length === 0) {
-      console.warn(`Won't push snapshot because there's no project name`);
+    if (typeof projectId !== 'string' || projectId.length === 0) {
+      console.warn(`Project ID is not defined!`);
       return;
     }
 
     const record = this.getRecord();
-    const knownSnapshots = record[projectName] ?? [];
+    const knownSnapshots = record[projectId] ?? [];
 
     const newRecord: Record = {
       ...record,
-      [projectName]: [...knownSnapshots, this.getSnapshot()],
+      [projectId]: [...knownSnapshots, this.getSnapshot()],
     };
 
     LocaleStorageService.setRecord(newRecord);
@@ -82,6 +83,7 @@ export default class LocaleStorageService {
       graphState: this.graphService.snapshot,
       selection: this.graphSelection.items,
       viewportOffset: this.layoutService.snapshot.viewportOffset,
+      projectName: this.projectService.snapshot.projectName,
     };
   }
 
@@ -89,43 +91,16 @@ export default class LocaleStorageService {
     localStorage.setItem(LocaleStorageService.persistenceKey, JSON.stringify(records));
   }
 
-  renameProject(value: string): void {
-    const currentName = this.projectService.snapshot.projectName;
-    const newName = value.trim();
-
-    if (currentName === newName
-      || newName.length === 0) {
-      return;
-    }
-
-    const record = this.getRecord();
-
-    if (record[newName] != null) {
-      throw new Error(`A project named "${newName}" already exists.`);
-    }
-
-    const knownSnapshots = record[currentName] ?? [];
-    const newRecord: Record = {
-      ...record,
-      [newName]: [...knownSnapshots, this.getSnapshot()],
-      [currentName]: [],
-    };
-
-    LocaleStorageService.setRecord(newRecord);
-
-    this.projectService.setProjectName(newName);
-  }
-
   loadProject(info: ProjectInfo): void {
-    const projectName = info.projectName;
+    const projectId = info.projectId;
     const record = this.getRecord();
-    const snapshots = record[projectName];
+    const snapshots = record[projectId];
     const latest = snapshots ? [...snapshots].pop() : null;
 
     if (latest) {
       this.graphService.loadState(latest.graphState);
       this.graphSelection.setSelection(latest.selection);
-      this.projectService.setProjectName(projectName);
+      this.projectService.restoreProject(projectId, info.projectName);
       this.layoutService.setViewportTranslate(latest.viewportOffset);
       this.historyService.setSavePoint();
     }
@@ -137,14 +112,15 @@ interface Record {
 }
 
 interface Snapshot {
+  projectName: string;
   graphState: GraphState;
   selection: string[];
   date: string;
-  name?: string | null;
   viewportOffset: Coordinates;
 }
 
 export interface ProjectInfo {
+  projectId: string;
   projectName: string;
   lastModification: Date;
 }
