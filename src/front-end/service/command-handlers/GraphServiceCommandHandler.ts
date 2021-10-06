@@ -73,11 +73,13 @@ export default class GraphServiceCommandHandler implements CommandHandler {
     };
 
     if (nodeKind === NodeKind.destination) {
-      this.graphService.addAudioDestination(bounds);
+      const newNode = this.graphService.addAudioDestination(bounds);
+      this.graphSelection.setUniqueSelection(newNode.id);
     } else {
       const nodeDefinition = this.nodeDefinitionService.getNodeDefinition(nodeKind);
       const name = findDefaultName(nodeKind, this.graphService.snapshot);
-      this.graphService.createAndAddNode(name, nodeDefinition!, bounds);
+      const newNode = this.graphService.createAndAddNode(name, nodeDefinition!, bounds);
+      this.graphSelection.setUniqueSelection(newNode.id);
     }
   }
 }
