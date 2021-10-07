@@ -35,7 +35,6 @@ const {
 
 interface GraphComponentState {
   graphState: GraphState;
-  canvasRef: React.RefObject<HTMLCanvasElement>;
   selection: string[];
   connectionCurves: ConnectionCurve[];
   mouseCoordinates: Coordinates;
@@ -46,13 +45,15 @@ interface GraphComponentState {
 
 class GraphComponent extends React.Component<{}, GraphComponentState> {
   private resizeHandler?: (() => void);
+  private observer?: ResizeObserver;
+  private canvasRef = createRef<HTMLCanvasElement>();
+  private graphContainerRef = createRef<HTMLDivElement>();
 
   constructor(props: {}) {
     super(props);
 
     this.state = {
       graphState: graphService.snapshot,
-      canvasRef: createRef(),
       selection: graphSelection.items,
       connectionCurves: [],
       mouseCoordinates: emptyCoordinates(),
@@ -78,26 +79,59 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
     };
   }
 
-  componentWillUnmount(): void {
-    this.state.subscriptions.forEach(sub => sub.unsubscribe());
-
-    if (this.resizeHandler != null) {
-      window.removeEventListener('resize', this.resizeHandler!);
-      this.resizeHandler = undefined;
-    }
-  }
-
   componentDidMount(): void {
     this.resizeHandler = () => {
       this.renderConnections();
       this.updateMiniMapState$().subscribe();
-    }
+    };
+
     window.addEventListener('resize', this.resizeHandler);
+    this.observeGraphContainerPositionChange();
 
     this.computeConnectionCurves$()
       .subscribe(() => this.renderConnections());
 
     this.updateMiniMapState$().subscribe();
+  }
+
+  private observeGraphContainerPositionChange(): void {
+    if (! ('IntersectionObserver' in window)) {
+      return;
+    }
+
+    const graphContainer = this.graphContainerRef.current;
+
+    if (graphContainer) {
+      const callback: IntersectionObserverCallback = () => {
+        this.computeConnectionCurves$()
+          .subscribe(() => this.renderConnections());
+      };
+
+      // Value used to determine callback ratios. precision = 100 means we want
+      // to detect changes when visible portion changes by something as small as 1/100.
+      const precision = 500;
+
+      const options: IntersectionObserverInit = {
+        threshold: Array.from(Array(precision).keys()).map(n => n / precision),
+      };
+
+      this.observer = new IntersectionObserver(callback, options);
+      this.observer.observe(graphContainer);
+    }
+  }
+
+  componentWillUnmount(): void {
+    this.state.subscriptions.forEach(sub => sub.unsubscribe());
+
+    if (this.resizeHandler != null) {
+      window.removeEventListener('resize', this.resizeHandler);
+      this.resizeHandler = undefined;
+    }
+
+    if (this.observer != null) {
+      this.observer.disconnect();
+      this.observer = undefined;
+    }
   }
 
   componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any): void {
@@ -131,7 +165,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
   }
 
   private renderConnections(): void {
-    const canvas = this.state.canvasRef.current;
+    const canvas = this.canvasRef.current;
 
     if (canvas != null) {
       canvas.width = canvas.clientWidth ?? 0;
@@ -222,8 +256,8 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
         onPointerUp={handlePointerUp}
         tabIndex={0}
       >
-        <div className="CanvasContainer">
-          <canvas ref={this.state.canvasRef}/>
+        <div className="CanvasContainer" ref={this.graphContainerRef}>
+          <canvas ref={this.canvasRef}/>
         </div>
         <div className="GraphContainer" onPointerDown={handlePointerDown}>
           <DragToMove
@@ -246,14 +280,14 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
 
   private updateGraphState$ = (graphState: GraphState) => {
     return this.update$(s => ({...s, graphState}));
-  }
+  };
 
   private computeConnectionCurves$ = () => {
     return this.update$(s => ({
       ...s,
       connectionCurves: computeConnectionCurves(graphService, portRegistry),
     }));
-  }
+  };
 
   private updateSelection$ = (selection: string[]) => this.update$(s => ({...s, selection}));
 
@@ -267,7 +301,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
       ...s,
       miniMapState: computeMiniMapState(graphService.snapshot, layoutService.snapshot.viewportOffset),
     }));
-  }
+  };
 
   private update$ = (stateMapper: (s: GraphComponentState) => GraphComponentState) => {
     return new Observable<GraphComponentState>(subscriber => {
@@ -276,7 +310,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
         subscriber.complete();
       });
     });
-  }
+  };
 }
 
 function getGraphAnchorStyle(viewportOffset: Coordinates): any {
