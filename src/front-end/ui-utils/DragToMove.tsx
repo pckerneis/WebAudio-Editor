@@ -47,8 +47,8 @@ export default function DragToMove(props: DragToMoveProps) {
   const handlePointerMove = useCallback((e: any) => {
     if (isDragging) {
       const newPosition = {
-        x: startPosition.x + (e.screenX - dragStartPosition.x),
-        y: startPosition.y + (e.screenY - dragStartPosition.y),
+        x: startPosition.x + (e.screenX - dragStartPosition.x) / window.devicePixelRatio,
+        y: startPosition.y + (e.screenY - dragStartPosition.y) / window.devicePixelRatio,
       }
       onDragMove(newPosition);
     }
