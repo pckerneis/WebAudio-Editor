@@ -24,8 +24,9 @@ export default function EditableLabel(props: EditableLabelProps) {
   const handleKeyUp = (event: any) => {
     if (isEnterKeyEvent(event)) {
       sendValueAndClose();
-      event.stopPropagation();
     }
+
+    consumeEvent(event);
   };
 
   const sendValueAndClose = () => {
@@ -43,6 +44,7 @@ export default function EditableLabel(props: EditableLabelProps) {
       onPointerUp={consumeEvent}
       onChange={(event) => setTransientValue(event.target.value)}
       onKeyDown={consumeEvent}
+      onKeyPress={consumeEvent}
       onKeyUp={handleKeyUp}
       onBlur={sendValueAndClose}
       placeholder={placeHolder}
