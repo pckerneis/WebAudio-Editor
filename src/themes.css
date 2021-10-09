@@ -53,4 +53,5 @@
 
     --secondary-background-90: rgba(var(--secondary-background-rgb), 90%);
     --secondary-background-95: rgba(var(--secondary-background-rgb), 95%);
+    --secondary-background-50: rgba(var(--secondary-background-rgb), 50%);
 }

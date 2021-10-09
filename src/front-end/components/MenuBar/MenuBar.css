@@ -9,6 +9,7 @@
     left: 20px;
     border-radius: 4px;
     display: flex;
+    user-select: none;
 }
 
 .MenuBarSeparator {

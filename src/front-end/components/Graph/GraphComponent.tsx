@@ -21,6 +21,8 @@ import {getEmptyMiniMapState, MiniMapState} from '../../state/MiniMapState';
 import {areBoundsEqual} from '../../../document/models/Bounds';
 import {TransactionNames} from '../../service/HistoryService';
 import {Layout} from '../../service/LayoutService';
+import ContainerElement from '../Container/ContainerElement';
+import {ContainerState} from '../../state/ContainerState';
 
 const MAX_PORT_CLICK_DISTANCE = 8;
 
@@ -95,7 +97,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
   }
 
   private observeGraphContainerPositionChange(): void {
-    if (! ('IntersectionObserver' in window)) {
+    if (!('IntersectionObserver' in window)) {
       return;
     }
 
@@ -189,77 +191,23 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
 
   render() {
     const graphAnchorStyle = getGraphAnchorStyle(this.state.viewportOffset);
+    const containers = buildContainers(this.state.graphState);
     const nodes = buildNodes(this.state.graphState);
-
-    const handlePointerDown = (evt: any) => {
-      let somethingHit = false;
-      const mouseCoordinates = {
-        x: evt.clientX,
-        y: evt.clientY,
-      };
-
-      if (!somethingHit) {
-        for (const c of this.state.connectionCurves) {
-          if (hitsConnectionCurve(mouseCoordinates, c, MAX_PORT_CLICK_DISTANCE)) {
-            graphSelection.selectOnMouseDown(c.id, evt);
-            somethingHit = true;
-          }
-        }
-      }
-
-      if (!somethingHit) {
-        graphSelection.clearSelection();
-      }
-    };
-
-    const handlePointerUp = (evt: any) => {
-      const mouseCoordinates = {
-        x: evt.clientX,
-        y: evt.clientY,
-      };
-
-      if (this.state.graphState.temporaryConnectionPort) {
-        const suitablePort = portRegistry.findSuitablePort(mouseCoordinates, this.state.graphState);
-
-        if (suitablePort) {
-          graphService.applyTemporaryConnection(suitablePort.id);
-          historyService.pushTransaction(TransactionNames.CREATE_CONNECTION);
-        } else {
-          graphService.removeTemporaryConnection();
-        }
-      }
-    };
-
-    const handleMouseMove = (e: any) => {
-      this.setState(state => ({
-        ...state,
-        mouseCoordinates: {
-          x: e.clientX,
-          y: e.clientY,
-        },
-      }));
-    };
-
-    const handleKeyUp = (e: any) => {
-      if (e.code === 'Delete' || e.code === 'Backspace') {
-        graphService.remove(graphSelection.items);
-        historyService.pushTransaction(TransactionNames.DELETE_SELECTION);
-        consumeEvent(e);
-      }
-    };
 
     return (
       <div
         className="GraphComponent"
-        onMouseMove={handleMouseMove}
-        onKeyUp={handleKeyUp}
-        onPointerUp={handlePointerUp}
+        onMouseMove={evt => this.handleMouseMove(evt)}
+        onKeyUp={evt => this.handleKeyUp(evt)}
+        onPointerUp={evt => this.handlePointerUp(evt)}
         tabIndex={0}
       >
         <div className="CanvasContainer" ref={this.graphContainerRef}>
           <canvas ref={this.canvasRef}/>
         </div>
-        <div className="GraphContainer" onPointerDown={handlePointerDown}>
+        <div className="GraphContainer"
+             onPointerDown={evt => this.handlePointerDown(evt)}
+        >
           <DragToMove
             onDragMove={e => layoutService.setViewportTranslate(e)}
             elementPosition={this.state.viewportOffset}
@@ -267,6 +215,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
             style={({minHeight: '100vh'})}
           >
             <div className="GraphViewportAnchor" style={graphAnchorStyle}>
+              {containers}
               {nodes}
             </div>
           </DragToMove>
@@ -276,6 +225,63 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
         />
       </div>
     );
+  }
+
+  private handlePointerDown(evt: any) {
+    let somethingHit = false;
+    const mouseCoordinates = {
+      x: evt.clientX,
+      y: evt.clientY,
+    };
+
+    if (!somethingHit) {
+      for (const c of this.state.connectionCurves) {
+        if (hitsConnectionCurve(mouseCoordinates, c, MAX_PORT_CLICK_DISTANCE)) {
+          graphSelection.selectOnMouseDown(c.id, evt);
+          somethingHit = true;
+        }
+      }
+    }
+
+    if (!somethingHit) {
+      graphSelection.clearSelection();
+    }
+  }
+
+  private handlePointerUp(evt: any) {
+    const mouseCoordinates = {
+      x: evt.clientX,
+      y: evt.clientY,
+    };
+
+    if (this.state.graphState.temporaryConnectionPort) {
+      const suitablePort = portRegistry.findSuitablePort(mouseCoordinates, this.state.graphState);
+
+      if (suitablePort) {
+        graphService.applyTemporaryConnection(suitablePort.id);
+        historyService.pushTransaction(TransactionNames.CREATE_CONNECTION);
+      } else {
+        graphService.removeTemporaryConnection();
+      }
+    }
+  }
+
+  private handleMouseMove(e: any) {
+    this.setState(state => ({
+      ...state,
+      mouseCoordinates: {
+        x: e.clientX,
+        y: e.clientY,
+      },
+    }));
+  }
+
+  private handleKeyUp(e: any) {
+    if (e.code === 'Delete' || e.code === 'Backspace') {
+      graphService.remove(graphSelection.items);
+      historyService.pushTransaction(TransactionNames.DELETE_SELECTION);
+      consumeEvent(e);
+    }
   }
 
   private updateGraphState$ = (graphState: GraphState) => {
@@ -331,6 +337,18 @@ function buildNodes(graphState: GraphState): JSX.Element[] {
               portRegistry={portRegistry}
               selected={graphSelection.isSelected(id)}
               selectedItemSet={graphSelection}
+        />
+      )
+    });
+}
+
+function buildContainers(graphState: GraphState): JSX.Element[] {
+  return Object.entries(graphState.containers ?? {})
+    .map(([id, containerState]: [string, ContainerState]) => {
+      return (
+        <ContainerElement
+          key={id}
+          containerState={containerState}
         />
       )
     });

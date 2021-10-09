@@ -28,6 +28,14 @@ import {
 } from './actions/ConnectionCommands';
 import {NodeDefinition} from '../../document/node-definitions/NodeDefinition';
 import StoreBasedService from './helpers/StoreBasedService';
+import {ContainerState} from '../state/ContainerState';
+import {
+  addContainer,
+  createContainer,
+  setContainerHeight, setContainerName,
+  setContainerPosition, setContainerSize,
+  setContainerWidth
+} from './actions/ContainerCommands';
 
 export const DEFAULT_NODE_WIDTH = 150;
 export const MIN_NODE_WIDTH = 80;
@@ -44,6 +52,12 @@ export default class GraphService extends StoreBasedService<GraphState> {
     return n;
   }
 
+  createAndAddContainer(name: string, bounds: Bounds): ContainerState {
+    const n = createContainer(name, bounds, this.snapshot);
+    this.addContainer(n);
+    return n;
+  }
+
   addAudioDestination(bounds: Bounds): NodeState {
     const n = createAudioDestination(bounds, this.snapshot);
     this.addNode(n);
@@ -54,8 +68,40 @@ export default class GraphService extends StoreBasedService<GraphState> {
     this.commit(s => addNode(node.id, node, s));
   }
 
+  private addContainer(container: ContainerState): void {
+    this.commit(s => addContainer(container, s));
+  }
+
   setNodePosition(id: string, coordinates: Coordinates): void {
     this.commit(s => setNodePosition(id, coordinates, s));
+  }
+
+  setNodeWidth(nodeId: string, newWidth: number): void {
+    this.commit(s => setNodeWidth(nodeId, newWidth, s));
+  }
+
+  setNodeHeight(nodeId: string, newHeight: number): void {
+    this.commit(s => setNodeHeight(nodeId, newHeight, s));
+  }
+
+  setContainerPosition(id: string, coordinates: Coordinates): void {
+    this.commit(s => setContainerPosition(id, coordinates, s));
+  }
+
+  setContainerWidth(id: string, width: number): void {
+    this.commit(s => setContainerWidth(id, width, s));
+  }
+
+  setContainerHeight(id: string, height: number): void {
+    this.commit(s => setContainerHeight(id, height, s));
+  }
+
+  setContainerSize(id: string, width: number, height: number): void {
+    this.commit(s => setContainerSize(id, width, height, s));
+  }
+
+  setContainerName(id: string, name: string): void {
+    this.commit(s => setContainerName(id, name, s));
   }
 
   sendNodeToFront(id: string): void {
@@ -109,14 +155,6 @@ export default class GraphService extends StoreBasedService<GraphState> {
 
   loadState(graphState: GraphState): void {
     this.commit(() => graphState);
-  }
-
-  setNodeWidth(nodeId: string, newWidth: number): void {
-    this.commit(s => setNodeWidth(nodeId, newWidth, s));
-  }
-
-  setNodeHeight(nodeId: string, newHeight: number): void {
-    this.commit(s => setNodeHeight(nodeId, newHeight, s));
   }
 }
 

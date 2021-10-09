@@ -66,7 +66,7 @@ export default function EditableLabel(props: EditableLabelProps) {
 }
 
 interface EditableLabelProps {
-  onChange: Function,
+  onChange: (value: string) => void,
   value: string,
   inputStyle?: React.CSSProperties;
   className?: string,

@@ -10,19 +10,26 @@ export function loadDemoProject(graphService: GraphService,
                                 nodeDefinitionService: NodeDefinitionService): void {
   const osc = graphService.createAndAddNode('osc',
     nodeDefinitionService.getNodeDefinition(NodeKind.osc)!,
-    {x: 120, y: 20, width: DEFAULT_NODE_WIDTH, height: 20});
+    {x: 200, y: 140, width: DEFAULT_NODE_WIDTH, height: 20});
 
   const gain1 = graphService.createAndAddNode('gain1',
     nodeDefinitionService.getNodeDefinition(NodeKind.gain)!,
-    {x: 150, y: 300, width: DEFAULT_NODE_WIDTH, height: 20});
+    {x: 300, y: 220, width: DEFAULT_NODE_WIDTH, height: 20});
 
   const gain2 = graphService.createAndAddNode('gain2',
     nodeDefinitionService.getNodeDefinition(NodeKind.gain)!,
-    {x: 200, y: 150, width: DEFAULT_NODE_WIDTH, height: 20});
+    {x: 200, y: 300, width: DEFAULT_NODE_WIDTH, height: 20});
 
   graphService.addConnection(osc.id, 0, gain1.id, 0);
   graphService.addConnection(gain1.id, 0, gain2.id, 0);
   graphService.addConnection(osc.id, 0, gain2.id, 0);
+
+  graphService.createAndAddContainer('container', {
+    x: 180,
+    y: 90,
+    width: 300,
+    height: 320,
+  });
 
   graphSelection.addToSelection(osc.id);
 

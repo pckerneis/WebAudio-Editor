@@ -41,6 +41,7 @@ export default class JsonAdapterService {
         this.graphSelection.setSelection(parsed.selection);
         this.graphService.loadState({
           ...parsed.audioGraph,
+          containers: {}, // TODO
           temporaryConnectionPort: null,
         });
       } else {

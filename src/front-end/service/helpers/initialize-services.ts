@@ -15,6 +15,7 @@ import HistoryServiceCommandHandler from '../command-handlers/HistoryServiceComm
 import LayoutService from '../LayoutService';
 import PlayService from '../PlayService';
 import LocaleStorageService from '../LocaleStorageService';
+import {loadDemoProject} from '../../../project-setup';
 
 export default function initializeOrGetServices(): Services {
   const firstInitialization = ! SingletonWrapper.hasInstance(GraphService);
@@ -39,10 +40,12 @@ export default function initializeOrGetServices(): Services {
       new HistoryServiceCommandHandler(historyService),
     );
 
-    const latestProject = localeStorageService.findLatestProject();
-    if (latestProject != null) {
-      localeStorageService.loadProject(latestProject);
-    }
+    // const latestProject = localeStorageService.findLatestProject();
+    // if (latestProject != null) {
+    //   localeStorageService.loadProject(latestProject);
+    // }
+
+    loadDemoProject(graphService, graphSelection, historyService,nodeDefinitionService);
   }
 
   return {
