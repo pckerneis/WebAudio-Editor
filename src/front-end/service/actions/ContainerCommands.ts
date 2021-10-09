@@ -11,6 +11,12 @@ function nextContainerId(knownIds: string[]): string {
   return nextId('Container-', knownIds);
 }
 
+export function isContainerId(candidate: any): boolean {
+  return typeof candidate === 'string'
+    && candidate.split('-').length === 2
+    && candidate.split('-')[0] === 'Container';
+}
+
 function extractAllContainerIds(graphState: GraphState): string[] {
   return Object.keys(graphState.containers);
 }

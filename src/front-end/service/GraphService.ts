@@ -32,6 +32,7 @@ import {ContainerState} from '../state/ContainerState';
 import {
   addContainer,
   createContainer,
+  isContainerId,
   setContainerHeight,
   setContainerName,
   setContainerPosition,
@@ -167,6 +168,7 @@ export default class GraphService extends StoreBasedService<GraphState> {
 function remove(ids: string[], state: GraphState): GraphState {
   const connectionsToRemove = ids.filter(isConnectionId);
   const nodesToRemove = ids.filter(isNodeId);
+  const connectionToRemove = ids.filter(isContainerId);
   const impactedConnections = state.connections
     .filter(c => {
       const sourceNode = findParentNode(c.source, state)?.id;
@@ -188,9 +190,18 @@ function remove(ids: string[], state: GraphState): GraphState {
   const connections = state.connections.filter(({id}) => !impactedConnections.includes(id)
     && !connectionsToRemove.includes(id));
 
+  const containers: { [id: string]: ContainerState } = {};
+
+  Object.entries(state.containers).forEach(([id, container]) => {
+    if (!connectionToRemove.includes(id)) {
+      containers[id] = container;
+    }
+  });
+
   return {
     ...state,
     nodes,
+    containers,
     elementOrder: nodeOrder,
     connections,
   };
