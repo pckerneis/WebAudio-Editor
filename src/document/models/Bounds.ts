@@ -62,3 +62,29 @@ export function expandBounds(bounds: Bounds, amount: number): Bounds {
     height: bounds.height + amount,
   };
 }
+
+interface TopRightBottomLeft {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
+function asTopRightBottomLeft(bounds: Bounds): TopRightBottomLeft {
+  return {
+    top: bounds.y,
+    right: bounds.x + bounds.width,
+    bottom: bounds.y + bounds.height,
+    left: bounds.x,
+  };
+}
+
+export function boundsIntersect(first: Bounds, second: Bounds): boolean {
+  const r1 = asTopRightBottomLeft(first);
+  const r2 = asTopRightBottomLeft(second);
+
+  return !(r2.left > r1.right ||
+    r2.right < r1.left ||
+    r2.top > r1.bottom ||
+    r2.bottom < r1.top);
+}

@@ -1,43 +1,17 @@
 import './ContainerElement.css';
 import React, {useCallback, useState} from 'react';
-import DragToMove from '../../ui-utils/DragToMove';
-import EditableLabel from '../EditableLabel/EditableLabel';
 import {ContainerState} from '../../state/ContainerState';
 import initializeOrGetServices from '../../service/helpers/initialize-services';
-import Bounds from '../../../document/models/Bounds';
+import Bounds, {boundsIntersect} from '../../../document/models/Bounds';
 import Coordinates from '../../../document/models/Coordinates';
 import {NodeState} from '../../state/NodeState';
+import BaseContainerElement from '../BaseContainer/BaseContainerElement';
 
 const {
   graphService,
   graphSelection,
 } = initializeOrGetServices();
 
-interface TopRightBottomLeft {
-  top: number;
-  right: number;
-  bottom: number;
-  left: number;
-}
-
-function asTopRightBottomLeft(bounds: Bounds): TopRightBottomLeft {
-  return {
-    top: bounds.y,
-    right: bounds.x + bounds.width,
-    bottom: bounds.y + bounds.height,
-    left: bounds.x,
-  };
-}
-
-function boundsIntersect(first: Bounds, second: Bounds): boolean {
-  const r1 = asTopRightBottomLeft(first);
-  const r2 = asTopRightBottomLeft(second);
-
-  return !(r2.left > r1.right ||
-    r2.right < r1.left ||
-    r2.top > r1.bottom ||
-    r2.bottom < r1.top);
-}
 
 function findContainedNodes(containerState: ContainerState, nodes: { [p: string]: NodeState }): NodeState[] {
   return Object.values(nodes)
@@ -54,11 +28,6 @@ export default function ContainerElement(props: ContainerElementProps) {
   const [positionByItem, setPositionByItem] = useState({} as { [id: string]: Bounds });
 
   const bounds = containerState.display.bounds;
-  const style = getStyle(bounds, -100);
-
-  const setWidth = (width: number) => graphService.setContainerWidth(containerState.id, width);
-  const setHeight = (height: number) => graphService.setContainerHeight(containerState.id, height);
-  const setSize = (size: Coordinates) => graphService.setContainerSize(containerState.id, size.x, size.y);
 
   const handlePointerDown = useCallback((evt: any) => {
     graphService.sendContainerToFront(containerState.id);
@@ -100,33 +69,22 @@ export default function ContainerElement(props: ContainerElementProps) {
   }, [containerState.display.bounds, containerState.id]);
 
   return (
-    <div className={'ContainerElement' + (selected ? ' selected' : '')}
-         style={style}
-         onPointerDown={handlePointerDown}
-    >
-      <ResizeBorders
-        bounds={bounds}
-        setWidth={setWidth}
-        setHeight={setHeight}
-        setSize={setSize}
-      />
-      <div className="ContainerHeader">
-        <DragToMove
-          onDragStart={handleDragStart}
-          onDragMove={handleMoved}
-          elementPosition={bounds}
-          buttons={[0]}
-          style={{width: '100%', display: 'flex', flexGrow: 1}}
-        >
-          <EditableLabel
-            className="ContainerEditableLabel"
-            onChange={(value) => graphService.setContainerName(containerState.id, value)}
-            value={containerState.name}
-            inputStyle={{flexGrow: 1}}
-          />
-        </DragToMove>
-      </div>
-    </div>
+    <BaseContainerElement
+      className={'ContainerElement'}
+      bounds={bounds}
+      handlePointerDown={handlePointerDown}
+      handleDragStart={handleDragStart}
+      handleMoved={handleMoved}
+      name={containerState.name}
+      onRename={v => graphService.setContainerName(containerState.id, v)}
+      selected={selected}
+      setHeight={v => graphService.setContainerHeight(containerState.id, v)}
+      setWidth={v => graphService.setContainerWidth(containerState.id, v)}
+      setSize={v => graphService.setContainerSize(containerState.id, v.x, v.y)}
+      zIndex={Object.keys(graphService.snapshot.containers).indexOf(containerState.id)}
+      headerClassName={'ContainerHeader'}
+      labelClassName={'ContainerEditableLabel'}
+    />
   );
 }
 
@@ -134,60 +92,4 @@ interface ContainerElementProps {
   containerState: ContainerState;
   zIndex: number;
   selected: boolean;
-}
-
-function getStyle(bounds: Bounds, zIndex: number): any {
-  return {
-    transform: `translate(${bounds.x}px, ${bounds.y}px)`,
-    width: `${bounds.width}px`,
-    height: `${bounds.height}px`,
-    zIndex,
-  };
-}
-
-function ResizeBorders(props: any): JSX.Element {
-  const {
-    bounds,
-    setWidth,
-    setHeight,
-    setSize,
-  } = props;
-
-  return (
-    <div className="ContainerHandles">
-      <div
-        className="ContainerRightResizeHandle"
-        key="rightHandle"
-      >
-        <DragToMove
-          onDragMove={(coordinates) => setWidth(coordinates.x)}
-          elementPosition={{x: bounds.width, y: 0}}
-          buttons={[0]}
-          style={{width: '100%'}}
-        />
-      </div>
-      <div
-        className="ContainerBottomResizeHandle"
-        key="bottomHandle"
-      >
-        <DragToMove
-          onDragMove={(coordinates) => setHeight(coordinates.y)}
-          elementPosition={{x: 0, y: bounds.height}}
-          buttons={[0]}
-          style={{width: '100%'}}
-        />
-      </div>
-      <div
-        className="ContainerBottomRightResizeHandle"
-        key="bottomRightHandle"
-      >
-        <DragToMove
-          onDragMove={(coordinates) => setSize(coordinates)}
-          elementPosition={{x: bounds.width, y: bounds.height}}
-          buttons={[0]}
-          style={{width: '100%'}}
-        />
-      </div>
-    </div>
-  );
 }

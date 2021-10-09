@@ -161,7 +161,15 @@ export default class GraphService extends StoreBasedService<GraphState> {
   }
 
   loadState(graphState: GraphState): void {
-    this.commit(() => graphState);
+    const newState: GraphState = {
+      containers: {},
+      nodes: {},
+      connections: [],
+      elementOrder: [],
+      temporaryConnectionPort: null,
+      ...(graphState as Partial<GraphState>),
+    };
+    this.commit(newState);
   }
 }
 
