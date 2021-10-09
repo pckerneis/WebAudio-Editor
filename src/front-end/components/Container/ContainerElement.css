@@ -6,6 +6,10 @@
     flex-direction: column;
 }
 
+.ContainerElement.selected {
+    border-color: var(--selection-outline-color);
+}
+
 .ContainerHeader {
     background: var(--secondary-background-50);
     height: 26px;

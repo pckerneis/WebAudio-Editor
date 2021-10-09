@@ -1,7 +1,6 @@
 import React, {createRef, useCallback, useLayoutEffect, useState} from 'react';
 import './Node.css';
 import DragToMove from '../../ui-utils/DragToMove';
-import PropTypes from 'prop-types';
 import EditableLabel from '../EditableLabel/EditableLabel';
 import FoldButton from '../FoldButton/FoldButton';
 import ParamPanel from '../ParamPanel/ParamPanel';
@@ -202,16 +201,6 @@ function Node(props: NodeProps) {
       </div>
     </div>
   );
-}
-
-const {shape, bool, number} = PropTypes;
-
-Node.propTypes = {
-  nodeState: shape({}).isRequired,
-  definition: shape({}),
-  style: shape({}),
-  selected: bool,
-  zIndex: number,
 }
 
 type Nodes = { [id: string]: NodeState };

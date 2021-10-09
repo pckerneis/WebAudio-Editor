@@ -32,8 +32,10 @@ import {ContainerState} from '../state/ContainerState';
 import {
   addContainer,
   createContainer,
-  setContainerHeight, setContainerName,
-  setContainerPosition, setContainerSize,
+  setContainerHeight,
+  setContainerName,
+  setContainerPosition,
+  setContainerSize,
   setContainerWidth
 } from './actions/ContainerCommands';
 
@@ -102,6 +104,10 @@ export default class GraphService extends StoreBasedService<GraphState> {
 
   setContainerName(id: string, name: string): void {
     this.commit(s => setContainerName(id, name, s));
+  }
+
+  sendContainerToFront(id: string): void {
+    this.commit(s => sendNodeToFront(id, s));
   }
 
   sendNodeToFront(id: string): void {
@@ -178,14 +184,14 @@ function remove(ids: string[], state: GraphState): GraphState {
     }
   });
 
-  const nodeOrder = state.nodeOrder.filter(id => !nodesToRemove.includes(id));
+  const nodeOrder = state.elementOrder.filter(id => !nodesToRemove.includes(id));
   const connections = state.connections.filter(({id}) => !impactedConnections.includes(id)
     && !connectionsToRemove.includes(id));
 
   return {
     ...state,
     nodes,
-    nodeOrder,
+    elementOrder: nodeOrder,
     connections,
   };
 }

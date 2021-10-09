@@ -5,6 +5,6 @@ export type NodeModels = { [id: string]: NodeModel; };
 
 export interface AudioGraphModel {
   nodes: NodeModels;
-  nodeOrder: string[];
+  elementOrder: string[];
   connections: ConnectionModel[];
 }

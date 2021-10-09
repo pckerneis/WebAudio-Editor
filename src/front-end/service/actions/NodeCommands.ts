@@ -101,7 +101,7 @@ export function addNode(id: string, nodeState: NodeState, state: GraphState): Gr
   return {
     ...state,
     nodes: {...state.nodes, [id]: nodeState},
-    nodeOrder: [...state.nodeOrder, id],
+    elementOrder: [...state.elementOrder, id],
   };
 }
 
@@ -135,7 +135,7 @@ export function transformExistingNode(id: string,
 export function sendNodeToFront(id: string, state: GraphState): GraphState {
   return {
     ...state,
-    nodeOrder: [...state.nodeOrder.filter(n => n !== id), id],
+    elementOrder: [...state.elementOrder.filter(n => n !== id), id],
   };
 }
 

@@ -9,7 +9,7 @@ type Id = string;
 export interface GraphState extends AudioGraphModel {
   containers: { [id: Id]: ContainerState; };
   nodes: { [id: Id]: NodeState; };
-  nodeOrder: string[];
+  elementOrder: string[];
   connections: ConnectionState[];
   temporaryConnectionPort: PortModel | null;
 }
@@ -19,7 +19,7 @@ export function getInitialGraphModel(): GraphState {
     connections: [],
     containers: {},
     nodes: {},
-    nodeOrder: [],
+    elementOrder: [],
     temporaryConnectionPort: null,
   };
 }

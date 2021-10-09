@@ -24,7 +24,7 @@ export default function DragToMove(props: DragToMoveProps) {
       setIsDragging(true);
       setStartPosition(elementPosition);
       setDragStartPosition({x: e.screenX, y: e.screenY});
-      if (onDragStart) onDragStart();
+      if (onDragStart) onDragStart(e);
       e.stopPropagation();
     }
   };
@@ -91,7 +91,7 @@ DragToMove.propTypes = {
 
 interface DragToMoveProps {
   elementPosition: Coordinates;
-  onDragStart?: () => void;
+  onDragStart?: (evt: React.PointerEvent) => void;
   onDragMove: (newPosition: Coordinates) => void;
   onDragEnd?: (info: DragEndInfo) => void;
   children?: any;

@@ -145,7 +145,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
       || !arePrimitiveArraysEqual(Object.keys(nextState.graphState.nodes), Object.keys(this.state.graphState.nodes))
       || !areNodesVisuallySimilar(nextState.graphState.nodes, this.state.graphState.nodes);
 
-    const hasNodeOrderChanged = () => !arePrimitiveArraysEqual(nextState.graphState.nodeOrder, this.state.graphState.nodeOrder);
+    const hasElementOrderChanged = () => !arePrimitiveArraysEqual(nextState.graphState.elementOrder, this.state.graphState.elementOrder);
 
     const temporaryConnectionMoved = () => {
       const hasTemporaryConnection = nextState.graphState.temporaryConnectionPort != null;
@@ -161,7 +161,7 @@ class GraphComponent extends React.Component<{}, GraphComponentState> {
       || nextState.selection !== this.state.selection
       || nextState.connectionCurves !== this.state.connectionCurves
       || hasNodesChanges()
-      || hasNodeOrderChanged()
+      || hasElementOrderChanged()
       || temporaryConnectionMoved()
       || viewportBoundsChanged();
   }
@@ -331,7 +331,7 @@ function buildNodes(graphState: GraphState): JSX.Element[] {
       return (
         <Node key={id}
               nodeState={nodeState}
-              zIndex={graphState.nodeOrder.indexOf(id)}
+              zIndex={graphState.elementOrder.indexOf(id)}
               service={graphService}
               definition={definition}
               portRegistry={portRegistry}
@@ -349,6 +349,8 @@ function buildContainers(graphState: GraphState): JSX.Element[] {
         <ContainerElement
           key={id}
           containerState={containerState}
+          selected={graphSelection.isSelected(id)}
+          zIndex={graphState.elementOrder.indexOf(id)}
         />
       )
     });
