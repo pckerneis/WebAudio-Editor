@@ -8,8 +8,10 @@ import HistoryService, {TransactionNames} from '../HistoryService';
 import LocaleStorageService from '../LocaleStorageService';
 import Coordinates from '../../../document/models/Coordinates';
 import LayoutService from '../LayoutService';
+import {DEFAULT_CONTAINER_HEIGHT, DEFAULT_CONTAINER_WIDTH} from '../actions/ContainerCommands';
 
 const DELETE_SELECTION_COMMAND_ID = 'DeleteSelection';
+const CREATE_DYNAMIC_SECTION_COMMAND_ID = 'CreateDynamicSection';
 const CREATE_NODE_COMMAND_PREFIX = 'CreateNode/';
 
 export default class GraphServiceCommandHandler implements CommandHandler {
@@ -27,7 +29,7 @@ export default class GraphServiceCommandHandler implements CommandHandler {
     }
 
     if (commandPath === DELETE_SELECTION_COMMAND_ID) {
-      return ! this.graphSelection.isSelectionEmpty();
+      return !this.graphSelection.isSelectionEmpty();
     }
 
     return true;
@@ -35,6 +37,7 @@ export default class GraphServiceCommandHandler implements CommandHandler {
 
   public executeCommand(commandPath: string): boolean {
     return this.executeCreateNodeCommand(commandPath)
+      || this.executeCreateDynamicSectionCommand(commandPath)
       || this.executeDeleteSelectionCommand(commandPath)
       || false;
   }
@@ -44,6 +47,29 @@ export default class GraphServiceCommandHandler implements CommandHandler {
       const nodeKind = extractNodeKindFromCreateNodeCommand(commandPath);
       this.createAndAddNode(nodeKind as NodeKind, this.layoutService.snapshot.viewportOffset);
       this.historyService.pushTransaction(TransactionNames.CREATE_NODE);
+      return true;
+    }
+
+    return false;
+  }
+
+  private executeCreateDynamicSectionCommand(commandPath: string): boolean {
+    if (commandPath === CREATE_DYNAMIC_SECTION_COMMAND_ID) {
+      const existingDynamicSectionNames = Object.values(this.graphService.snapshot.containers)
+        .map(container => container.name);
+      const name = makeUniqueName('dynamicSection', existingDynamicSectionNames);
+
+      const viewportOffset = this.layoutService.snapshot.viewportOffset;
+      const bounds = {
+        x: window.innerWidth / 2 - viewportOffset.x - 50,
+        y: window.innerHeight / 2 - viewportOffset.y - 10,
+        width: DEFAULT_CONTAINER_WIDTH,
+        height: DEFAULT_CONTAINER_HEIGHT,
+      };
+
+      const newNode = this.graphService.createAndAddContainer(name, bounds);
+      this.graphSelection.setUniqueSelection(newNode.id);
+      this.historyService.pushTransaction(TransactionNames.CREATE_DYNAMIC_SECTION);
       return true;
     }
 
@@ -77,7 +103,7 @@ export default class GraphServiceCommandHandler implements CommandHandler {
       this.graphSelection.setUniqueSelection(newNode.id);
     } else {
       const nodeDefinition = this.nodeDefinitionService.getNodeDefinition(nodeKind);
-      const name = findDefaultName(nodeKind, this.graphService.snapshot);
+      const name = findDefaultNodeName(nodeKind, this.graphService.snapshot);
       const newNode = this.graphService.createAndAddNode(name, nodeDefinition!, bounds);
       this.graphSelection.setUniqueSelection(newNode.id);
     }
@@ -111,14 +137,14 @@ const desiredNames: DesiredNames = {
 };
 
 
-function findDefaultName(nodeKind: NodeKind, graphState: GraphState): string {
+function findDefaultNodeName(nodeKind: NodeKind, graphState: GraphState): string {
   const desiredName = desiredNames[nodeKind];
-  return makeUniqueName(desiredName, graphState);
+  const existingNodeNames = Object.values(graphState.nodes).map(n => n.name);
+  return makeUniqueName(desiredName, existingNodeNames);
 }
 
-function makeUniqueName(desiredName: string, graphState: GraphState): string {
-  const existingNodeNames = Object.values(graphState.nodes).map(n => n.name);
-  if (!existingNodeNames.includes(desiredName)) {
+function makeUniqueName(desiredName: string, existingNames: string[]): string {
+  if (!existingNames.includes(desiredName)) {
     return desiredName;
   }
 
@@ -128,7 +154,7 @@ function makeUniqueName(desiredName: string, graphState: GraphState): string {
   do {
     candidate = `${desiredName} (${++suffixNumber})`;
   }
-  while (existingNodeNames.includes(candidate));
+  while (existingNames.includes(candidate));
 
   return candidate;
 }
@@ -139,6 +165,10 @@ export function makeGraphServiceCommands(): Command[] {
       path: 'CreateNode/' + kind,
       label: 'Create ' + decamelized(kind) + ' node',
     })),
+    {
+      label: 'Create dynamic section',
+      path: CREATE_DYNAMIC_SECTION_COMMAND_ID,
+    },
     {
       label: 'Delete selected items',
       path: DELETE_SELECTION_COMMAND_ID,
@@ -164,7 +194,10 @@ function extractNodeKindFromCreateNodeCommand(commandPath: string): string {
 
 function isSupportedCommand(commandPath: string): boolean {
   return isCreateNodeCommand(commandPath)
-    || commandPath === DELETE_SELECTION_COMMAND_ID;
+    || [
+      DELETE_SELECTION_COMMAND_ID,
+      CREATE_DYNAMIC_SECTION_COMMAND_ID
+    ].includes(commandPath);
 }
 
 const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';

@@ -6,6 +6,8 @@ import {nextId} from '../../utils/IdentifierGenerator';
 
 const MIN_WIDTH = 100;
 const MIN_HEIGHT = 100;
+export const DEFAULT_CONTAINER_WIDTH = 300;
+export const DEFAULT_CONTAINER_HEIGHT = 300;
 
 function nextContainerId(knownIds: string[]): string {
   return nextId('Container-', knownIds);

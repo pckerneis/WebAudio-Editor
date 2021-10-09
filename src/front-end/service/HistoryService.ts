@@ -154,6 +154,7 @@ export enum TransactionNames {
 
   CREATE_NODE = 'create node',
   CREATE_CONNECTION = 'create connection',
+  CREATE_DYNAMIC_SECTION = 'create dynamic section',
 
   DELETE_SELECTION = 'delete selection',
 
