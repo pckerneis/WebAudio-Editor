@@ -1,4 +1,8 @@
-# Getting Started with Create React App
+# WebAudio-Editor
+
+A simple GUI for the WebAudio API.
+
+![WebAudio-Editor screenshot](./doc/WebAudio-Editor.png)
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
